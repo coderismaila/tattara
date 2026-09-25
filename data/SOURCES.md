@@ -41,7 +41,18 @@ Raw files live in `data/raw/` (gitignored). Re-fetch with the scripts named belo
 - **Known limitations (from GRID3):** operational, not authoritative boundaries; not fully validated by government;
   spelling/naming inconsistencies expected. 2,004 ward polygons vs INEC's 2,003 wards — to reconcile in the boundary join (task 1.5).
 
+## Evaluated and rejected
+
+- **mykeels/inec-polling-units** (https://github.com/mykeels/inec-polling-units, MIT, last updated 2022-07-15;
+  also re-published inside Geoinfotech-Web/ggis-election-webapp). Its PU list is an older copy of INEC's
+  (91% of NW PU names still match today's codes), but its coordinates are **Google Places text-search geocodes**
+  of the PU name, not INEC points. Checked 2026-09-25 against 20,982 PUs where we hold INEC's own coordinate:
+  median error 5.1 km, 38.9% more than 10 km off, p90 82 km. Our ward-centroid estimate (leave-one-out) is better:
+  median 2.3 km, 4.6% more than 10 km off. **Not used.** No registered-voter figures in it either.
+- **CCIJ 2023 result-sheet archive** (169,353 files): scanned, largely handwritten result sheets. Registered-voter
+  counts would need OCR of handwriting and are not the official register. **Not used.**
+
 ## Open items
 
-- [ ] Resume PU coordinates after the INEC block lifts (see above).
+- [ ] Resume PU coordinates after the INEC block lifts (see above). Re-checked 2026-09-25: still 403.
 - [ ] Registered voters per PU (INEC 2023 register) — needs the human: request from INEC or locate the published PDFs.

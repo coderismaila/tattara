@@ -33,7 +33,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
 - [x] **1.1 Schema: units, unit_targets** (DATA_MODEL §1) + migration + indexes.
 - [x] **1.2 Dev seed** `scripts/seed-dev.ts` (fake geography + users + supporters stub). _Done: geography + targets (`pnpm db:seed:dev`). Users are seeded in 2.1, supporters in 3.1, by extending `scripts/seed/run.ts`._
   **AC:** `pnpm db:seed` is idempotent; codes are in real format.
-- [ ] 👤 **1.3 Obtain INEC PU data + GRID3 boundaries** into `data/raw/`, fill `data/SOURCES.md`.
+- [ ] 👤 **1.3 Obtain INEC PU data + GRID3 boundaries** into `data/raw/`, fill `data/SOURCES.md`. _Status 2026-09-25: fetched by script. INEC hierarchy complete (41,671 PUs, counts match the PRD); GRID3 states/LGAs/wards complete. PU coordinates partial (26,550; INEC answered 403, resume later). Registered voters per PU still missing (👤). See `data/SOURCES.md`._
 - [ ] **1.4 INEC importer** `scripts/import-inec-pus.ts` → normalised CSV → DB, with the validation checks in SEED_DATA §3.
   **AC:** prints per-state counts vs expected; zero orphans; re-run is a no-op.
 - [ ] **1.5 Boundary importer** per SEED_DATA §4, writing `public/geo/*`.

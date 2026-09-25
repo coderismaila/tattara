@@ -22,7 +22,10 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/db-migrate.ts",
     "db:studio": "drizzle-kit studio",
-    "db:seed:dev": "node scripts/seed-dev.ts"
+    "db:seed:dev": "node scripts/seed-dev.ts",
+    "data:fetch:inec": "node scripts/fetch/inec-pus.ts",
+    "data:fetch:inec-coords": "node scripts/fetch/inec-pus.ts --coords",
+    "data:fetch:grid3": "node scripts/fetch/grid3-boundaries.ts"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.1",

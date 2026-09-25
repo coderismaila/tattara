@@ -30,4 +30,5 @@ playwright-report
 blob-report
 
 # Raw/normalised source data (INEC, GRID3); see docs/SEED_DATA.md
-data/
+data/raw/
+data/normalised/

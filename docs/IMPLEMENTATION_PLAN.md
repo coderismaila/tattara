@@ -41,7 +41,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
 
 ## Phase 2 — Accounts & hierarchy
 
-- [ ] **2.1 Schema:** users, user_devices, invites, otp_codes, audit_log. Also: extend the dev seed with a user for every role (PIN `123456`, dev only).
+- [x] **2.1 Schema:** users, user_devices, invites, otp_codes, audit_log. Also: extend the dev seed with a user for every role (PIN `123456`, dev only).
 - [ ] **2.2 SMS abstraction** `server/utils/sms/` with `fake` + `termii` providers, `sms_queue` table and a Nitro task processor.
   **AC:** in dev, sends appear in the console and the DB; provider errors retry with backoff.
 - [ ] **2.3 Scope utils** `server/utils/scope.ts` (`getScope`, `requireScope`, `scopeWhere`) + `audit.ts`.

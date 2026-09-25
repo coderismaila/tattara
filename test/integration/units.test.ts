@@ -5,6 +5,7 @@ import { runMigrations } from '../../server/db/migrate'
 import { unitTargets, units, type NewUnit } from '../../server/db/schema'
 import { normaliseName } from '../../shared/utils/text'
 import { createTempDatabase, isDbReachable } from './helpers/db'
+import { pgErrorCode } from './helpers/pg-error'
 
 const dbAvailable = await isDbReachable()
 if (process.env.CI && !dbAvailable) {
@@ -14,19 +15,6 @@ if (process.env.CI && !dbAvailable) {
 function unit(code: string, level: NewUnit['level'], parentCode: string | null, extra: Partial<NewUnit> = {}): NewUnit {
   const name = extra.name ?? `UNIT ${code}`
   return { code, level, parentCode, name, nameNormalised: normaliseName(name), sourceVersion: 'test', ...extra }
-}
-
-/** Postgres error code of a rejected insert (23514 check, 23503 FK, 23505 unique, 22P02 bad enum). */
-async function pgErrorCode(p: Promise<unknown>): Promise<string | undefined> {
-  try {
-    await p
-    return undefined
-  }
-  catch (e) {
-    // Drizzle wraps driver errors; the Postgres code is on the error or its cause.
-    const err = e as { code?: string, cause?: { code?: string } }
-    return err.cause?.code ?? err.code
-  }
 }
 
 describe.skipIf(!dbAvailable)('units schema', () => {

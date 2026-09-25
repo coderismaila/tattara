@@ -50,7 +50,12 @@ CHECKs: the code's shape matches `level` (`SS`, `SS/LL`, `SS/LL/WW`, `SS/LL/WW/P
 | invited_by | uuid FK users | |
 | created_at, updated_at, last_seen_at | timestamptz | |
 
-Constraint: partial unique index — only one `active` user per `(role, unit_code)`.
+| unit_level | enum null | denormalised from `units.level`; with `unit_code` it forms a composite FK → `units(code, level)` |
+
+Constraints: partial unique index — only one `active` user per `(role, unit_code)`.
+CHECK: role ↔ `unit_level` (`ROLE_LEVEL` in `shared/constants/roles.ts`; ADMIN/DG have no unit), so with the
+composite FK a lead can only sit at a unit of their role's level. CHECK: phone is an E.164 NG mobile;
+`status = 'active'` requires `pin_hash`. IDs are server-generated UUIDv7.
 
 ### `user_devices`
 | id | user_id FK | device_id text | label text | first_seen_at | last_seen_at | revoked_at |
@@ -125,7 +130,7 @@ Flag types: `gps_far`, `duplicate_phone`, `pu_over_capacity`, `rate_anomaly`, `g
 ### `exports`
 | id | scope_code | requested_by | approved_by | status | file_ref | watermark | created_at | expires_at |
 
-### `audit_log` (append-only; no UPDATE/DELETE grants for the app role)
+### `audit_log` (append-only; no UPDATE/DELETE grants for the app role, and a trigger rejects UPDATE/DELETE/TRUNCATE for every role)
 | id bigserial | at | actor_id | actor_role | action text | target_type | target_id | scope_code | ip | meta jsonb |
 
 ## 6. Client (Dexie) schema

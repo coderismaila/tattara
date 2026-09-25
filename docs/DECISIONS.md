@@ -81,3 +81,11 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 **Decision:** `geographyPoint()` is a Drizzle `customType` (`server/db/schema/types.ts`): writes via `ST_SetSRID(ST_MakePoint(lng, lat), 4326)::geography`, reads by parsing EWKB hex (`server/db/geo.ts`) into `{ lng, lat }`. The units table also enforces code/level/parent consistency with CHECK constraints.
 **Why:** Drizzle 0.45 has `geometry` but no `geography`; geography gives metre-based `ST_DWithin` for GPS flags without projection work. CHECKs make a bad import fail at the DB, not only in the importer.
 **Consequences:** drizzle-kit 0.31 quotes the custom type (`"geography(Point, 4326)"`), which is invalid SQL. **Every generated migration that adds a geography column must be hand-fixed** to `geography(Point, 4326)`; the integration test on a fresh DB catches it if forgotten. `db:generate` reports no drift after the edit.
+
+### ADR-018 · 2026-09-25 · Accepted · Users: DB-enforced role levels, append-only audit, argon2id
+**Decision:**
+- `users.unit_level` + composite FK `(unit_code, unit_level) → units(code, level)` + a CHECK mapping role → level. A lead can never be attached to a unit of the wrong level, whatever the API does.
+- `audit_log` gets a trigger (migration 0003) rejecting UPDATE/DELETE/TRUNCATE with SQLSTATE 42501, in addition to deployment grants.
+- PINs use `@node-rs/argon2` (prebuilt binaries, no native build) at m=19 MiB, t=2, p=1 (`server/utils/pin.ts`).
+**Why:** Scope is the core security property (ADR-002); audit integrity must not depend on grants being configured right.
+**Consequences:** Migration 0002 was hand-ordered so `units(code, level)` UNIQUE exists before the FK (drizzle-kit emitted it last). Dev users referenced by audit rows can't be deleted, so `db:seed:dev --reset` then asks you to recreate the local DB. The argon2 native module must be verified in the production Nitro build when auth routes first use it (2.4).

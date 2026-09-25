@@ -15,6 +15,20 @@
       "when": 1790316703032,
       "tag": "0001_units",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790323810983,
+      "tag": "0002_users_auth_audit",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790323834476,
+      "tag": "0003_audit_log_append_only",
+      "breakpoints": true
     }
   ]
 }

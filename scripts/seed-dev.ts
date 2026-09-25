@@ -13,7 +13,7 @@ if (!url) {
 
 try {
   const result = await seedDev(url, { reset: process.argv.includes('--reset') })
-  console.log(`Dev seed applied: ${result.units} units, ${result.targets} targets.`)
+  console.log(`Dev seed applied: ${result.units} units, ${result.targets} targets, ${result.users} users (PIN 123456).`)
 }
 catch (error) {
   if (error instanceof SeedRefusedError) {

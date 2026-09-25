@@ -1,6 +1,6 @@
 // Geography (DATA_MODEL §1): one table for every level, keyed by the INEC code `SS/LL/WW/PPP`.
 import { sql } from 'drizzle-orm'
-import { boolean, check, index, integer, pgTable, text, timestamp, uuid, type AnyPgColumn } from 'drizzle-orm/pg-core'
+import { boolean, check, index, integer, pgTable, text, timestamp, unique, type AnyPgColumn } from 'drizzle-orm/pg-core'
 import { unitLevel } from './enums.ts'
 import { geographyPoint } from './types.ts'
 
@@ -25,6 +25,8 @@ export const units = pgTable('units', {
   // Scope queries: `code LIKE '19/05/%'` (ARCHITECTURE §4).
   index('units_code_prefix_idx').on(t.code.op('text_pattern_ops')),
   index('units_location_gist_idx').using('gist', t.location),
+  // Target of users(unit_code, unit_level) so a lead's role level must match the unit's level.
+  unique('units_code_level_key').on(t.code, t.level),
 
   // Defence in depth for imports: the code's shape matches its level, and the parent is the code minus
   // its last segment. IS NOT DISTINCT FROM so a NULL parent can't slip through; COALESCE so NULL ⇒ fail.
@@ -38,16 +40,5 @@ export const units = pgTable('units', {
   check('units_registered_voters_non_negative', sql`${t.registeredVoters} is null or ${t.registeredVoters} >= 0`),
 ])
 
-export const unitTargets = pgTable('unit_targets', {
-  unitCode: text().primaryKey().references(() => units.code),
-  target: integer().notNull(),
-  // FK to users(id) is added with the users table (task 2.1).
-  setBy: uuid(),
-  setAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-}, t => [
-  check('unit_targets_target_non_negative', sql`${t.target} >= 0`),
-])
-
 export type Unit = typeof units.$inferSelect
 export type NewUnit = typeof units.$inferInsert
-export type UnitTarget = typeof unitTargets.$inferSelect

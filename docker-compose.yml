@@ -1,0 +1,13 @@
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    environment:
+      POSTGRES_USER: tattara
+      POSTGRES_PASSWORD: tattara
+      POSTGRES_DB: tattara
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:

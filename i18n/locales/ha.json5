@@ -1,0 +1,12 @@
+// Hausa (default locale). JSON5 so machine-drafted strings can carry review markers.
+{
+  app: {
+    name: 'Tattara',
+    // TODO(ha-review)
+    tagline: 'Rijistar magoya baya ta Arewa maso Yamma',
+  },
+  auth: {
+    // TODO(ha-review)
+    signIn: 'Shiga',
+  },
+}

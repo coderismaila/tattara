@@ -1,0 +1,9 @@
+{
+  "app": {
+    "name": "Tattara",
+    "tagline": "Supporter registry for the North West"
+  },
+  "auth": {
+    "signIn": "Sign in"
+  }
+}

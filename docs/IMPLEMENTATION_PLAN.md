@@ -20,7 +20,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
   `docker-compose.yml` with `postgis/postgis:17-3.5` (or current), Drizzle client in `server/db/client.ts`, drizzle-kit config, `db:*` scripts.
   **AC:** `pnpm db:migrate` applies an empty migration; the PostGIS extension is enabled by migration.
 
-- [ ] **0.4 Shared foundations**
+- [x] **0.4 Shared foundations**
   `shared/constants/enums.ts`, `roles.ts`, `states.ts` (7 NW states + codes — verify with seed), `shared/utils/pu-code.ts`, `phone.ts` (libphonenumber-js, NG), `uuid.ts` (UUIDv7).
   **AC:** unit tests cover pu-code parse/parent/level/isWithin edge cases and phone normalisation (`0803…`, `803…`, `+234803…`, `234803…`, invalid).
 

@@ -28,10 +28,12 @@
     "@nuxtjs/i18n": "10.6.0",
     "@vite-pwa/nuxt": "1.1.1",
     "drizzle-orm": "^0.45.3",
+    "libphonenumber-js": "^1.13.14",
     "nuxt": "^4.5.2",
     "nuxt-auth-utils": "0.5.30",
     "postgres": "^3.4.9",
     "tailwindcss": "^4.3.3",
+    "uuid": "^14.0.2",
     "vue": "^3.5.43",
     "vue-router": "^5.3.1"
   },

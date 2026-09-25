@@ -21,7 +21,8 @@
     "db:up": "docker compose up -d --wait db",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/db-migrate.ts",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:seed:dev": "node scripts/seed-dev.ts"
   },
   "dependencies": {
     "@nuxt/ui": "4.11.2",

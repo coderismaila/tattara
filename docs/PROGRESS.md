@@ -20,11 +20,14 @@ Also note blockers and anything the next session must know.
 - PWA is a minimal generateSW placeholder (manifest + sw.js build fine); 4.1 replaces it with injectManifest.
 - DB: `pnpm db:up && pnpm db:migrate`. Integration tests (`pnpm test:integration`) need the DB; they skip locally
   without it and fail in CI. `pg_trgm` is available but not enabled: add it in the 3.4 (search) migration.
-- **2.1:** add the FK `unit_targets.set_by → users.id` when the users table lands.
+- **2.1:** add the FK `unit_targets.set_by → users.id` when the users table lands, and seed a user per role.
+- Dev data: `pnpm db:up && pnpm db:migrate && pnpm db:seed:dev` (Kano 19 + Katsina 20, fake names, `source_version = 'dev-fake'`).
+  `--reset` deletes only dev rows; the seed refuses in production or if real units exist. `db:seed` is reserved for the INEC import (1.4).
 - drizzle-kit quotes custom geography types in generated SQL; hand-fix to `geography(Point, 4326)` (ADR-017).
 - Hausa strings live in `i18n/locales/ha.json5` (ADR-008).
 
 ## Log
+- 2026-09-25 · 1.2 · Dev seed (geography + targets): deterministic generator (2 states × 3 × 4 × 10, voter sums, PUs ≤ ~1 km from ward), idempotent upsert, `--reset`, production/real-data guards; users → 2.1, supporters → 3.1. Nuxt test hook timeout raised to 60 s (cold-boot flake) · see commit `feat(seed)`
 - 2026-09-25 · 1.1 · `units` (code/level/parent CHECKs, text_pattern_ops + GIST indexes, geography point, location_estimated) and `unit_targets`; migration 0001; `normaliseName`; EWKB parser; integration tests for constraints, prefix index and ST_DWithin · see commit `feat(db)`
 - 2026-09-25 · 0.5 · Theme (dye/laterite/neem/millet, AA-checked, light only, 17 px base, Noto Sans self-hosted), `default` + `app` layouts (bottom nav on mobile), language switch persisted on device, `/app` + `/app/settings` shells, offline icons; axe + Lighthouse a11y 100 · see commit `feat(ui)`
 - 2026-09-25 · 0.4 · Shared enums, roles (level + child-role maps), 7 NW states, pu-code utils (`parsePuCode`, `isWithin`, …), `normalizePhone` (NG mobiles, min metadata), UUIDv7 `newId`; 70 unit tests · see commit `feat(shared)`

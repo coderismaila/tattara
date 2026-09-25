@@ -28,6 +28,9 @@ export default defineConfig({
           name: 'nuxt',
           include: ['test/nuxt/**/*.{test,spec}.ts'],
           environment: 'nuxt',
+          // Booting the Nuxt test app cold can take ~10 s locally (more on CI) when other projects run in parallel.
+          hookTimeout: 60_000,
+          testTimeout: 30_000,
           environmentOptions: {
             nuxt: {
               domEnvironment: 'happy-dom',

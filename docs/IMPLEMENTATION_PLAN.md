@@ -31,7 +31,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
 ## Phase 1 — Geography
 
 - [x] **1.1 Schema: units, unit_targets** (DATA_MODEL §1) + migration + indexes.
-- [ ] **1.2 Dev seed** `scripts/seed-dev.ts` (fake geography + users + supporters stub).
+- [x] **1.2 Dev seed** `scripts/seed-dev.ts` (fake geography + users + supporters stub). _Done: geography + targets (`pnpm db:seed:dev`). Users are seeded in 2.1, supporters in 3.1, by extending `scripts/seed/run.ts`._
   **AC:** `pnpm db:seed` is idempotent; codes are in real format.
 - [ ] 👤 **1.3 Obtain INEC PU data + GRID3 boundaries** into `data/raw/`, fill `data/SOURCES.md`.
 - [ ] **1.4 INEC importer** `scripts/import-inec-pus.ts` → normalised CSV → DB, with the validation checks in SEED_DATA §3.
@@ -41,7 +41,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
 
 ## Phase 2 — Accounts & hierarchy
 
-- [ ] **2.1 Schema:** users, user_devices, invites, otp_codes, audit_log.
+- [ ] **2.1 Schema:** users, user_devices, invites, otp_codes, audit_log. Also: extend the dev seed with a user for every role (PIN `123456`, dev only).
 - [ ] **2.2 SMS abstraction** `server/utils/sms/` with `fake` + `termii` providers, `sms_queue` table and a Nitro task processor.
   **AC:** in dev, sends appear in the console and the DB; provider errors retry with backoff.
 - [ ] **2.3 Scope utils** `server/utils/scope.ts` (`getScope`, `requireScope`, `scopeWhere`) + `audit.ts`.
@@ -54,7 +54,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
 
 ## Phase 3 — Supporter capture (online)
 
-- [ ] **3.1 Schema:** supporters, flags, pu_stats; the service `server/services/supporters.ts` with create/update/serialize and incremental pu_stats updates.
+- [ ] **3.1 Schema:** supporters, flags, pu_stats; the service `server/services/supporters.ts` with create/update/serialize and incremental pu_stats updates. Also: extend the dev seed with 5,000 fake supporters (some flag-worthy).
 - [ ] **3.2 Shared Zod schema** `shared/schemas/supporter.ts` (consent required, enums, max lengths).
 - [ ] **3.3 Capture page** per UX §4.1 using Nuxt UI `UForm` + chip groups; consent script from `shared/constants/consent.ts`; silent GPS.
   **AC:** keyboard-only and TalkBack usable; required-field errors in the active language.

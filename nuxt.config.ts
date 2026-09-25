@@ -20,7 +20,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     databaseUrl: '',
-    sms: { provider: 'fake', apiKey: '', senderId: '', webhookSecret: '' },
+    // NUXT_SMS_*: provider fake | termii; Termii's base URL is account-specific (dashboard).
+    sms: { provider: 'fake', apiKey: '', senderId: '', baseUrl: '', webhookSecret: '' },
     // nuxt-auth-utils reads session.password (NUXT_SESSION_PASSWORD), ≥ 32 chars
     session: { password: '' },
     public: { appVersion: '', gpsFlagMeters: 3000 },
@@ -34,6 +35,14 @@ export default defineNuxtConfig({
 
   future: { compatibilityVersion: 5 },
   compatibilityDate: '2026-09-25',
+
+  nitro: {
+    experimental: { tasks: true },
+    // Cron runs in UTC; 23:55 WAT tasks (6.1) will be '55 22 * * *'.
+    scheduledTasks: {
+      '* * * * *': ['sms:process'],
+    },
+  },
 
   typescript: {
     strict: true,

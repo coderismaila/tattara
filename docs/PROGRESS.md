@@ -49,12 +49,17 @@ Also note blockers and anything the next session must know.
   (state → PU 19/01/01/001), Katsina chain 0201–0204 (out-of-scope counterpart). `--reset` deletes only dev rows,
   and refuses once audit_log references dev users (then `docker compose down -v` and re-migrate).
   The seed refuses in production or if real units exist. `db:seed` is reserved for the INEC import (1.4).
+- **SMS (2.2):** queue with `enqueueSms(db, …)`; the `sms:process` task runs every minute. **2.4:** after queueing an
+  OTP, call `runTask('sms:process')` (from `nitropack/runtime`) so the code arrives in seconds. Dev: messages print as
+  `[sms:fake] …` in the dev server console. Manual run in dev: `GET /_nitro/tasks/sms:process`.
+  Termii needs `NUXT_SMS_BASE_URL` (account-specific) besides key + sender ID.
 - **2.4:** first real use of `@node-rs/argon2` in a Nitro route; verify it works in the production build (native module).
 - Migrations need hand-review: drizzle-kit may misorder constraints (0002) or quote custom types (0001).
 - drizzle-kit quotes custom geography types in generated SQL; hand-fix to `geography(Point, 4326)` (ADR-017).
 - Hausa strings live in `i18n/locales/ha.json5` (ADR-008).
 
 ## Log
+- 2026-09-26 · 2.2 · SMS: `SmsProvider` (fake with masked logs, termii with unicode for Hausa), `sms_queue` + `enqueueSms`/`processSmsQueue` (SKIP LOCKED lease, backoff, DB clock, OTP/invite redaction), `sms:process` task every minute; verified in dev (console + DB, schedule fires) and prod build · see commit `feat(sms)`
 - 2026-09-25 · 1.3 · Closed: data fetched by script; registered voters moved to field collection by PU leads (new task 3.7, PRD US-24); importer now never overwrites a stored registered-voters figure with NULL · see commit `feat(import)`
 - 2026-09-25 · 1.5 · Boundary join (`pnpm geo:build`): Jaro-Winkler names + spatial vote from INEC points, manual crosswalk, unmatched/review CSVs; mapshaper-simplified `public/geo/*` (all under size targets) + ATTRIBUTION; ward polygon points + `boundary_ref` fed to the importer (every unit now located) · see commit `feat(geo)`
 - 2026-09-25 · 1.4 · INEC importer (`pnpm db:seed`): normaliser with SEED_DATA §3 checks (counts vs PRD, codes, per-state coordinate boxes, voters), estimated locations, `data/normalised/units.csv`, idempotent upsert + deactivation + `--dry-run`; real import verified (43,867 units, all counts match); dev seed adds users only on real geography · see commit `feat(import)`

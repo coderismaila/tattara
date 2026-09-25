@@ -29,6 +29,13 @@
       "when": 1790323834476,
       "tag": "0003_audit_log_append_only",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790377165260,
+      "tag": "0004_sms_queue",
+      "breakpoints": true
     }
   ]
 }

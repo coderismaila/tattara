@@ -108,3 +108,13 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 **Decision:** Per-PU registered-voter counts are reported by PU leads from the register displayed at the PU (PRD US-24, task 3.7), with the ward lead able to correct them. They are not imported from INEC. The INEC importer keeps any stored figure (`coalesce(excluded, existing)`), so re-importing geography never wipes field reports.
 **Why:** Owner decision; INEC does not publish per-PU figures in any source we can reach, and PU leads can read them at the PU.
 **Consequences:** Coverage %, `pu_over_capacity` (5.1) and default target splits (6.4) must handle missing figures (skip, or fall back to PU count) and show how many PUs have reported. Aggregates are computed in stats rather than stored on parent units.
+
+### ADR-022 · 2026-09-26 · Accepted · SMS queue: lease-based claims, DB clock, redacted secrets
+**Decision:**
+- Providers implement `SmsProvider.send` and throw `SmsSendError { retryable }` (network/5xx/429 retry; other 4xx and non-`ok` codes fail). `fake` logs with a masked phone and refuses to run in production; `termii` posts to `{NUXT_SMS_BASE_URL}/api/sms/send` (base URL is account-specific), `channel: dnd` for transactional and `generic` for broadcasts, and `type: unicode` whenever the text is not GSM-7 (Hausa ɓ ɗ ƙ ƴ).
+- `processSmsQueue` claims due rows with one `UPDATE … WHERE id IN (SELECT … FOR UPDATE SKIP LOCKED)` that sets a 5-minute lease, then sends **outside** a transaction. Delivery is at-least-once; parallel workers never send the same message.
+- All queue time arithmetic uses the **database clock** (`now()`); an optional fixed `now` exists for tests.
+- OTP and invite bodies are redacted after the final outcome.
+- The `sms:process` Nitro task runs every minute (`nitro.experimental.tasks` + `scheduledTasks`).
+**Why:** Retries without long transactions; the app-vs-DB clock mix made fresh messages look "not due" (caught by a flaky test); queued OTP text would otherwise defeat hashing OTPs at rest.
+**Consequences:** 2.4 must trigger `runTask('sms:process')` right after queueing an OTP (a minute is too slow for login). Per-scope daily caps (SECURITY §10) and templates arrive with broadcasts/thank-you SMS (5.2, v1.1). Scheduled-task cron is UTC.

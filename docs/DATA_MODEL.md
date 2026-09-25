@@ -119,7 +119,11 @@ Flag types: `gps_far`, `duplicate_phone`, `pu_over_capacity`, `rate_anomaly`, `g
 ## 5. Messaging and ops
 
 ### `sms_queue`
-| id | to_phone | body | template_key | purpose enum `thank_you\|otp\|invite\|broadcast` | scope_code | status enum `queued\|sent\|failed\|delivered` | attempts | provider_ref | created_by | created_at | sent_at |
+| id | to_phone | body | template_key | purpose enum `thank_you\|otp\|invite\|broadcast` | scope_code | status enum `queued\|sent\|failed\|delivered` | attempts | next_attempt_at | last_error | provider_ref | created_by | created_at | sent_at |
+
+Processed by the `sms:process` Nitro task: claims due rows with `FOR UPDATE SKIP LOCKED` plus a 5-minute lease,
+retries with backoff (30 s × 2ⁿ, max 5 attempts). All times use the DB clock. OTP and invite bodies are replaced
+with `[redacted]` once sent or finally failed. `last_error` holds provider error text only.
 
 ### `sms_templates`
 | key PK | body_ha | body_en | approved_by | approved_at |

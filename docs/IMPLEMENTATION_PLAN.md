@@ -36,7 +36,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
 - [ ] 👤 **1.3 Obtain INEC PU data + GRID3 boundaries** into `data/raw/`, fill `data/SOURCES.md`. _Status 2026-09-25: fetched by script. INEC hierarchy complete (41,671 PUs, counts match the PRD); GRID3 states/LGAs/wards complete. PU coordinates partial (26,550; INEC answered 403, resume later). Registered voters per PU still missing (👤). See `data/SOURCES.md`._
 - [x] **1.4 INEC importer** `scripts/import-inec-pus.ts` → normalised CSV → DB, with the validation checks in SEED_DATA §3. _Re-run `pnpm db:seed` when the remaining coordinates / registered voters arrive (1.3)._
   **AC:** prints per-state counts vs expected; zero orphans; re-run is a no-op.
-- [ ] **1.5 Boundary importer** per SEED_DATA §4, writing `public/geo/*`.
+- [x] **1.5 Boundary importer** per SEED_DATA §4, writing `public/geo/*`. _17 wards await the human in `data/crosswalk/unmatched.csv` (add to `manual.csv`, re-run `pnpm geo:build`, then `pnpm db:seed`)._
   **AC:** all 186 LGAs matched; ward match ≥ 98% before the manual crosswalk, 100% after.
 
 ## Phase 2 — Accounts & hierarchy

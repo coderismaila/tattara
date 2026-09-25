@@ -1,0 +1,20 @@
+code,level,inec_name,grid3_ids,grid3_names,method,name_score,spatial_share,note
+17/13/06,ward,MAJEMA,grid3-ward-v3:1965,Majema,name,1,0.8,"Name match kept, but 80% of its PUs lie in Rumfa"
+18/09/02,ward,GAJI,grid3-ward-v3:2872,Dadi Riba,spatial,0.664,0.979,No name match; 98% of its PUs lie in Dadi Riba
+18/10/10,ward,SABON GARI SOUTH,grid3-ward-v3:2889,Sabon Gari South,name,1,0.903,"Name match kept, but 90% of its PUs lie in Sabon Gari North"
+18/16/03,ward,SABON GARI HUNKUYI,grid3-ward-v3:3350,Sabon Gari,spatial,0.99,1,No name match; 100% of its PUs lie in Sabon Gari
+19/08,lga,DANBATA,grid3-lga:ec14654c-7aef-43aa-b175-ae4ff47085e3,Dambatta,spatial,0.895,0.974,No name match; 97% of its PUs lie in Dambatta
+19/12/05,ward,FAGGE E,grid3-ward-v3:1462,Fagge D2,spatial,0.99,0.929,No name match; 93% of its PUs lie in Fagge D2
+19/15/10,ward,YALWAN YADAKWARI,grid3-ward-v3:1641,Dakasoye,spatial,0.99,1,No name match; 100% of its PUs lie in Dakasoye
+19/18/02,ward,DISO,grid3-ward-v3:1896,Diso,name,1,0.6,"Name match kept, but 60% of its PUs lie in Gwale"
+19/28,lga,MADOBI,grid3-lga:43622bbc-3ca2-42d8-a8e4-8af4a3a64a3b,Madobi,name,1,0.74,"Name match kept, but 74% of its PUs lie in Makoda"
+19/29,lga,MAKODA,grid3-lga:cf615a9b-5a38-4e84-8f88-c5abbb0fa8a7,Makoda,name,1,1,"Name match kept, but 100% of its PUs lie in Minjibir"
+19/40,lga,TSANYAWA,grid3-lga:8d394a62-9e78-4ee9-8618-ef53821eb607,Tsanyawa,name,1,1,"Name match kept, but 100% of its PUs lie in Tudun Wada"
+19/43/01,ward,AMARAWA,grid3-ward-v3:5556,Amarawa,name,1,0.667,"Name match kept, but 67% of its PUs lie in Katarkawa"
+20/02/02,ward,BATAGARAWA B,grid3-ward-v3:571,Dabaibayawa,spatial,0.99,0.769,No name match; 77% of its PUs lie in Dabaibayawa
+20/07/11,ward,MAGAJI WANDO B,grid3-ward-v3:1082,Dansoda,spatial,0.99,0.786,No name match; 79% of its PUs lie in Dansoda
+20/09/02,ward,DAN ALKIMA,grid3-ward-v3:1066,Mara B,spatial,0.99,1,No name match; 100% of its PUs lie in Mara B
+20/14/03,ward,UNGUWAR RABIU,grid3-ward-v3:1540,Nasarawa,spatial,0.901,1,No name match; 100% of its PUs lie in Nasarawa
+20/21/03,ward,KANGIWA,grid3-ward-v3:3112,Gabas 3,spatial,0.717,0.767,No name match; 77% of its PUs lie in Gabas 3
+20/21/05,ward,WAKILIN YAMMA 1I,grid3-ward-v3:3119,Yamma 2,spatial,0.977,0.711,No name match; 71% of its PUs lie in Yamma 2
+20/23/08,ward,BAURANYA 'B',grid3-ward-v3:3417,Kafarda,spatial,0.99,0.875,No name match; 88% of its PUs lie in Kafarda

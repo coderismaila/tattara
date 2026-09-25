@@ -16,6 +16,8 @@ const HIERARCHY = join(RAW, 'inec/hierarchy.ndjson')
 const COORDS = join(RAW, 'inec/pu-coords.ndjson')
 const VOTERS = join(RAW, 'inec/registered-voters.csv')
 const GRID3_STATES = join(RAW, 'grid3/states.geojson')
+const CROSSWALK = join(ROOT, 'data/normalised/boundary-crosswalk.csv')
+const WARD_POINTS = join(ROOT, 'data/normalised/ward-points.csv')
 const OUT_CSV = join(ROOT, 'data/normalised/units.csv')
 
 const args = process.argv.slice(2)
@@ -84,11 +86,20 @@ if (existsSync(GRID3_STATES)) {
   }
 }
 
+// Optional, from `pnpm geo:build` (task 1.5): GRID3 ids per unit and ward polygon interior points.
+const csvRows = (file: string) => readFileSync(file, 'utf8').split(/\r?\n/).slice(1).filter(l => l.trim()).map(l => l.split(','))
+const boundaryRefs = existsSync(CROSSWALK)
+  ? new Map(csvRows(CROSSWALK).map(([code, , ids]) => [code!, ids!]))
+  : undefined
+const wardPoints = existsSync(WARD_POINTS)
+  ? new Map(csvRows(WARD_POINTS).map(([code, lat, lng]) => [code!, { lat: Number(lat), lng: Number(lng) }]))
+  : undefined
+
 const sourceVersion = sourceVersionArg && !sourceVersionArg.startsWith('--')
   ? sourceVersionArg
   : `inec-locator-${statSync(HIERARCHY).mtime.toISOString().slice(0, 10)}`
 
-const { units, report } = normaliseInec({ hierarchy, coords, voters, stateBoxes, sourceVersion })
+const { units, report } = normaliseInec({ hierarchy, coords, voters, stateBoxes, wardPoints, boundaryRefs, sourceVersion })
 
 // Report.
 console.log(`Source version: ${sourceVersion}`)
@@ -100,6 +111,9 @@ console.table(report.states.map(s => ({
 })))
 const c = report.coords
 console.log(`Coordinates: ${c.inec} from INEC, ${c.estimated} estimated (${c.notFetched} not fetched, ${c.returnedNone} none from INEC, ${c.outliers} outliers)`)
+console.log(boundaryRefs
+  ? `Boundaries: ${units.filter(u => u.boundaryRef).length} units linked to GRID3; ${wardPoints?.size ?? 0} ward polygon points`
+  : 'Boundaries: none yet (run pnpm geo:build)')
 console.log(`Registered voters: ${report.voters.pus} PUs with figures, ${report.voters.missing} missing`)
 
 const errors = report.issues.filter(i => i.severity === 'error')

@@ -37,6 +37,10 @@ export interface InecInputs {
   voters?: Map<string, number>
   /** State code → bounding box (from GRID3 state polygons). Falls back to NW_BBOX. */
   stateBoxes?: Map<string, BBox>
+  /** Ward code → interior point of its GRID3 polygon (data/normalised/ward-points.csv). */
+  wardPoints?: Map<string, LngLat>
+  /** Unit code → GRID3 feature id(s) (data/normalised/boundary-crosswalk.csv). */
+  boundaryRefs?: Map<string, string>
   sourceVersion: string
 }
 
@@ -49,6 +53,7 @@ export interface NormalisedUnit {
   registeredVoters: number | null
   location: LngLat | null
   locationEstimated: boolean
+  boundaryRef: string | null
   sourceVersion: string
 }
 
@@ -130,6 +135,7 @@ export function normaliseInec(inputs: InecInputs): { units: NormalisedUnit[], re
       registeredVoters: null,
       location: null,
       locationEstimated: false,
+      boundaryRef: null,
       sourceVersion: inputs.sourceVersion,
     }
     byCode.set(code, unit)
@@ -197,6 +203,17 @@ export function normaliseInec(inputs: InecInputs): { units: NormalisedUnit[], re
     return centroidCache.get(code)!
   }
 
+  // Ward polygon interior points (GRID3, via pnpm geo:build); their mean stands in for an LGA/state.
+  const wardPoints = inputs.wardPoints ?? new Map<string, LngLat>()
+  const polygonPoint = (code: string) =>
+    wardPoints.get(code) ?? mean([...wardPoints].filter(([w]) => w.startsWith(`${code}/`)).map(([, p]) => p))
+
+  /** Best estimate for a ward/LGA/state: its known PU points, else its polygon point(s), else its parent's. */
+  const estimate = (code: string): LngLat | null => {
+    const parent = parentCode(code)
+    return centroid(code) ?? polygonPoint(code) ?? (parent ? estimate(parent) : null)
+  }
+
   for (const pu of pus) {
     const own = known.get(pu.code)
     if (own) {
@@ -204,26 +221,19 @@ export function normaliseInec(inputs: InecInputs): { units: NormalisedUnit[], re
       coordStats.inec++
       continue
     }
-    // Ward → LGA → state centroid of known PU points.
-    const [s, l, w] = pu.code.split('/')
-    pu.location = centroid(`${s}/${l}/${w}`) ?? centroid(`${s}/${l}`) ?? centroid(s!)
+    pu.location = estimate(pu.parentCode!)
     pu.locationEstimated = true
     coordStats.estimated++
   }
-  for (const level of ['ward', 'lga', 'state'] as const) {
-    for (const u of units.filter(x => x.level === level)) {
-      const c = centroid(u.code)
-      if (c) {
-        u.location = c
-      }
-      else {
-        // No known PU points below: borrow the parent's centroid if any.
-        const [s, l] = u.code.split('/')
-        u.location = (level === 'ward' ? centroid(`${s}/${l}`) : null) ?? (level !== 'state' ? centroid(s!) : null)
-        u.locationEstimated = true
-      }
-    }
+  for (const u of units.filter(x => x.level !== 'pu')) {
+    const c = centroid(u.code)
+    u.location = c ?? estimate(u.code)
+    // A centroid of real INEC points is a genuine location for an area; anything else is an estimate.
+    u.locationEstimated = !c
   }
+
+  // GRID3 feature ids from the boundary join.
+  for (const u of units) u.boundaryRef = inputs.boundaryRefs?.get(u.code) ?? null
 
   // 3. Registered voters: PU values from the register; wards/LGAs/states are sums (only when every PU has a value).
   const voterStats = { pus: 0, missing: 0 }
@@ -292,7 +302,7 @@ export function toUnitsCsv(units: NormalisedUnit[]): string {
     const s = String(v)
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
   }
-  const header = 'code,level,parent_code,name,registered_voters,lat,lng,location_estimated,source_version'
+  const header = 'code,level,parent_code,name,registered_voters,lat,lng,location_estimated,boundary_ref,source_version'
   const lines = units.map(u => [
     u.code,
     u.level,
@@ -302,6 +312,7 @@ export function toUnitsCsv(units: NormalisedUnit[]): string {
     u.location?.lat ?? null,
     u.location?.lng ?? null,
     u.locationEstimated,
+    u.boundaryRef,
     u.sourceVersion,
   ].map(esc).join(','))
   return `${header}\n${lines.join('\n')}\n`

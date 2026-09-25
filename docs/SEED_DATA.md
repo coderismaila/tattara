@@ -43,12 +43,25 @@ Flags: `--dry-run` (diff only), `--csv-only`, `--source-version <v>`.
 4. `registered_voters` non-negative; ward sum sanity check.
 
 ## 4. Boundary join
-`scripts/import-grid3-boundaries.ts`:
+`pnpm geo:build` (`scripts/import-grid3-boundaries.ts`, matcher in `scripts/boundaries/match.ts`):
 1. Load GRID3 layers, filter to the 7 states.
 2. Match to our units by normalised name within parent (state → LGA → ward), using Jaro-Winkler similarity ≥ 0.92.
-3. Write unmatched pairs to `data/crosswalk/unmatched.csv`; the human fills `data/crosswalk/manual.csv` (`grid3_id,code`).
-4. Simplify with mapshaper (`-simplify 3% keep-shapes`), set `code` property, write to `public/geo/`.
+   Names are compared with Roman numerals as digits and also with spaces removed; alternative names count 0.01 less.
+   Wards are only compared with wards of their LGA (GRID3's ward layer spells some LGAs differently from its LGA
+   layer, so the closest ward-layer LGA name is used).
+   **Spatial vote** (LGAs and wards): which candidate polygon holds most of the unit's INEC-coordinate PUs.
+   Name ≥ 0.97 wins over a disagreeing vote (flagged for review); a weaker name that the vote contradicts goes to the
+   human; with no name match, a spatial majority (≥ 60% of ≥ 3 points) is accepted (flagged for review).
+3. Write unresolved units and unused GRID3 features to `data/crosswalk/unmatched.csv`, and accepted-but-flagged
+   matches to `data/crosswalk/review.csv`; the human fills `data/crosswalk/manual.csv` (`grid3_id,code,note`),
+   which overrides everything. Re-run `pnpm geo:build` after editing it.
+4. Simplify with mapshaper (`-simplify 3% keep-shapes`, dissolved by code, 0.0001° precision), set `code` + `name`
+   properties, write `public/geo/nw-states.geojson`, `nw-lgas.geojson`, `wards/{stateCode}.geojson` and
+   `ATTRIBUTION.md` (wards are CC BY-SA 4.0).
 5. Report file sizes; target states < 150 KB, LGAs < 600 KB, each state's wards < 800 KB.
+6. Write `data/normalised/boundary-crosswalk.csv` (→ `units.boundary_ref`) and `ward-points.csv` (polygon interior
+   points, the importer's location fallback after a ward's own PU points), plus a report of INEC PU points outside
+   their matched ward (`data/normalised/reports/pu-outside-ward.csv`). Then run `pnpm db:seed`.
 
 ## 5. Dev seed
 `scripts/seed-dev.ts` creates:

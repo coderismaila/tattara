@@ -39,6 +39,7 @@ export async function writeUnits(db: Db, rows: NormalisedUnit[], options: { dryR
     registeredVoters: units.registeredVoters,
     location: units.location,
     locationEstimated: units.locationEstimated,
+    boundaryRef: units.boundaryRef,
     active: units.active,
   }).from(units)
   const before = new Map(existing.map(e => [e.code, e]))
@@ -55,6 +56,7 @@ export async function writeUnits(db: Db, rows: NormalisedUnit[], options: { dryR
     const changed = e.name !== r.name
       || e.registeredVoters !== r.registeredVoters
       || e.locationEstimated !== r.locationEstimated
+      || e.boundaryRef !== r.boundaryRef
       || !sameLocation(e.location, r.location)
     if (changed) diff.updated++
     else if (e.active) diff.unchanged++
@@ -76,6 +78,7 @@ export async function writeUnits(db: Db, rows: NormalisedUnit[], options: { dryR
             registeredVoters: sql`excluded.registered_voters`,
             location: sql`excluded.location`,
             locationEstimated: sql`excluded.location_estimated`,
+            boundaryRef: sql`excluded.boundary_ref`,
             sourceVersion: sql`excluded.source_version`,
             active: sql`true`,
             updatedAt: sql`now()`,

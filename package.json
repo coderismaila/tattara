@@ -26,7 +26,8 @@
     "data:fetch:inec": "node scripts/fetch/inec-pus.ts",
     "data:fetch:inec-coords": "node scripts/fetch/inec-pus.ts --coords",
     "data:fetch:grid3": "node scripts/fetch/grid3-boundaries.ts",
-    "db:seed": "node scripts/import-inec-pus.ts"
+    "db:seed": "node scripts/import-inec-pus.ts",
+    "geo:build": "node scripts/import-grid3-boundaries.ts"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.1",
@@ -60,6 +61,7 @@
     "husky": "^9.1.7",
     "json5": "^2.2.3",
     "lint-staged": "^17.5.1",
+    "mapshaper": "^0.7.67",
     "typescript": "^6.0.3",
     "vitest": "^5.0.1",
     "vue-tsc": "^3.3.11"

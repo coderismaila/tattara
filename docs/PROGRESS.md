@@ -26,7 +26,16 @@ Also note blockers and anything the next session must know.
     **403** to this machine after ~30k requests (two fetch instances ran at once by mistake). Wait before resuming:
     `pnpm data:fetch:inec-coords` (now 1 req / 1.5 s, lock file, stops on 403), then once with `--retry-missing`.
   - **👤 Registered voters per PU** are not in the INEC locator; needs the 2023 register figures from INEC.
-  - **After fetching more data, re-run `pnpm db:seed`** (use `--dry-run` first to see the diff). It upserts and is idempotent.
+  - **After fetching more data, re-run `pnpm geo:build` then `pnpm db:seed`** (use `--dry-run` first to see the diff).
+    Both are idempotent. geo:build gives the importer `boundary_ref` + ward polygon points (location fallback).
+- **1.5 boundaries:** 7/7 states, 186/186 LGAs (2 via `data/crosswalk/manual.csv`), 1,986/2,003 wards.
+  - **👤 17 wards unresolved** in `data/crosswalk/unmatched.csv` (with candidate GRID3 wards and scores); 19 accepted
+    matches flagged in `data/crosswalk/review.csv`. Resolve by adding `grid3_id,code,note` rows to `manual.csv`.
+  - Kebbi/Sokoto/Zamfara wards match on names only until their PU coordinates are fetched.
+  - Every unit now has a location (all 43,867); 2,657 INEC PU points lie outside their matched ward polygon (report).
+  - **About page (UI task):** must show the attribution in `public/geo/ATTRIBUTION.md` (wards are CC BY-SA 4.0).
+  - 6.3 map: files are `public/geo/nw-states.geojson` (9 KB), `nw-lgas.geojson` (75 KB), `wards/{state}.geojson`
+    (190–475 KB); each feature has `code` (INEC) + `name` (+ `state`).
   - Real geography locally: `docker compose down -v && pnpm db:up && pnpm db:migrate && pnpm db:seed && pnpm db:seed:dev`
     (the importer refuses a DB holding fake dev units; the dev seed then adds only users). Import takes ~30 s.
   - Current import: 43,867 units; PU locations 26,550 INEC / 3,856 estimated; **Kebbi, Sokoto, Zamfara have no
@@ -43,6 +52,7 @@ Also note blockers and anything the next session must know.
 - Hausa strings live in `i18n/locales/ha.json5` (ADR-008).
 
 ## Log
+- 2026-09-25 · 1.5 · Boundary join (`pnpm geo:build`): Jaro-Winkler names + spatial vote from INEC points, manual crosswalk, unmatched/review CSVs; mapshaper-simplified `public/geo/*` (all under size targets) + ATTRIBUTION; ward polygon points + `boundary_ref` fed to the importer (every unit now located) · see commit `feat(geo)`
 - 2026-09-25 · 1.4 · INEC importer (`pnpm db:seed`): normaliser with SEED_DATA §3 checks (counts vs PRD, codes, per-state coordinate boxes, voters), estimated locations, `data/normalised/units.csv`, idempotent upsert + deactivation + `--dry-run`; real import verified (43,867 units, all counts match); dev seed adds users only on real geography · see commit `feat(import)`
 - 2026-09-25 · 1.3 (partial) · Fetch scripts for INEC PU locator (hierarchy + coordinates, resumable, polite) and GRID3 boundaries; `data/SOURCES.md` with provenance and licences; `data/raw` + `data/normalised` gitignored · see commit `feat(data)`
 - 2026-09-25 · 2.1 · `users` (role ↔ unit level via composite FK + CHECK, one active lead per unit, E.164 phone CHECK), `user_devices`, `invites`, `otp_codes`, `audit_log` (append-only trigger), `unit_targets.set_by` FK; argon2id `hashPin`/`verifyPin`; dev seed users per role (Kano + Katsina chains); `data/` gitignored · see commit `feat(db)`

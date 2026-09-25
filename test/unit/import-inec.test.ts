@@ -160,8 +160,30 @@ describe('toUnitsCsv', () => {
       coords: new Map([['19/01/01/001', { lat: 12, lng: 8.5 }]]),
     }))
     const lines = toUnitsCsv(units).trim().split('\n')
-    expect(lines[0]).toBe('code,level,parent_code,name,registered_voters,lat,lng,location_estimated,source_version')
-    expect(lines).toContain('19,state,,KANO,,12,8.5,false,test-v1')
-    expect(lines).toContain('19/01/01/001,pu,19/01/01,"KOFAR ""GABAS"", PS",,12,8.5,false,test-v1')
+    expect(lines[0]).toBe('code,level,parent_code,name,registered_voters,lat,lng,location_estimated,boundary_ref,source_version')
+    expect(lines).toContain('19,state,,KANO,,12,8.5,false,,test-v1')
+    expect(lines).toContain('19/01/01/001,pu,19/01/01,"KOFAR ""GABAS"", PS",,12,8.5,false,,test-v1')
+  })
+})
+
+describe('normaliseInec: boundary join inputs', () => {
+  it('falls back to ward polygon points before the LGA, and links GRID3 ids', () => {
+    const { units } = normaliseInec(base({
+      coords: new Map([['19/01/01/001', { lat: 12.0, lng: 8.5 }]]),
+      wardPoints: new Map([
+        ['19/01/02', { lat: 11.5, lng: 8.1 }],
+        ['20/01/01', { lat: 13.0, lng: 7.6 }],
+      ]),
+      boundaryRefs: new Map([['19/01/02', 'grid3-ward-v3:7']]),
+    }))
+    // Ward 19/01/02 has no INEC points: its polygon point beats the LGA centroid.
+    expect(find(units, '19/01/02/001')).toMatchObject({ location: { lat: 11.5, lng: 8.1 }, locationEstimated: true })
+    expect(find(units, '19/01/02')).toMatchObject({ location: { lat: 11.5, lng: 8.1 }, locationEstimated: true, boundaryRef: 'grid3-ward-v3:7' })
+    // A state with no INEC points at all gets located from its ward polygons.
+    expect(find(units, '20/01/01/001').location).toEqual({ lat: 13.0, lng: 7.6 })
+    expect(find(units, '20')).toMatchObject({ location: { lat: 13.0, lng: 7.6 }, locationEstimated: true })
+    // Ward with its own INEC points: still their centroid.
+    expect(find(units, '19/01/01/002').location).toEqual({ lat: 12.0, lng: 8.5 })
+    expect(find(units, '19/01/01').boundaryRef).toBeNull()
   })
 })

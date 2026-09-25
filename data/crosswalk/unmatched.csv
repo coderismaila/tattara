@@ -1,0 +1,36 @@
+kind,code_or_grid3_id,level,name,reason,candidates
+inec_unit,19/22/03,ward,KARAYE,Best name match Daura already taken,"grid3-ward-v3:3057 ""Daura"" name=0.7 spatial=- | grid3-ward-v3:3058 ""Kafin Dabga"" name=0.68 spatial=- | grid3-ward-v3:3060 ""Kwanyawa"" name=0.675 spatial=- | grid3-ward-v3:3062 ""Magajin Gari"" name=- spatial=0.517"
+inec_unit,21/02/03,ward,DAURA/SAKKWABE/JARKUKA,Best name match Gumumunde-Rafin Tsaka already taken,"grid3-ward-v3:294 ""Gumumunde-Rafin Tsaka"" name=0.597 spatial=- | grid3-ward-v3:297 ""Sarka"" name=0.583 spatial=- | grid3-ward-v3:292 ""Feske-Jaffeji"" name=0.573 spatial=-"
+inec_unit,21/10/06,ward,GWANDU SARKIN FAWA,Best name match Gwandu Marafa already taken,"grid3-ward-v3:1910 ""Gwandu Marafa"" name=0.903 spatial=- | grid3-ward-v3:1909 ""Gwandu Dangaladima"" name=0.842 spatial=- | grid3-ward-v3:1913 ""Maruda"" name=0.615 spatial=-"
+inec_unit,21/20/01,ward,CHULU/KOMA,No name match ≥ 0.92 and no spatial majority,"grid3-ward-v3:5712 ""Chulu Gumbi"" name=0.867 spatial=- | grid3-ward-v3:5713 ""Gungun Sarki"" name=0.572 spatial=- | grid3-ward-v3:5717 ""Yelwa East"" name=0.533 spatial=-"
+inec_unit,33/07/02,ward,ASARA AREWA,Best name match Asara already taken,"grid3-ward-v3:1874 ""Asara"" name=0.99 spatial=- | grid3-ward-v3:1876 ""Chimola"" name=0.677 spatial=- | grid3-ward-v3:1879 ""Gwadabawa"" name=0.619 spatial=-"
+inec_unit,33/07/05,ward,CHIMOLA AREWA,Best name match Chimola already taken,"grid3-ward-v3:1876 ""Chimola"" name=0.99 spatial=- | grid3-ward-v3:1883 ""Salame"" name=0.683 spatial=- | grid3-ward-v3:1874 ""Asara"" name=0.667 spatial=-"
+inec_unit,33/10/06,ward,G/ MODIBBO/ G. AKWARA,Best name match Kware already taken,"grid3-ward-v3:3451 ""Kware"" name=0.99 spatial=- | grid3-ward-v3:3446 ""Durbawa"" name=0.683 spatial=- | grid3-ward-v3:3447 ""Gandu"" name=0.678 spatial=-"
+inec_unit,33/12/05,ward,GAWAKUKE,Best name match Gandi I already taken,"grid3-ward-v3:4680 ""Gandi I"" name=0.69 spatial=- | grid3-ward-v3:4684 ""Maikujera"" name=0.648 spatial=- | grid3-ward-v3:4690 ""Yarstakuwa"" name=0.633 spatial=-"
+inec_unit,33/13/02,ward,S/BIRNI WEST,Best name match Sabon Birni already taken,"grid3-ward-v3:4792 ""Sabon Birni"" name=0.99 spatial=- | grid3-ward-v3:4790 ""Lajinge"" name=0.576 spatial=- | grid3-ward-v3:4789 ""Kurawa"" name=0.511 spatial=-"
+inec_unit,33/15/02,ward,GANDE WEST,Best name match Gande already taken,"grid3-ward-v3:5026 ""Gande"" name=0.99 spatial=- | grid3-ward-v3:5034 ""Marafa"" name=0.622 spatial=- | grid3-ward-v3:5027 ""Gaukai"" name=0.615 spatial=-"
+inec_unit,33/15/06,ward,KUBODU SOUTH,Best name match Kubodu already taken,"grid3-ward-v3:5031 ""Kubodu"" name=0.99 spatial=- | grid3-ward-v3:5030 ""Katami South"" name=0.664 spatial=- | grid3-ward-v3:5029 ""Katami North"" name=0.618 spatial=-"
+inec_unit,33/15/09,ward,MARAFA WEST,Best name match Marafa already taken,"grid3-ward-v3:5034 ""Marafa"" name=0.99 spatial=- | grid3-ward-v3:5033 ""Maje"" name=0.747 spatial=- | grid3-ward-v3:5026 ""Gande"" name=0.65 spatial=-"
+inec_unit,33/17/01,ward,R/DOROWA 'A',No name match ≥ 0.92 and no spatial majority,"grid3-ward-v3:5062 ""Rijia B"" name=0.844 spatial=- | grid3-ward-v3:5061 ""Rijia A"" name=0.663 spatial=- | grid3-ward-v3:5067 ""Tudun Wada A"" name=0.634 spatial=-"
+inec_unit,33/17/02,ward,R/DOROWA 'B',No name match ≥ 0.92 and no spatial majority,"grid3-ward-v3:5062 ""Rijia B"" name=0.844 spatial=- | grid3-ward-v3:5064 ""Sarkin Addar B"" name=0.718 spatial=- | grid3-ward-v3:5068 ""Tudun Wada B"" name=0.69 spatial=-"
+inec_unit,33/17/11,ward,S/A/K/ATIKU,No name match ≥ 0.92 and no spatial majority,"grid3-ward-v3:5064 ""Sarkin Addar B"" name=0.729 spatial=- | grid3-ward-v3:5063 ""Sarkin Addar A"" name=0.691 spatial=- | grid3-ward-v3:5065 ""Sarkin Zamfara A"" name=0.675 spatial=-"
+inec_unit,33/20/04,ward,BARAYAR GIWA,Best name match Gidan Kare already taken,"grid3-ward-v3:5336 ""Gidan Kare"" name=0.657 spatial=- | grid3-ward-v3:5338 ""Kwarare"" name=0.645 spatial=- | grid3-ward-v3:5341 ""Tsamiya"" name=0.613 spatial=-"
+inec_unit,36/03/06,ward,KIYAWA,Best name match Madomawa East already taken,"grid3-ward-v3:761 ""Madomawa East"" name=0.59 spatial=- | grid3-ward-v3:762 ""Madomawa West"" name=0.59 spatial=- | grid3-ward-v3:756 ""Birnin Magaji"" name=0.583 spatial=-"
+grid3_feature,grid3-ward-v3:288,ward,Bachaka,"state 21, LGA Arewa Dandi",
+grid3_feature,grid3-ward-v3:765,ward,Nasarawa Mailayi,"state 36, LGA Birnin Magaji/Kiyaw",
+grid3_feature,grid3-ward-v3:1881,ward,Mamman Suka,"state 33, LGA Gwadabawa",
+grid3_feature,grid3-ward-v3:1884,ward,Tambagarka,"state 33, LGA Gwadabawa",
+grid3_feature,grid3-ward-v3:1909,ward,Gwandu Dangaladima,"state 21, LGA Gwandu",
+grid3_feature,grid3-ward-v3:3062,ward,Magajin Gari,"state 19, LGA Karaye",
+grid3_feature,grid3-ward-v3:3447,ward,Gandu,"state 33, LGA Kware",
+grid3_feature,grid3-ward-v3:3830,ward,Gwari,"state 17, LGA Miga",
+grid3_feature,grid3-ward-v3:4687,ward,Tofa,"state 33, LGA Rabah",
+grid3_feature,grid3-ward-v3:4793,ward,Takatsaba,"state 33, LGA Sabon Birni",
+grid3_feature,grid3-ward-v3:5027,ward,Gaukai,"state 33, LGA Silame",
+grid3_feature,grid3-ward-v3:5028,ward,Jekanadu,"state 33, LGA Silame",
+grid3_feature,grid3-ward-v3:5033,ward,Maje,"state 33, LGA Silame",
+grid3_feature,grid3-ward-v3:5061,ward,Rijia A,"state 33, LGA Sokoto South",
+grid3_feature,grid3-ward-v3:5062,ward,Rijia B,"state 33, LGA Sokoto South",
+grid3_feature,grid3-ward-v3:5064,ward,Sarkin Addar B,"state 33, LGA Sokoto South",
+grid3_feature,grid3-ward-v3:5333,ward,Dangulbi,"state 33, LGA Tureta",
+grid3_feature,grid3-ward-v3:5712,ward,Chulu Gumbi,"state 21, LGA Yauri",

@@ -30,7 +30,13 @@ export default defineNuxtConfig({
   future: { compatibilityVersion: 5 },
   compatibilityDate: '2026-09-25',
 
-  typescript: { strict: true },
+  typescript: {
+    strict: true,
+    // Typecheck unit + e2e tests and the Playwright config (test/nuxt is in the app context by default).
+    nodeTsConfig: {
+      include: ['../test/unit/**/*', '../test/e2e/**/*', '../playwright.config.*'],
+    },
+  },
 
   eslint: {
     config: { stylistic: true },
@@ -39,6 +45,9 @@ export default defineNuxtConfig({
   i18n: {
     defaultLocale: 'ha',
     strategy: 'no_prefix',
+    // Hausa first: never auto-switch from the phone's language (many are set to English).
+    // The user's choice is persisted by the language switch (task 0.5).
+    detectBrowserLanguage: false,
     locales: [
       { code: 'ha', language: 'ha-NG', name: 'Hausa', file: 'ha.json5' },
       { code: 'en', language: 'en-NG', name: 'English', file: 'en.json' },

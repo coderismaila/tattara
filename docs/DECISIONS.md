@@ -38,3 +38,13 @@ Default Termii behind an interface; confirm pricing, sender ID approval and deli
 **Decision:** pnpm pinned via `packageManager: pnpm@10.33.0` (corepack). TypeScript pinned to 6.x.
 **Why:** TypeScript 7 (native port) ships without the JS API that `vue-tsc` / `nuxt typecheck` depend on.
 **Consequences:** Revisit TS 7 when vue-tsc supports it. No compat-5 escape hatch was needed: all modules load under `compatibilityVersion: 5` (only non-fatal warnings, see PROGRESS notes).
+
+### ADR-010 · 2026-09-25 · Accepted · No browser-language detection (Hausa always default)
+**Decision:** `i18n.detectBrowserLanguage: false`. The app always opens in Hausa; the user switches via the header toggle.
+**Why:** UX_GUIDELINES "Hausa first". Many field phones are set to English, and detection silently served them English (caught by the Nuxt test in 0.2).
+**Consequences:** The language switch (task 0.5) must persist the user's choice itself (cookie/localStorage + `setLocale` on load).
+
+### ADR-011 · 2026-09-25 · Accepted · Test layout
+**Decision:** Vitest projects `unit` (`test/unit`, node) and `nuxt` (`test/nuxt`, Nuxt runtime + happy-dom). E2E in Playwright (`test/e2e`) against a production build on a Pixel 5 (Android Chrome) profile. The PWA client plugin is disabled inside the Vitest Nuxt env (its `virtual:pwa-register` import can't resolve there).
+**Why:** Fast node tests for services/utils; real-runtime tests only where needed; e2e on the target device class.
+**Consequences:** PWA behaviour is covered by Playwright only.

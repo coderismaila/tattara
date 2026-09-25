@@ -12,7 +12,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
   Set `future.compatibilityVersion: 5`, `compatibilityDate`, TS strict, `app/` structure per ARCHITECTURE §3.
   **AC:** `pnpm dev` serves a Nuxt UI page; `pnpm lint`, `pnpm typecheck` pass; no module errors under compat 5 (or escape hatch logged in DECISIONS.md).
 
-- [ ] **0.2 Tooling**
+- [x] **0.2 Tooling**
   Vitest (unit + nuxt env), Playwright, `@nuxt/eslint` flat config, Husky + lint-staged, Conventional Commits, `.env.example`, `.nvmrc` (24), GitHub Actions CI: install → lint → typecheck → test → build.
   **AC:** CI green on a sample test; pre-commit runs lint on staged files.
 

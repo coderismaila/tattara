@@ -97,6 +97,14 @@ describe.skipIf(!dbAvailable)('INEC import → units', () => {
     expect(await get('19/01/02/001')).toMatchObject({ active: true })
   })
 
+  it('never wipes a field-reported registered-voters figure on re-import', async () => {
+    // Simulates a PU lead's report (task 3.7).
+    await db.update(units).set({ registeredVoters: 734 }).where(eq(units.code, '19/01/01/001'))
+    const diff = await writeUnits(db, normalise(HIERARCHY, 'inec-test-3')) // import carries NULL voters
+    expect(diff.updated).toBe(0)
+    expect((await get('19/01/01/001'))!.registeredVoters).toBe(734)
+  })
+
   it('the dev seed adds only dev users on real geography', async () => {
     expect(await seedDev(temp.url, { nodeEnv: 'test' })).toEqual({ units: 0, targets: 0, users: DEV_USERS.length })
     expect(await unitCount()).toBe(11)

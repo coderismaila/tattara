@@ -23,7 +23,7 @@ single polling unit.
 
 **Goals**
 1. Every PU lead can add a supporter in under 60 seconds, online or offline.
-2. Leadership sees near-real-time coverage (supporters ÷ INEC registered voters) at every level on a map.
+2. Leadership sees near-real-time coverage (supporters ÷ registered voters, as reported by PU leads) at every level on a map.
 3. The data is trustworthy: verified phones, GPS evidence, duplicate and anomaly flags, call-back audits.
 4. The data is safe: strict scoped access, masking, consent records, audit trail, NDPA-aligned.
 5. The same registry powers get-out-the-vote (SMS) and, later, election-day operations.
@@ -82,6 +82,7 @@ Each lead creates the accounts one level below them (cascading onboarding). The 
 - **US-6** I can add supporters with no network; they sync automatically when signal returns, and I can see what's pending.
 - **US-7** I get an immediate warning if the phone number already exists in my PU (offline check) or anywhere (online check).
 - **US-8** I can view, search and edit supporters I registered; I cannot hard-delete (only request removal).
+- **US-24** I record the number of registered voters at my PU (from the register displayed at the PU) and can update it; my ward lead can correct it. INEC does not publish these per PU, so the field is the source.
 - **R-3** Consent screen: a short script shown in the active language that the lead reads aloud; the lead ticks "Supporter agreed". Consent version and language are stored.
 - **R-4** GPS location and accuracy are captured when available; saving is never blocked by lack of GPS.
 - **R-5** Phone numbers are normalised to E.164 (+234). Shared household phones are allowed with a "shared phone" tick, max 3 supporters per number system-wide.
@@ -89,7 +90,7 @@ Each lead creates the accounts one level below them (cascading onboarding). The 
 ### 6.3 Verification and data quality
 - **US-9** After sync, the supporter receives an SMS: a thank-you plus an opt-out ("Reply STOP"). Replies update the record.
 - **US-10** As a ward lead, I get a daily random sample (default 5%) of new supporters in my ward to call back and mark verified / wrong number / denies / unreachable.
-- **R-6** Automatic flags: GPS > configurable distance from PU (default 3 km); duplicate phone; PU count > 90% of INEC registered voters; capture rate anomaly (> 60 records/hour per lead); many records with identical GPS fix.
+- **R-6** Automatic flags: GPS > configurable distance from PU (default 3 km); duplicate phone; PU count > 90% of its registered voters (as reported by the PU lead; not checked until reported); capture rate anomaly (> 60 records/hour per lead); many records with identical GPS fix.
 - **R-7** Each lead has a **quality score** (verified rate, flag rate, opt-out rate), shown to their supervisors.
 
 ### 6.4 Dashboards and map
@@ -101,7 +102,7 @@ Each lead creates the accounts one level below them (cascading onboarding). The 
 - **R-9** Above ward level, no individual supporter data is shown — aggregates only.
 
 ### 6.5 Targets
-- **US-15** DG sets state targets; each lead may split their target across child units (defaulting to proportional by INEC registered voters).
+- **US-15** DG sets state targets; each lead may split their target across child units (defaulting to proportional by reported registered voters, or by PU count where figures are missing).
 
 ### 6.6 Communication (Phase 2)
 - **US-16** DG and state leads can send approved SMS templates to supporters in scope (e.g. PVC collection reminders, rally notices, election-day reminders), with opt-outs honoured and every send audited.
@@ -110,7 +111,7 @@ Each lead creates the accounts one level below them (cascading onboarding). The 
 ### 6.7 Data rights and admin
 - **US-18** A supporter can ask to be removed (via SMS STOP or via their lead); removal anonymises the record within 72 hours.
 - **US-19** DG can request an export for a scope; it requires a second approver (ADMIN) and is watermarked and audited.
-- **US-20** Admin can import and refresh INEC geography and registered-voter counts.
+- **US-20** Admin can import and refresh INEC geography. (Registered-voter counts come from PU leads, US-24.)
 
 ### 6.8 Election day (Phase 3, post-MVP)
 - **US-21** PU leads mark supporters as "voted" to drive live turnout tracking.

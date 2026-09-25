@@ -33,8 +33,8 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
 - [x] **1.1 Schema: units, unit_targets** (DATA_MODEL §1) + migration + indexes.
 - [x] **1.2 Dev seed** `scripts/seed-dev.ts` (fake geography + users + supporters stub). _Done: geography + targets (`pnpm db:seed:dev`). Users are seeded in 2.1, supporters in 3.1, by extending `scripts/seed/run.ts`._
   **AC:** `pnpm db:seed` is idempotent; codes are in real format.
-- [ ] 👤 **1.3 Obtain INEC PU data + GRID3 boundaries** into `data/raw/`, fill `data/SOURCES.md`. _Status 2026-09-25: fetched by script. INEC hierarchy complete (41,671 PUs, counts match the PRD); GRID3 states/LGAs/wards complete. PU coordinates partial (26,550; INEC answered 403, resume later). Registered voters per PU still missing (👤). See `data/SOURCES.md`._
-- [x] **1.4 INEC importer** `scripts/import-inec-pus.ts` → normalised CSV → DB, with the validation checks in SEED_DATA §3. _Re-run `pnpm db:seed` when the remaining coordinates / registered voters arrive (1.3)._
+- [x] 👤 **1.3 Obtain INEC PU data + GRID3 boundaries** into `data/raw/`, fill `data/SOURCES.md`. _Done 2026-09-25 by script: INEC hierarchy complete (41,671 PUs, counts match the PRD); GRID3 states/LGAs/wards complete. Registered voters are out of scope here (field-reported, 3.7). Follow-up, non-blocking: the remaining PU coordinates once INEC stops answering 403 (see PROGRESS)._
+- [x] **1.4 INEC importer** `scripts/import-inec-pus.ts` → normalised CSV → DB, with the validation checks in SEED_DATA §3. _Re-run `pnpm db:seed` when the remaining coordinates arrive._
   **AC:** prints per-state counts vs expected; zero orphans; re-run is a no-op.
 - [x] **1.5 Boundary importer** per SEED_DATA §4, writing `public/geo/*`. _17 wards await the human in `data/crosswalk/unmatched.csv` (add to `manual.csv`, re-run `pnpm geo:build`, then `pnpm db:seed`)._
   **AC:** all 186 LGAs matched; ward match ≥ 98% before the manual crosswalk, 100% after.
@@ -61,6 +61,12 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
 - [ ] **3.4 Supporter list + detail + edit** (PU & ward), search by name/phone, cursor pagination.
 - [ ] **3.5 Phone duplicate check** (`/supporters/check-phone`) + the shared-phone rule (max 3).
 - [ ] **3.6 Access-control test suite** table-driven over every supporter/user/stats route × role × in/out-of-scope.
+- [ ] **3.7 Registered voters from the field** (PRD US-24). PU lead enters/updates their PU's registered-voter count
+  (from the register displayed at the PU); ward lead can correct within their ward. Store on `units.registered_voters`
+  with `registered_voters_reported_by` / `_at` (migration); audited; route `PUT /units/:code/registered-voters` via
+  `requireScope`. Home prompts the PU lead once if missing. Ward+ see sums plus "reported for X of Y PUs".
+  **AC:** the INEC re-import keeps reported figures (already enforced by the importer); 5.1 `pu_over_capacity` and
+  coverage % skip unreported PUs; 6.4 default target split falls back to PU count; the 3.6 access suite covers the route.
   **AC:** the suite runs in CI; any new route without a matrix entry fails a meta-test.
 
 ## Phase 4 — Offline-first & PWA

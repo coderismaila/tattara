@@ -25,7 +25,10 @@ Also note blockers and anything the next session must know.
   - **PU coordinates partial:** 26,550 found, 3,856 returned none, 11,265 not yet asked. INEC started answering
     **403** to this machine after ~30k requests (two fetch instances ran at once by mistake). Wait before resuming:
     `pnpm data:fetch:inec-coords` (now 1 req / 1.5 s, lock file, stops on 403), then once with `--retry-missing`.
-  - **👤 Registered voters per PU** are not in the INEC locator; needs the 2023 register figures from INEC.
+  - **Registered voters per PU: collected by PU leads in the field** (decided 2026-09-25; PRD US-24, task 3.7).
+    The importer never overwrites a stored figure with NULL, so re-imports are safe once leads start reporting.
+  - **Follow-up (non-blocking):** remaining PU coordinates — INEC still 403 on 2026-09-25. Resume from another
+    network or later; then `pnpm geo:build && pnpm db:seed`.
   - **After fetching more data, re-run `pnpm geo:build` then `pnpm db:seed`** (use `--dry-run` first to see the diff).
     Both are idempotent. geo:build gives the importer `boundary_ref` + ward polygon points (location fallback).
 - **1.5 boundaries:** 7/7 states, 186/186 LGAs (2 via `data/crosswalk/manual.csv`), 1,986/2,003 wards.
@@ -52,6 +55,7 @@ Also note blockers and anything the next session must know.
 - Hausa strings live in `i18n/locales/ha.json5` (ADR-008).
 
 ## Log
+- 2026-09-25 · 1.3 · Closed: data fetched by script; registered voters moved to field collection by PU leads (new task 3.7, PRD US-24); importer now never overwrites a stored registered-voters figure with NULL · see commit `feat(import)`
 - 2026-09-25 · 1.5 · Boundary join (`pnpm geo:build`): Jaro-Winkler names + spatial vote from INEC points, manual crosswalk, unmatched/review CSVs; mapshaper-simplified `public/geo/*` (all under size targets) + ATTRIBUTION; ward polygon points + `boundary_ref` fed to the importer (every unit now located) · see commit `feat(geo)`
 - 2026-09-25 · 1.4 · INEC importer (`pnpm db:seed`): normaliser with SEED_DATA §3 checks (counts vs PRD, codes, per-state coordinate boxes, voters), estimated locations, `data/normalised/units.csv`, idempotent upsert + deactivation + `--dry-run`; real import verified (43,867 units, all counts match); dev seed adds users only on real geography · see commit `feat(import)`
 - 2026-09-25 · 1.3 (partial) · Fetch scripts for INEC PU locator (hierarchy + coordinates, resumable, polite) and GRID3 boundaries; `data/SOURCES.md` with provenance and licences; `data/raw` + `data/normalised` gitignored · see commit `feat(data)`

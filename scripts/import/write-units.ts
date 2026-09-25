@@ -54,7 +54,8 @@ export async function writeUnits(db: Db, rows: NormalisedUnit[], options: { dryR
     }
     if (!e.active) diff.reactivated++
     const changed = e.name !== r.name
-      || e.registeredVoters !== r.registeredVoters
+      // A NULL from the import never replaces a stored figure (PU leads report them from the field, task 3.7).
+      || (r.registeredVoters !== null && e.registeredVoters !== r.registeredVoters)
       || e.locationEstimated !== r.locationEstimated
       || e.boundaryRef !== r.boundaryRef
       || !sameLocation(e.location, r.location)
@@ -75,7 +76,8 @@ export async function writeUnits(db: Db, rows: NormalisedUnit[], options: { dryR
           set: {
             name: sql`excluded.name`,
             nameNormalised: sql`excluded.name_normalised`,
-            registeredVoters: sql`excluded.registered_voters`,
+            // Keep field-reported figures: only a non-NULL imported value overwrites.
+            registeredVoters: sql`coalesce(excluded.registered_voters, ${units.registeredVoters})`,
             location: sql`excluded.location`,
             locationEstimated: sql`excluded.location_estimated`,
             boundaryRef: sql`excluded.boundary_ref`,

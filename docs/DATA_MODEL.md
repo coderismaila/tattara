@@ -15,7 +15,7 @@ One table for every level: this keeps rollups, scoping and the map uniform.
 | parent_code | text FK → units.code, null for state | |
 | name | text | INEC name, as published |
 | name_normalised | text | lowercase, no punctuation, for matching/search |
-| registered_voters | int null | INEC figure; PU level primary, others = sum |
+| registered_voters | int null | PU: reported by the PU lead from the field (US-24, task 3.7); the INEC import never overwrites it with NULL. Aggregates are computed in stats, not stored |
 | location | geography(Point, 4326) null | PU coordinates (INEC) or centroid |
 | location_estimated | bool default false | true when `location` is a fallback (e.g. ward centroid), SEED_DATA §1 |
 | boundary_ref | text null | GRID3 feature id for joins |

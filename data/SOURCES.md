@@ -22,8 +22,7 @@ Raw files live in `data/raw/` (gitignored). Re-fetch with the scripts named belo
   to this machine after ~30k requests. Resume later (the script is resumable, now one request at a time with a 1.5 s
   pause, and stops on 403): `node scripts/fetch/inec-pus.ts --coords`, then `--coords --retry-missing` once.
   PUs still without coordinates fall back to their ward centroid with `location_estimated = true` (SEED_DATA §1).
-- **Not obtained:** registered voters per PU. The locator does not expose it. Needs the INEC 2023 register figures
-  (PDF/CSV) — see open item below.
+- **Registered voters per PU: not needed from INEC.** PU leads report them from the field (PRD US-24, decided 2026-09-25).
 
 ## GRID3 boundaries — `data/raw/grid3/`
 
@@ -55,4 +54,3 @@ Raw files live in `data/raw/` (gitignored). Re-fetch with the scripts named belo
 ## Open items
 
 - [ ] Resume PU coordinates after the INEC block lifts (see above). Re-checked 2026-09-25: still 403.
-- [ ] Registered voters per PU (INEC 2023 register) — needs the human: request from INEC or locate the published PDFs.

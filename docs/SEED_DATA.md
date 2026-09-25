@@ -8,7 +8,7 @@ The app is only as good as its geography. Getting all 41,671 NW polling units in
 |---|---|---|---|
 | States, LGAs, wards, PUs with codes and names | INEC (inecnigeria.org polling unit directory / PU locator; INEC may provide a CSV on request) | PDF / CSV / JSON | Codes are `SS/LL/WW/PPP`. PDFs need parsing. |
 | PU coordinates | INEC GIS data (INEC geolocated all 176,846 PUs) | CSV/GeoJSON if obtainable | If unavailable, fall back to ward centroid and flag `location_estimated`. |
-| Registered voters per PU | INEC 2023 register figures | CSV | If PU-level is missing, use ward-level totals for coverage. |
+| Registered voters per PU | **Not imported:** reported by PU leads from the field (PRD US-24, task 3.7) | — | The importer can still read an optional `data/raw/inec/registered-voters.csv`, but never overwrites a stored figure with NULL. |
 | State/LGA/ward boundaries | GRID3 Nigeria operational boundaries | GeoJSON/Shapefile | Check the licence and attribute it in the app's About page. |
 
 Put raw files in `data/raw/` (gitignored). Record each file's origin and date in `data/SOURCES.md`.

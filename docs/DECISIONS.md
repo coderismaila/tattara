@@ -89,3 +89,12 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - PINs use `@node-rs/argon2` (prebuilt binaries, no native build) at m=19 MiB, t=2, p=1 (`server/utils/pin.ts`).
 **Why:** Scope is the core security property (ADR-002); audit integrity must not depend on grants being configured right.
 **Consequences:** Migration 0002 was hand-ordered so `units(code, level)` UNIQUE exists before the FK (drizzle-kit emitted it last). Dev users referenced by audit rows can't be deleted, so `db:seed:dev --reset` then asks you to recreate the local DB. The argon2 native module must be verified in the production Nitro build when auth routes first use it (2.4).
+
+### ADR-019 · 2026-09-25 · Accepted · INEC import: estimated locations, refresh-safe upserts, real-vs-dev geography
+**Decision:**
+- `pnpm db:seed` imports the INEC PU directory: normalise → `data/normalised/units.csv` → upsert by code. Units missing from a later import are set `active = false`, never deleted; `--dry-run` prints the added/updated/deactivated diff first (SEED_DATA §6).
+- PUs without a usable INEC coordinate get the centroid of known PU points in their ward → LGA → state, with `location_estimated = true`. Ward/LGA/state locations are PU centroids. Coordinates are checked against each PU's own state box from GRID3 (+0.05°), not one NW box (SEED_DATA's lng ≤ 10.5 excluded real Jigawa PUs).
+- `registered_voters` stays NULL until `data/raw/inec/registered-voters.csv` exists; parents are sums only when every child has a figure.
+- Fake dev geography and real geography never mix: the importer refuses a DB with `dev-fake` units; on real geography `db:seed:dev` seeds only the dev users (on real codes 19/01/01/001 and 20/01/01/001).
+**Why:** Import now with partial data (coordinates 64%, no voter figures) and re-run as the rest arrives without losing supporter links.
+**Consequences:** Kebbi, Sokoto and Zamfara have no locations until their coordinates are fetched; 1.5 should fall back to GRID3 ward-polygon centroids, and flag checks that need `registered_voters` (5.1 `pu_over_capacity`) must skip NULLs.

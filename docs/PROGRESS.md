@@ -26,7 +26,11 @@ Also note blockers and anything the next session must know.
     **403** to this machine after ~30k requests (two fetch instances ran at once by mistake). Wait before resuming:
     `pnpm data:fetch:inec-coords` (now 1 req / 1.5 s, lock file, stops on 403), then once with `--retry-missing`.
   - **👤 Registered voters per PU** are not in the INEC locator; needs the 2023 register figures from INEC.
-  - 1.4 (importer) can proceed with what we have: PUs without coordinates → ward centroid, `location_estimated`.
+  - **After fetching more data, re-run `pnpm db:seed`** (use `--dry-run` first to see the diff). It upserts and is idempotent.
+  - Real geography locally: `docker compose down -v && pnpm db:up && pnpm db:migrate && pnpm db:seed && pnpm db:seed:dev`
+    (the importer refuses a DB holding fake dev units; the dev seed then adds only users). Import takes ~30 s.
+  - Current import: 43,867 units; PU locations 26,550 INEC / 3,856 estimated; **Kebbi, Sokoto, Zamfara have no
+    locations yet** (none fetched) → 1.5 should fall back to GRID3 ward centroids. `registered_voters` all NULL.
   - GRID3 wards are **CC BY-SA 4.0**: derived `public/geo` ward files must carry that licence + attribution.
 - Dev data: `pnpm db:up && pnpm db:migrate && pnpm db:seed:dev` (Kano 19 + Katsina 20, fake names, `source_version = 'dev-fake'`).
   Users: one active per role, PIN `123456`, phones `+234800000xxxx` — ADMIN 0001, DG 0002, Kano chain 0101–0104
@@ -39,6 +43,7 @@ Also note blockers and anything the next session must know.
 - Hausa strings live in `i18n/locales/ha.json5` (ADR-008).
 
 ## Log
+- 2026-09-25 · 1.4 · INEC importer (`pnpm db:seed`): normaliser with SEED_DATA §3 checks (counts vs PRD, codes, per-state coordinate boxes, voters), estimated locations, `data/normalised/units.csv`, idempotent upsert + deactivation + `--dry-run`; real import verified (43,867 units, all counts match); dev seed adds users only on real geography · see commit `feat(import)`
 - 2026-09-25 · 1.3 (partial) · Fetch scripts for INEC PU locator (hierarchy + coordinates, resumable, polite) and GRID3 boundaries; `data/SOURCES.md` with provenance and licences; `data/raw` + `data/normalised` gitignored · see commit `feat(data)`
 - 2026-09-25 · 2.1 · `users` (role ↔ unit level via composite FK + CHECK, one active lead per unit, E.164 phone CHECK), `user_devices`, `invites`, `otp_codes`, `audit_log` (append-only trigger), `unit_targets.set_by` FK; argon2id `hashPin`/`verifyPin`; dev seed users per role (Kano + Katsina chains); `data/` gitignored · see commit `feat(db)`
 - 2026-09-25 · 1.2 · Dev seed (geography + targets): deterministic generator (2 states × 3 × 4 × 10, voter sums, PUs ≤ ~1 km from ward), idempotent upsert, `--reset`, production/real-data guards; users → 2.1, supporters → 3.1. Nuxt test hook timeout raised to 60 s (cold-boot flake) · see commit `feat(seed)`

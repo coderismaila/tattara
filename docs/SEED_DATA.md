@@ -31,9 +31,15 @@ Rules:
 - Parent must exist; no orphans.
 
 ## 3. Validation checks (script fails loudly)
+
+Implemented by `pnpm db:seed` (`scripts/import-inec-pus.ts` → `scripts/import/inec.ts`). Errors stop the import; warnings are printed.
+Optional inputs are picked up when present: `data/raw/inec/pu-coords.ndjson`, `data/raw/inec/registered-voters.csv` (`code,registered_voters`, PU level), `data/raw/grid3/states.geojson`.
+PUs without a usable coordinate get the centroid of known PU points in their ward (then LGA, then state) with `location_estimated = true`.
+Flags: `--dry-run` (diff only), `--csv-only`, `--source-version <v>`.
+
 1. Counts per state match expectations (see the PRD table): print a diff table, and do not fail on mismatch; ask the human to confirm.
 2. No duplicate codes; every PU's parent chain resolves to one of the 7 NW state codes.
-3. PU coordinates fall inside NW bounding box (lat 9–14, lng 3–10.5) and ideally inside their ward polygon (PostGIS `ST_Within`); report outliers.
+3. PU coordinates fall inside **their own state's** bounding box (from the GRID3 state polygons, +0.05° margin; fallback NW box lat 9.0–14.0, lng 3.4–10.7 — Jigawa reaches lng 10.61, so the old lng ≤ 10.5 was too tight) and ideally inside their ward polygon (PostGIS `ST_Within`, task 1.5); outliers are reported and replaced by an estimate.
 4. `registered_voters` non-negative; ward sum sanity check.
 
 ## 4. Boundary join

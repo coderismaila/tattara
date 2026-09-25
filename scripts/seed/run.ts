@@ -1,4 +1,5 @@
 // Writes the dev seed: fake geography + targets (1.2), a user per role (2.1). Supporters follow in 3.1.
+// If real INEC geography has been imported (pnpm db:seed), only the dev users are seeded, on real unit codes.
 import { and, count, eq, inArray, like, ne, sql } from 'drizzle-orm'
 import { createDb, type Db } from '../../server/db/client.ts'
 import { invites, otpCodes, unitTargets, units, userDevices, users } from '../../server/db/schema/index.ts'
@@ -108,11 +109,16 @@ export async function seedDev(url: string, options: SeedOptions = {}): Promise<S
 
   const { db, client } = createDb(url, { max: 1 })
   try {
+    // With real (imported) geography, never add fake units: seed only the dev users, on real unit codes.
     const [real] = await db.select({ n: count() }).from(units).where(ne(units.sourceVersion, DEV_SOURCE_VERSION))
-    if (real && real.n > 0) {
-      throw new SeedRefusedError(
-        `Refusing to seed fake geography: ${real.n} real (non-${DEV_SOURCE_VERSION}) units exist in this database.`,
-      )
+    const realGeography = !!real && real.n > 0
+    if (realGeography) {
+      const needed = DEV_USERS.map(u => u.unitCode).filter((c): c is string => c !== null)
+      const found = await db.select({ code: units.code }).from(units).where(inArray(units.code, needed))
+      const missing = needed.filter(c => !found.some(f => f.code === c))
+      if (missing.length) {
+        throw new SeedRefusedError(`Real geography is loaded but lacks the dev users' units: ${missing.join(', ')}.`)
+      }
     }
 
     return await db.transaction(async (tx) => {
@@ -131,7 +137,7 @@ export async function seedDev(url: string, options: SeedOptions = {}): Promise<S
           throw error
         }
       }
-      const geo = await seedGeography(tx)
+      const geo = realGeography ? { units: 0, targets: 0 } : await seedGeography(tx)
       const userCount = await seedUsers(tx)
       return { ...geo, users: userCount }
     })

@@ -92,7 +92,7 @@ describe.skipIf(!dbAvailable)('dev seed', () => {
     expect(await seedDev(temp.url, { nodeEnv: 'test' })).toEqual(expectedCounts)
   })
 
-  it('refuses when real (non-dev) units exist', async () => {
+  it('never adds fake geography once real (non-dev) units exist', async () => {
     await db.insert(units).values({
       code: '36',
       level: 'state',
@@ -101,7 +101,8 @@ describe.skipIf(!dbAvailable)('dev seed', () => {
       nameNormalised: 'zamfara',
       sourceVersion: 'inec-2023-01',
     })
-    await expect(seedDev(temp.url, { nodeEnv: 'test' })).rejects.toThrow(/real .*units exist/)
+    // Users only (their units still exist here); no geography written. Full real-data path: import-inec.test.ts.
+    expect(await seedDev(temp.url, { nodeEnv: 'test' })).toEqual({ units: 0, targets: 0, users: DEV_USERS.length })
     expect((await counts()).units).toBe(expectedCounts.units + 1)
   })
 })

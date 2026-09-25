@@ -24,7 +24,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
   `shared/constants/enums.ts`, `roles.ts`, `states.ts` (7 NW states + codes — verify with seed), `shared/utils/pu-code.ts`, `phone.ts` (libphonenumber-js, NG), `uuid.ts` (UUIDv7).
   **AC:** unit tests cover pu-code parse/parent/level/isWithin edge cases and phone normalisation (`0803…`, `803…`, `+234803…`, `234803…`, invalid).
 
-- [ ] **0.5 Theme, layouts, i18n shell**
+- [x] **0.5 Theme, layouts, i18n shell**
   Nuxt UI theme per UX_GUIDELINES §3, Noto Sans, `default` and `app` layouts (bottom nav on mobile), language switch, `ha.json`/`en.json` with the initial keys.
   **AC:** switching language updates all visible strings without reload; Lighthouse accessibility ≥ 95 on the shell.
 

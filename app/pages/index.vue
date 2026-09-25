@@ -5,7 +5,7 @@ useHead({ title: () => t('app.name') })
 </script>
 
 <template>
-  <UContainer class="flex min-h-dvh flex-col items-center justify-center gap-4 text-center">
+  <UContainer class="flex flex-1 flex-col items-center justify-center gap-4 py-12 text-center">
     <h1 class="text-3xl font-bold text-primary">
       {{ t('app.name') }}
     </h1>
@@ -15,6 +15,7 @@ useHead({ title: () => t('app.name') })
     <!-- TODO(2.4): link to /login once it exists -->
     <UButton
       size="xl"
+      class="min-h-12"
       :label="t('auth.signIn')"
     />
   </UContainer>

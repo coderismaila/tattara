@@ -6,10 +6,11 @@ Also note blockers and anything the next session must know.
 ## Blockers / notes for next session
 - Toolchain: Node 24 (nvm-windows) + pnpm via corepack (`corepack enable pnpm`). TypeScript stays on 6.x (ADR-009).
 - Compat-5 warnings (non-fatal, all modules already at latest): `unplugin-vue-i18n:resource`,
-  `nuxt-fonts-public-assets` and devtools have Vite hooks ignored under the environment API. i18n verified working
-  (both locales load). **0.5:** verify Noto Sans actually loads via `@nuxt/fonts` given the fonts warning.
-- **0.5:** browser-language detection is off (ADR-010), so nothing persists the language yet. The language switch
-  must save the choice and restore it on load (works offline, no server round-trip).
+  `nuxt-fonts-public-assets` and devtools have Vite hooks ignored under the environment API. Verified harmless:
+  both locales load, and Noto Sans loads in the production build (e2e `shell.spec.ts` checks ɓ ɗ ƙ ƴ).
+- Shell: nav items live in `app/utils/nav.ts`; add each page there when it lands. App pages set
+  `definePageMeta({ layout: 'app', titleKey })`. Every new page should be added to the axe loop in `test/e2e/shell.spec.ts`.
+- Lighthouse accessibility on the prod build (0.5): `/` 100, `/app` 100, `/app/settings` 100.
 - CI workflow (`.github/workflows/ci.yml`) has not run on GitHub yet: no remote. All its steps pass locally
   (frozen install, lint, typecheck, test, build, e2e). Push to GitHub to confirm the AC "CI green".
 - `pnpm install` still prints an "Ignored build scripts" notice for unrs-resolver/vue-demi despite
@@ -22,6 +23,7 @@ Also note blockers and anything the next session must know.
 - Hausa strings live in `i18n/locales/ha.json5` (ADR-008).
 
 ## Log
+- 2026-09-25 · 0.5 · Theme (dye/laterite/neem/millet, AA-checked, light only, 17 px base, Noto Sans self-hosted), `default` + `app` layouts (bottom nav on mobile), language switch persisted on device, `/app` + `/app/settings` shells, offline icons; axe + Lighthouse a11y 100 · see commit `feat(ui)`
 - 2026-09-25 · 0.4 · Shared enums, roles (level + child-role maps), 7 NW states, pu-code utils (`parsePuCode`, `isWithin`, …), `normalizePhone` (NG mobiles, min metadata), UUIDv7 `newId`; 70 unit tests · see commit `feat(shared)`
 - 2026-09-25 · 0.3 · Drizzle 0.45 + postgres.js client (`createDb`, `useDb`), drizzle-kit config, migration 0000 enables PostGIS, `db:up/generate/migrate/studio`, integration test on a fresh template0 DB, PostGIS service in CI · see commit `feat(db)`
 - 2026-09-25 · 0.2 · Vitest 5 (unit + nuxt projects), Playwright (Pixel 5, prod build), Husky + lint-staged + commitlint, .nvmrc 24, .gitattributes (LF), GitHub Actions CI; Hausa-always default (ADR-010) · see commit `chore(tooling)`

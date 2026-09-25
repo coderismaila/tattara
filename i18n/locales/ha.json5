@@ -1,4 +1,5 @@
-// Hausa (default locale). JSON5 so machine-drafted strings can carry review markers.
+// Hausa (default locale). JSON5 so machine-drafted strings can carry review markers (ADR-008).
+// Every string marked TODO(ha-review) needs a native speaker's approval before the pilot.
 {
   app: {
     name: 'Tattara',
@@ -8,5 +9,33 @@
   auth: {
     // TODO(ha-review)
     signIn: 'Shiga',
+  },
+  a11y: {
+    // TODO(ha-review)
+    skipToContent: 'Tsallaka zuwa abin ciki',
+  },
+  nav: {
+    // TODO(ha-review)
+    label: 'Babban kewayawa',
+    // TODO(ha-review)
+    home: 'Gida',
+    // TODO(ha-review)
+    settings: 'Saituna',
+  },
+  lang: {
+    // TODO(ha-review)
+    label: 'Harshe',
+    // TODO(ha-review)
+    switch: 'Zaɓi harshe',
+  },
+  home: {
+    // TODO(ha-review)
+    welcome: 'Barka da zuwa',
+    // TODO(ha-review)
+    placeholder: 'Taƙaitaccen bayanin yankinka zai bayyana a nan.',
+  },
+  settings: {
+    // TODO(ha-review)
+    languageHelp: 'Manhajar za ta buɗe da wannan harshe a wannan wayar.',
   },
 }

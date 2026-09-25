@@ -1,2 +1,101 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+/*
+ * Tattara palette (UX_GUIDELINES §3): Kofar Mata indigo dye + laterite earth.
+ * Each brand hex is shade 500; lighter shades mix toward white, darker toward black.
+ * Semantic mapping lives in app/app.config.ts. Swap `primary` there for the party colour.
+ */
+@theme static {
+  --font-sans: 'Noto Sans', system-ui, sans-serif;
+
+  /* dye: #1F3A68 */
+  --color-dye-50: #F4F5F7;
+  --color-dye-100: #E4E7ED;
+  --color-dye-200: #C5CCD8;
+  --color-dye-300: #9CA8BD;
+  --color-dye-400: #627595;
+  --color-dye-500: #1F3A68;
+  --color-dye-600: #1A3158;
+  --color-dye-700: #162949;
+  --color-dye-800: #112039;
+  --color-dye-900: #0C172A;
+  --color-dye-950: #080F1A;
+
+  /* laterite: #B5552B */
+  --color-laterite-50: #FBF7F4;
+  --color-laterite-100: #F6EBE6;
+  --color-laterite-200: #ECD3C8;
+  --color-laterite-300: #DEB4A2;
+  --color-laterite-400: #CB886B;
+  --color-laterite-500: #B5552B;
+  --color-laterite-600: #9A4825;
+  --color-laterite-700: #7F3C1E;
+  --color-laterite-800: #642F18;
+  --color-laterite-900: #482211;
+  --color-laterite-950: #2D150B;
+
+  /* neem: #3F7D4E */
+  --color-neem-50: #F5F9F6;
+  --color-neem-100: #E8EFEA;
+  --color-neem-200: #CDDDD1;
+  --color-neem-300: #ABC6B1;
+  --color-neem-400: #79A483;
+  --color-neem-500: #3F7D4E;
+  --color-neem-600: #366A42;
+  --color-neem-700: #2C5837;
+  --color-neem-800: #23452B;
+  --color-neem-900: #19321F;
+  --color-neem-950: #101F14;
+
+  /* millet: #E9D8A6 (highlight backgrounds, selected chips; never text) */
+  --color-millet-50: #FEFDFB;
+  --color-millet-100: #FCFAF4;
+  --color-millet-200: #F9F5E8;
+  --color-millet-300: #F5EED8;
+  --color-millet-400: #F0E4C1;
+  --color-millet-500: #E9D8A6;
+  --color-millet-600: #C6B88D;
+  --color-millet-700: #A39774;
+  --color-millet-800: #80775B;
+  --color-millet-900: #5D5642;
+  --color-millet-950: #3A362A;
+
+  --color-harmattan: #F5F2EC;
+  --color-ink: #1A1A1A;
+}
+
+/* Light theme only (ADR-015). All text tokens meet WCAG AA (≥ 4.5:1) on harmattan. */
+:root {
+  /* laterite-500 / neem-500 are 4.4:1 on harmattan; 600 is ≥ 5.6:1 */
+  --ui-secondary: var(--ui-color-secondary-600);
+  --ui-success: var(--ui-color-success-600);
+  --ui-warning: var(--ui-color-warning-800);
+  --ui-error: var(--ui-color-error-700);
+
+  --ui-bg: var(--color-harmattan);
+  --ui-text: var(--color-ink);
+  --ui-text-highlighted: var(--color-ink);
+  --ui-text-toned: var(--ui-color-neutral-800);
+  --ui-text-muted: var(--ui-color-neutral-700);
+  --ui-text-dimmed: var(--ui-color-neutral-600);
+
+  /* Buttons/inputs use rounded-md = 1.5 × radius ≈ 12 px. */
+  --ui-radius: 0.5rem;
+}
+
+@layer base {
+  /* Base font 17 px (UX §2.4), still scaling with the user's browser font setting. */
+  html {
+    font-size: 106.25%;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}

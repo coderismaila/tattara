@@ -66,3 +66,13 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 **Decision:** `normalizePhone` returns E.164 only for Nigerian mobile numbers (national `70x/80x/81x/90x/91x`, 10 digits), using `libphonenumber-js/min` plus that prefix rule. It accepts `0803…`, `803…`, `234803…`, `+234803…` and the common `+234 0803…` mistake; landlines and foreign numbers are rejected.
 **Why:** Supporter verification and lead login use SMS. The "max" metadata (needed for `getType()`) would add ~140 KB to the capture route.
 **Consequences:** If NCC opens a new mobile range, update the regex in `shared/utils/phone.ts` and its tests.
+
+### ADR-015 · 2026-09-25 · Accepted · Theme: light only, AA-checked semantic shades
+**Decision:** Light theme only (`ui.colorMode: false`). Brand hexes are shade 500 of generated scales (`dye`, `laterite`, `neem`, `millet`). `secondary`/`success` text use shade 600 because laterite-500 and neem-500 are 4.4:1 on harmattan (below AA); muted/dimmed text is darkened for the same reason. Root font 106.25% (17 px, still follows the user's font setting); `--ui-radius: 0.5rem` (≈ 12 px buttons/inputs).
+**Why:** Sunlight legibility and WCAG 2.2 AA (UX §2, §6); one theme halves visual QA.
+**Consequences:** Rebranding = change `primary` in `app.config.ts` and check its 500 shade against harmattan (≥ 4.5:1 for text, ≥ 3:1 for UI). The header is light with a dye rule rather than a solid dye bar, so the language switch and nav keep one consistent style.
+
+### ADR-016 · 2026-09-25 · Accepted · Offline-safe fonts, icons and language
+**Decision:** Noto Sans is self-hosted by `@nuxt/fonts` (400/600/700, latin + latin-ext for ɓ ɗ ƙ ƴ). Icons are bundled into the client (`icon.clientBundle.scan` + `@iconify-json/lucide`). The language choice is stored in `localStorage` (`tattara:locale`) and restored by a client plugin; on prerendered pages it applies after hydration.
+**Why:** Everything the shell needs must render with no network.
+**Consequences:** English users see Hausa briefly on the prerendered landing page before the switch applies; app routes are client-rendered and don't flash.

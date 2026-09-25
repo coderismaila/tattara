@@ -5,5 +5,24 @@
   },
   "auth": {
     "signIn": "Sign in"
+  },
+  "a11y": {
+    "skipToContent": "Skip to content"
+  },
+  "nav": {
+    "label": "Main navigation",
+    "home": "Home",
+    "settings": "Settings"
+  },
+  "lang": {
+    "label": "Language",
+    "switch": "Choose language"
+  },
+  "home": {
+    "welcome": "Welcome",
+    "placeholder": "Your unit summary will appear here."
+  },
+  "settings": {
+    "languageHelp": "The app opens in this language on this phone."
   }
 }

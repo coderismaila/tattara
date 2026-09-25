@@ -1,10 +1,14 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createDb } from '../../server/db/client'
-import { runMigrations } from '../../server/db/migrate'
+import { migrationsFolder, runMigrations } from '../../server/db/migrate'
 import { createTempDatabase, isDbReachable } from './helpers/db'
 
 // Needs Postgres+PostGIS (`pnpm db:up`). Skipped when no DB is reachable; CI provides one.
+const journal = JSON.parse(readFileSync(join(migrationsFolder, 'meta/_journal.json'), 'utf8')) as { entries: unknown[] }
+
 const dbAvailable = await isDbReachable()
 if (process.env.CI && !dbAvailable) {
   throw new Error('CI must run integration tests: database is not reachable.')
@@ -28,7 +32,7 @@ describe.skipIf(!dbAvailable)('database migrations', () => {
     expect(rows).toHaveLength(0)
   })
 
-  it('enables PostGIS and is idempotent', async () => {
+  it('applies every migration, enables PostGIS and is idempotent', async () => {
     await runMigrations(temp.url)
     await runMigrations(temp.url)
 
@@ -40,7 +44,7 @@ describe.skipIf(!dbAvailable)('database migrations', () => {
       const [applied] = await db.execute<{ n: number }>(
         sql`select count(*)::int as n from drizzle.__drizzle_migrations`,
       )
-      expect(applied?.n).toBe(1)
+      expect(applied?.n).toBe(journal.entries.length)
     }
     finally {
       await client.end()

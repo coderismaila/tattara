@@ -1,0 +1,272 @@
+{
+  "id": "dfa4d1a3-4461-4959-9a7f-662207d71c43",
+  "prevId": "ffc6e7c3-4b81-4384-8f60-5b22c7f07671",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.unit_targets": {
+      "name": "unit_targets",
+      "schema": "",
+      "columns": {
+        "unit_code": {
+          "name": "unit_code",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "target": {
+          "name": "target",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "set_by": {
+          "name": "set_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "set_at": {
+          "name": "set_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "unit_targets_unit_code_units_code_fk": {
+          "name": "unit_targets_unit_code_units_code_fk",
+          "tableFrom": "unit_targets",
+          "tableTo": "units",
+          "columnsFrom": [
+            "unit_code"
+          ],
+          "columnsTo": [
+            "code"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "unit_targets_target_non_negative": {
+          "name": "unit_targets_target_non_negative",
+          "value": "\"unit_targets\".\"target\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.units": {
+      "name": "units",
+      "schema": "",
+      "columns": {
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "level": {
+          "name": "level",
+          "type": "unit_level",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parent_code": {
+          "name": "parent_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name_normalised": {
+          "name": "name_normalised",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "registered_voters": {
+          "name": "registered_voters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "geography(Point, 4326)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location_estimated": {
+          "name": "location_estimated",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "boundary_ref": {
+          "name": "boundary_ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "source_version": {
+          "name": "source_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "units_parent_code_idx": {
+          "name": "units_parent_code_idx",
+          "columns": [
+            {
+              "expression": "parent_code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "units_level_idx": {
+          "name": "units_level_idx",
+          "columns": [
+            {
+              "expression": "level",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "units_code_prefix_idx": {
+          "name": "units_code_prefix_idx",
+          "columns": [
+            {
+              "expression": "code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last",
+              "opclass": "text_pattern_ops"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "units_location_gist_idx": {
+          "name": "units_location_gist_idx",
+          "columns": [
+            {
+              "expression": "location",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gist",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "units_parent_code_units_code_fk": {
+          "name": "units_parent_code_units_code_fk",
+          "tableFrom": "units",
+          "tableTo": "units",
+          "columnsFrom": [
+            "parent_code"
+          ],
+          "columnsTo": [
+            "code"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "units_code_matches_level": {
+          "name": "units_code_matches_level",
+          "value": "coalesce(case \"units\".\"level\"\n    when 'state' then \"units\".\"code\" ~ '^[0-9]{2}$' and \"units\".\"parent_code\" is null\n    when 'lga' then \"units\".\"code\" ~ '^[0-9]{2}/[0-9]{2}$' and \"units\".\"parent_code\" is not distinct from left(\"units\".\"code\", 2)\n    when 'ward' then \"units\".\"code\" ~ '^[0-9]{2}/[0-9]{2}/[0-9]{2}$' and \"units\".\"parent_code\" is not distinct from left(\"units\".\"code\", 5)\n    when 'pu' then \"units\".\"code\" ~ '^[0-9]{2}/[0-9]{2}/[0-9]{2}/[0-9]{3}$' and \"units\".\"parent_code\" is not distinct from left(\"units\".\"code\", 8)\n  end, false)"
+        },
+        "units_name_not_blank": {
+          "name": "units_name_not_blank",
+          "value": "length(trim(\"units\".\"name\")) > 0"
+        },
+        "units_registered_voters_non_negative": {
+          "name": "units_registered_voters_non_negative",
+          "value": "\"units\".\"registered_voters\" is null or \"units\".\"registered_voters\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.unit_level": {
+      "name": "unit_level",
+      "schema": "public",
+      "values": [
+        "state",
+        "lga",
+        "ward",
+        "pu"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

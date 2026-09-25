@@ -76,3 +76,8 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 **Decision:** Noto Sans is self-hosted by `@nuxt/fonts` (400/600/700, latin + latin-ext for ɓ ɗ ƙ ƴ). Icons are bundled into the client (`icon.clientBundle.scan` + `@iconify-json/lucide`). The language choice is stored in `localStorage` (`tattara:locale`) and restored by a client plugin; on prerendered pages it applies after hydration.
 **Why:** Everything the shell needs must render with no network.
 **Consequences:** English users see Hausa briefly on the prerendered landing page before the switch applies; app routes are client-rendered and don't flash.
+
+### ADR-017 · 2026-09-25 · Accepted · PostGIS geography column type and migration hand-edits
+**Decision:** `geographyPoint()` is a Drizzle `customType` (`server/db/schema/types.ts`): writes via `ST_SetSRID(ST_MakePoint(lng, lat), 4326)::geography`, reads by parsing EWKB hex (`server/db/geo.ts`) into `{ lng, lat }`. The units table also enforces code/level/parent consistency with CHECK constraints.
+**Why:** Drizzle 0.45 has `geometry` but no `geography`; geography gives metre-based `ST_DWithin` for GPS flags without projection work. CHECKs make a bad import fail at the DB, not only in the importer.
+**Consequences:** drizzle-kit 0.31 quotes the custom type (`"geography(Point, 4326)"`), which is invalid SQL. **Every generated migration that adds a geography column must be hand-fixed** to `geography(Point, 4326)`; the integration test on a fresh DB catches it if forgotten. `db:generate` reports no drift after the edit.

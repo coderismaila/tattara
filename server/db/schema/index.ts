@@ -1,2 +1,3 @@
-// Drizzle schema barrel. Tables are added per DATA_MODEL.md starting with task 1.1.
-export {}
+// Drizzle schema barrel (DATA_MODEL.md).
+export * from './enums.ts'
+export * from './units.ts'

@@ -17,14 +17,20 @@ One table for every level: this keeps rollups, scoping and the map uniform.
 | name_normalised | text | lowercase, no punctuation, for matching/search |
 | registered_voters | int null | INEC figure; PU level primary, others = sum |
 | location | geography(Point, 4326) null | PU coordinates (INEC) or centroid |
+| location_estimated | bool default false | true when `location` is a fallback (e.g. ward centroid), SEED_DATA §1 |
 | boundary_ref | text null | GRID3 feature id for joins |
 | active | bool default true | INEC occasionally relocates/renames |
 | source_version | text | e.g. `inec-2023-01` |
+| created_at, updated_at | timestamptz | for the refresh diff (SEED_DATA §6) |
 
 Indexes: `(parent_code)`, `(level)`, `code text_pattern_ops`, GIST on `location`.
 
+CHECKs: the code's shape matches `level` (`SS`, `SS/LL`, `SS/LL/WW`, `SS/LL/WW/PPP`, digits only);
+`parent_code` is NULL for a state and otherwise exactly the code minus its last segment; name not blank;
+`registered_voters >= 0`. `name_normalised` = `normaliseName(name)` from `shared/utils/text.ts`.
+
 ### `unit_targets`
-| unit_code FK | target int | set_by FK users | set_at |
+| unit_code PK/FK | target int (≥ 0) | set_by FK users (FK added in 2.1) | set_at |
 
 ## 2. People
 

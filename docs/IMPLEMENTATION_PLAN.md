@@ -30,7 +30,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
 
 ## Phase 1 — Geography
 
-- [ ] **1.1 Schema: units, unit_targets** (DATA_MODEL §1) + migration + indexes.
+- [x] **1.1 Schema: units, unit_targets** (DATA_MODEL §1) + migration + indexes.
 - [ ] **1.2 Dev seed** `scripts/seed-dev.ts` (fake geography + users + supporters stub).
   **AC:** `pnpm db:seed` is idempotent; codes are in real format.
 - [ ] 👤 **1.3 Obtain INEC PU data + GRID3 boundaries** into `data/raw/`, fill `data/SOURCES.md`.

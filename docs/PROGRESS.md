@@ -53,6 +53,10 @@ Also note blockers and anything the next session must know.
   OTP, call `runTask('sms:process')` (from `nitropack/runtime`) so the code arrives in seconds. Dev: messages print as
   `[sms:fake] …` in the dev server console. Manual run in dev: `GET /_nitro/tasks/sms:process`.
   Termii needs `NUXT_SMS_BASE_URL` (account-specific) besides key + sender ID.
+  - **👤 Before the pilot (Termii):** from https://app.termii.com copy the API key and base URL (if none is shown, ask
+    Termii support; commonly `https://v3.api.termii.com`), and **request a Sender ID early** (3–11 chars, e.g.
+    `Tattara`; pending → active after Termii review; ask whether a political sender ID needs extra paperwork for DND
+    routes). Put them in `.env` / the host's secrets, never in `.env.example`. Dev/tests keep `NUXT_SMS_PROVIDER=fake`.
 - **2.4:** first real use of `@node-rs/argon2` in a Nitro route; verify it works in the production build (native module).
 - Migrations need hand-review: drizzle-kit may misorder constraints (0002) or quote custom types (0001).
 - drizzle-kit quotes custom geography types in generated SQL; hand-fix to `geography(Point, 4326)` (ADR-017).

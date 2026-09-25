@@ -16,14 +16,21 @@
     "test:unit": "vitest run --project unit",
     "test:nuxt": "vitest run --project nuxt",
     "test:e2e": "playwright test",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:integration": "vitest run --project integration",
+    "db:up": "docker compose up -d --wait db",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node scripts/db-migrate.ts",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@nuxt/ui": "4.11.2",
     "@nuxtjs/i18n": "10.6.0",
     "@vite-pwa/nuxt": "1.1.1",
+    "drizzle-orm": "^0.45.3",
     "nuxt": "^4.5.2",
     "nuxt-auth-utils": "0.5.30",
+    "postgres": "^3.4.9",
     "tailwindcss": "^4.3.3",
     "vue": "^3.5.43",
     "vue-router": "^5.3.1"
@@ -36,6 +43,8 @@
     "@nuxt/test-utils": "4.3.2",
     "@playwright/test": "^1.63.0",
     "@vue/test-utils": "^2.5.1",
+    "dotenv": "^18.0.3",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^10.11.0",
     "happy-dom": "^20.14.5",
     "husky": "^9.1.7",

@@ -16,7 +16,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
   Vitest (unit + nuxt env), Playwright, `@nuxt/eslint` flat config, Husky + lint-staged, Conventional Commits, `.env.example`, `.nvmrc` (24), GitHub Actions CI: install → lint → typecheck → test → build.
   **AC:** CI green on a sample test; pre-commit runs lint on staged files.
 
-- [ ] **0.3 Local database**
+- [x] **0.3 Local database**
   `docker-compose.yml` with `postgis/postgis:17-3.5` (or current), Drizzle client in `server/db/client.ts`, drizzle-kit config, `db:*` scripts.
   **AC:** `pnpm db:migrate` applies an empty migration; the PostGIS extension is enabled by migration.
 

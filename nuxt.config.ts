@@ -34,7 +34,14 @@ export default defineNuxtConfig({
     strict: true,
     // Typecheck unit + e2e tests and the Playwright config (test/nuxt is in the app context by default).
     nodeTsConfig: {
-      include: ['../test/unit/**/*', '../test/e2e/**/*', '../playwright.config.*'],
+      include: [
+        '../test/unit/**/*',
+        '../test/integration/**/*',
+        '../test/e2e/**/*',
+        '../playwright.config.*',
+        '../drizzle.config.*',
+        '../scripts/**/*',
+      ],
     },
   },
 

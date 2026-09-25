@@ -12,6 +12,17 @@ export default defineConfig({
           environment: 'node',
         },
       },
+      {
+        test: {
+          name: 'integration',
+          include: ['test/integration/**/*.{test,spec}.ts'],
+          environment: 'node',
+          // Tests create their own databases; keep files serial to limit connections.
+          fileParallelism: false,
+          testTimeout: 30_000,
+          hookTimeout: 30_000,
+        },
+      },
       await defineVitestProject({
         test: {
           name: 'nuxt',

@@ -23,7 +23,7 @@ Errors carry `data.reason` (and `data.issues` with i18n keys for 400 `invalid`).
 | POST | `/team/:userId/deactivate` | WARD+ | `{ reason }` | direct children only (403, also for unknown ids); audited with the reason (a phone in it → 400); bumps session_version, revokes devices; 409 `already_deactivated` |
 | POST | `/team/:userId/reset-pin` | WARD+ | — | direct children only; back to invited with no PIN, sessions and devices revoked, new invite SMS; audited |
 
-WARD+ here means WARD_LEAD, LGA_LEAD, STATE_LEAD and DG (DG manages the state leads). ADMIN → DG is `/admin/users/dg` (2.6).
+WARD+ here means WARD_LEAD, LGA_LEAD, STATE_LEAD and DG (DG manages the state leads). ADMIN → DG is `/admin/users/dg`.
 
 ## Supporters
 | GET | `/supporters` | PU, WARD | `?q=&pu=&cursor=&limit=` | full phone for PU/WARD; 403 above ward |
@@ -68,7 +68,8 @@ Stats never include names or phones. `:code` is `all` for the region (DG).
 
 ## Admin
 | POST | `/admin/import/units` | ADMIN | multipart | validates + dry-run diff, then apply |
-| POST | `/admin/users/dg` | ADMIN | `{ fullName, phone }` | |
+| GET | `/admin/dg` | ADMIN | | `{ dg: { id, fullName, status: active\|locked\|invited, phone (masked), lastSeenAt } \| null }` (active DG, else the pending invite) |
+| POST | `/admin/users/dg` | ADMIN | `{ fullName, phone, replace? }` | invites the DG by SMS; 409 `dg_exists` unless `replace: true` (deactivates the current DG), `phone_in_use`. Supersedes a pending DG invite; same person → resend. Never returns the token. Other roles: 403 `admin_only`. ADMINs are created only by `pnpm admin:create` |
 | GET | `/admin/audit` | ADMIN, DG | filters | |
 
 ## Conventions

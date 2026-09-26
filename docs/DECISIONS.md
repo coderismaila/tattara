@@ -147,3 +147,12 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - Deactivate and reset PIN both bump `session_version` and revoke all trusted devices (reset PIN: the lead re-trusts a device when they follow the new link). Reasons go in the audit log and pass the PII guard.
 - 100 invites/hour per inviter (each invite is an SMS). Nav items carry `roles`; `TEAM_ROLES` is unit-tested against the server's `canManageTeam`.
 **Consequences:** 5.5 fills `qualityScore`. 4.5 acts on revoked devices (wipe on next contact).
+
+### ADR-026 · 2026-09-26 · Accepted · Admin bootstrap
+**Decision:**
+- **ADMIN accounts are created only by the CLI** (`pnpm admin:create --role ADMIN …`, `scripts/create-user.ts`), run by whoever holds the database credentials. No route creates an ADMIN, so a stolen session can't mint more admins. The CLI prints the single-use 72-hour setup link (optionally also queues the invite SMS for the running server to send), audited as `user.create` with `via: 'cli'` and no actor.
+- **One DG.** ADMIN and DG have no unit, so the one-active-lead-per-unit index can't enforce it; `server/services/admin.ts` does, in a transaction: an active DG blocks a new one (409 `dg_exists`) unless `replace`, which deactivates the old DG (session_version bump, devices revoked) and is audited `user.deactivate {reason: 'replaced'}`. A new invite supersedes a pending one; re-inviting the same person resends.
+- A phone belonging to an active/locked user, or to a pending invite for a **different role**, is refused (`phone_in_use`) rather than silently repurposed. Deactivated users' rows are reused (the phone is unique).
+- `/api/admin/users/dg` sends the link by SMS and never returns the token. `/api/admin/dg` shows the DG with a masked phone (the admin is above ward level). ADMIN-only routes use `requireAdmin` (403 `admin_only`).
+- `server/utils/sms/types.ts` avoids TypeScript parameter properties so scripts load it under Node's type stripping.
+**Consequences:** Replacing the only ADMIN means running the CLI again (there is no in-app admin management). The DG invites state leads from `/app/team` (ADR-025).

@@ -183,7 +183,7 @@ export async function inviteLead(
 // ── Deactivate / reset PIN ──────────────────────────────────────────────────
 
 /** Status deactivated, sessions revoked (session_version bump), devices revoked (wiped on next contact, 4.5). */
-async function deactivateUser(db: DbLike, userId: string) {
+export async function deactivateUser(db: DbLike, userId: string) {
   await db.update(users).set({
     status: 'deactivated',
     sessionVersion: sql`${users.sessionVersion} + 1`,

@@ -24,8 +24,11 @@ export interface SmsProvider {
  */
 export class SmsSendError extends Error {
   override name = 'SmsSendError'
-  constructor(message: string, readonly retryable: boolean, options?: { cause?: unknown }) {
+  // A plain field, not a parameter property, so scripts can load this under Node's type stripping.
+  readonly retryable: boolean
+  constructor(message: string, retryable: boolean, options?: { cause?: unknown }) {
     super(message, options)
+    this.retryable = retryable
   }
 }
 

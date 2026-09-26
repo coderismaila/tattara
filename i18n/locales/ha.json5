@@ -96,6 +96,8 @@
     settings: 'Saituna',
     // TODO(ha-review)
     team: 'Tawaga',
+    // TODO(ha-review)
+    admin: 'Gudanarwa',
   },
   lang: {
     // TODO(ha-review)
@@ -219,6 +221,34 @@
       phone_in_use: 'Wannan lambar wayar ta wani shugaba mai aiki ce a wani wuri.',
       // TODO(ha-review)
       already_deactivated: 'An riga an dakatar da wannan shugaban.',
+      // TODO(ha-review)
+      rate_limited: 'Gayyata sun yi yawa yanzu. Ku sake gwadawa bayan minti {minutes}.',
+    },
+  },
+  admin: {
+    // TODO(ha-review)
+    title: 'Gudanarwa',
+    // TODO(ha-review)
+    intro: 'Darakta Janar (DG) shi ke jagorantar yankin gaba ɗaya kuma yana gayyatar shugabannin jihohi.',
+    // TODO(ha-review)
+    dgHeading: 'Darakta Janar',
+    // TODO(ha-review)
+    noDg: 'Babu DG tukuna',
+    // TODO(ha-review)
+    inviteDg: 'Gayyaci DG',
+    // TODO(ha-review)
+    replaceDg: 'Maye gurbin DG',
+    // TODO(ha-review)
+    replaceWarning: 'Za a dakatar da {name} yanzu kuma a fitar da shi daga ko\'ina.',
+    // TODO(ha-review)
+    notAllowed: 'Mai gudanarwa ne kaɗai zai iya buɗe wannan shafi.',
+    errors: {
+      // TODO(ha-review)
+      dg_exists: 'Akwai DG mai aiki tuni. Yi amfani da Maye gurbi.',
+      // TODO(ha-review)
+      phone_in_use: 'Wannan lambar waya ta wani mai amfani ce.',
+      // TODO(ha-review)
+      admin_only: 'Mai gudanarwa ne kaɗai zai iya yin wannan.',
       // TODO(ha-review)
       rate_limited: 'Gayyata sun yi yawa yanzu. Ku sake gwadawa bayan minti {minutes}.',
     },

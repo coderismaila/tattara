@@ -51,7 +51,8 @@
     "label": "Main navigation",
     "home": "Home",
     "settings": "Settings",
-    "team": "Team"
+    "team": "Team",
+    "admin": "Admin"
   },
   "lang": {
     "label": "Language",
@@ -120,6 +121,22 @@
       "already_active": "This person is already the active lead here.",
       "phone_in_use": "This phone number belongs to an active lead elsewhere.",
       "already_deactivated": "This lead is already deactivated.",
+      "rate_limited": "Too many invites for now. Try again in {minutes} minutes."
+    }
+  },
+  "admin": {
+    "title": "Admin",
+    "intro": "The Director General (DG) leads the whole region and invites the state leads.",
+    "dgHeading": "Director General",
+    "noDg": "No DG yet",
+    "inviteDg": "Invite the DG",
+    "replaceDg": "Replace the DG",
+    "replaceWarning": "{name} will be deactivated now and signed out everywhere.",
+    "notAllowed": "Only the administrator can open this page.",
+    "errors": {
+      "dg_exists": "There is already an active DG. Use Replace instead.",
+      "phone_in_use": "This phone number belongs to another user.",
+      "admin_only": "Only the administrator can do this.",
       "rate_limited": "Too many invites for now. Try again in {minutes} minutes."
     }
   }

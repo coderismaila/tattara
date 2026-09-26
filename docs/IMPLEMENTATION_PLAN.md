@@ -50,7 +50,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
   **AC:** e2e: invited PU lead sets a PIN → logs in → OTP on second device → locked after 5 bad PINs.
 - [x] **2.5 Team management:** `/team` routes + Team page; the invite form only allows direct child units; deactivate/replace.
   **AC:** a ward lead cannot invite into another ward (403, tested); deactivation revokes the session on next request.
-- [ ] **2.6 Admin bootstrap:** CLI `scripts/create-dg.ts` + `/admin/users/dg`.
+- [x] **2.6 Admin bootstrap:** CLI `scripts/create-user.ts` (`pnpm admin:create`, ADMIN or DG) + `/admin/users/dg`.
 
 ## Phase 3 — Supporter capture (online)
 

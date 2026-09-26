@@ -1,11 +1,12 @@
-import { count, eq, ne } from 'drizzle-orm'
+import { count, eq, ne, sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createDb, type Db } from '../../server/db/client'
 import { runMigrations } from '../../server/db/migrate'
-import { auditLog, unitTargets, units, users } from '../../server/db/schema'
+import { auditLog, puStats, supporters, unitTargets, units, users } from '../../server/db/schema'
 import { verifyPin } from '../../server/utils/pin'
 import { ROLES } from '../../shared/constants/roles'
 import { DEV_SOURCE_VERSION, generateDevGeography } from '../../scripts/seed/dev-geography'
+import { DEV_SUPPORTER_COUNT } from '../../scripts/seed/dev-supporters'
 import { DEV_PIN, DEV_USERS } from '../../scripts/seed/dev-users'
 import { SeedRefusedError, seedDev } from '../../scripts/seed/run'
 import { createTempDatabase, isDbReachable } from './helpers/db'
@@ -16,7 +17,7 @@ if (process.env.CI && !dbAvailable) {
 }
 
 const geo = generateDevGeography()
-const expectedCounts = { units: geo.units.length, targets: geo.targets.length, users: DEV_USERS.length }
+const expectedCounts = { units: geo.units.length, targets: geo.targets.length, users: DEV_USERS.length, supporters: DEV_SUPPORTER_COUNT }
 
 describe.skipIf(!dbAvailable)('dev seed', () => {
   let temp: Awaited<ReturnType<typeof createTempDatabase>>
@@ -27,7 +28,8 @@ describe.skipIf(!dbAvailable)('dev seed', () => {
     const [u] = await db.select({ n: count() }).from(units)
     const [t] = await db.select({ n: count() }).from(unitTargets)
     const [p] = await db.select({ n: count() }).from(users)
-    return { units: u!.n, targets: t!.n, users: p!.n }
+    const [s] = await db.select({ n: count() }).from(supporters)
+    return { units: u!.n, targets: t!.n, users: p!.n, supporters: s!.n }
   }
 
   beforeAll(async () => {
@@ -45,7 +47,7 @@ describe.skipIf(!dbAvailable)('dev seed', () => {
 
   it('refuses to run in production', async () => {
     await expect(seedDev(temp.url, { nodeEnv: 'production' })).rejects.toBeInstanceOf(SeedRefusedError)
-    expect(await counts()).toEqual({ units: 0, targets: 0, users: 0 })
+    expect(await counts()).toEqual({ units: 0, targets: 0, users: 0, supporters: 0 })
   })
 
   it('seeds geography, targets and users, and is idempotent', async () => {
@@ -72,6 +74,14 @@ describe.skipIf(!dbAvailable)('dev seed', () => {
 
     const kanoState = rows.find(r => r.unitCode === '19')!
     expect(byId.get(kanoState.invitedBy!)?.role).toBe('DG')
+  })
+
+  it('seeds supporters on the dev PUs by the dev PU leads, with pu_stats matching', async () => {
+    const [kanoPu] = await db.select({ id: users.id }).from(users).where(eq(users.unitCode, '19/01/01/001'))
+    const rows = await db.select({ capturedBy: supporters.capturedBy, puCode: supporters.puCode }).from(supporters)
+    expect(rows.filter(r => r.puCode.startsWith('19/')).every(r => r.capturedBy === kanoPu!.id)).toBe(true)
+    const [stats] = await db.select({ total: sql<number>`sum(${puStats.total})::int` }).from(puStats)
+    expect(stats!.total).toBe(DEV_SUPPORTER_COUNT)
   })
 
   it('--reset replaces dev rows only', async () => {
@@ -102,7 +112,7 @@ describe.skipIf(!dbAvailable)('dev seed', () => {
       sourceVersion: 'inec-2023-01',
     })
     // Users only (their units still exist here); no geography written. Full real-data path: import-inec.test.ts.
-    expect(await seedDev(temp.url, { nodeEnv: 'test' })).toEqual({ units: 0, targets: 0, users: DEV_USERS.length })
+    expect(await seedDev(temp.url, { nodeEnv: 'test' })).toEqual({ units: 0, targets: 0, users: DEV_USERS.length, supporters: 0 })
     expect((await counts()).units).toBe(expectedCounts.units + 1)
   })
 })

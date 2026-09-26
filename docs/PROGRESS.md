@@ -66,6 +66,10 @@ Also note blockers and anything the next session must know.
   `pnpm dev` → `/login`, a seeded phone (e.g. `08000000104`) + PIN `123456`; a new browser needs the SMS code, which
   the **fake** provider prints in the dev console. Invites/PIN resets: `sendInvite(db, userId, createdBy, cfg)` (2.5).
   **2.5:** deactivate = `status: 'deactivated'` + bump `session_version` (requireAuth then rejects the old session).
+- **Supporters (3.1):** write only through `server/services/supporters.ts` (`createSupporter`, `updateSupporter`,
+  `getSupporter`, `serializeSupporter`); it keeps `pu_stats` in step. The phone limit (3.5) and flags (5.1) are not in
+  it yet. Routes must map `rejected` reasons to the sync item results (`invalid`, `no_consent`, `out_of_scope`,
+  `pu_inactive`). Dev DB has 5,000 supporters: re-run `pnpm db:seed:dev` after `pnpm db:migrate`.
 - **First admin (2.6):** `pnpm admin:create --role ADMIN --name "…" --phone 0806…` prints a 72-hour setup link
   (open it on that phone, choose a PIN); add `--sms` to also text it. The admin then invites the DG at `/app/admin`.
   In production run the same command on the server with its `NUXT_DATABASE_URL` / `NUXT_PUBLIC_SITE_URL`.
@@ -96,3 +100,4 @@ Also note blockers and anything the next session must know.
 - 2026-09-25 · 0.1 · Nuxt 4.5.2 + compat 5, Nuxt UI 4.11.2, i18n 10.6, vite-pwa 1.1.1, nuxt-auth-utils 0.5.30, eslint, test-utils; strict TS; folder skeleton; bilingual index page · see commit `chore(scaffold)`
 - 2026-09-25 · docs · Project docs created (PRD, plan, architecture, data model, API, security, UX, seed) · —
 - 2026-09-26 · 2.6 · Admin bootstrap: `pnpm admin:create` (only way to create an ADMIN; also DG, `--replace`, `--sms`); `GET /admin/dg` + `POST /admin/users/dg` (ADMIN only, one active DG, replace/supersede/resend, SMS invite, token never returned); `/app/admin` page + nav; E2E admin → DG → PIN, 403 for others, axe clean · see commit `feat(admin)`
+- 2026-09-26 · 3.1 · Supporters schema: `supporters` (consent/phone/anonymisation/PU CHECKs), `flags`, `pu_stats` (migration 0006); `server/services/supporters.ts` (create: idempotent by client id, own-PU only; update: LWW, audited field names; `serializeSupporter` masking; incremental `pu_stats` = recompute); dev seed + 5,000 supporters with planted flag patterns; meta-test: no supporter selects outside services · see commit `feat(supporters)`

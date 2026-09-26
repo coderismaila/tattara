@@ -1,12 +1,14 @@
-// Writes the dev seed: fake geography + targets (1.2), a user per role (2.1). Supporters follow in 3.1.
+// Writes the dev seed: fake geography + targets (1.2), a user per role (2.1), ~5,000 fake supporters (3.1).
 // If real INEC geography has been imported (pnpm db:seed), only the dev users are seeded, on real unit codes.
-import { and, count, eq, inArray, like, ne, sql } from 'drizzle-orm'
+import { and, count, eq, inArray, like, ne, or, sql } from 'drizzle-orm'
 import { createDb, type Db } from '../../server/db/client.ts'
-import { invites, otpCodes, unitTargets, units, userDevices, users } from '../../server/db/schema/index.ts'
+import { flags, invites, otpCodes, puStats, supporters, unitTargets, units, userDevices, users } from '../../server/db/schema/index.ts'
+import { recomputePuStats } from '../../server/services/supporters.ts'
 import { hashPin } from '../../server/utils/pin.ts'
 import { UNIT_LEVELS } from '../../shared/constants/enums.ts'
 import { ROLE_LEVEL } from '../../shared/constants/roles.ts'
 import { DEV_SOURCE_VERSION, generateDevGeography } from './dev-geography.ts'
+import { generateDevSupporters } from './dev-supporters.ts'
 import { DEV_PHONE_PREFIX, DEV_PIN, DEV_USERS } from './dev-users.ts'
 
 export class SeedRefusedError extends Error {
@@ -24,6 +26,7 @@ export interface SeedResult {
   units: number
   targets: number
   users: number
+  supporters: number
 }
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0]
@@ -31,6 +34,13 @@ type Tx = Parameters<Parameters<Db['transaction']>[0]>[0]
 const FK_VIOLATION = '23503'
 
 async function deleteDevData(tx: Tx) {
+  // Supporters (and their flags/counters) on dev units or captured by dev users go first (FKs).
+  const devCodes = tx.select({ code: units.code }).from(units).where(eq(units.sourceVersion, DEV_SOURCE_VERSION))
+  const devUserIdsForSupporters = tx.select({ id: users.id }).from(users).where(like(users.phone, `${DEV_PHONE_PREFIX}%`))
+  await tx.delete(flags).where(inArray(flags.puCode, devCodes))
+  await tx.delete(supporters).where(or(inArray(supporters.puCode, devCodes), inArray(supporters.capturedBy, devUserIdsForSupporters)))
+  await tx.delete(puStats).where(inArray(puStats.puCode, devCodes))
+
   const devUserIds = tx.select({ id: users.id }).from(users).where(like(users.phone, `${DEV_PHONE_PREFIX}%`))
   await tx.delete(userDevices).where(inArray(userDevices.userId, devUserIds))
   await tx.delete(invites).where(inArray(invites.userId, devUserIds))
@@ -40,7 +50,6 @@ async function deleteDevData(tx: Tx) {
   await tx.update(users).set({ invitedBy: null }).where(like(users.phone, `${DEV_PHONE_PREFIX}%`))
   await tx.delete(users).where(like(users.phone, `${DEV_PHONE_PREFIX}%`))
 
-  const devCodes = tx.select({ code: units.code }).from(units).where(eq(units.sourceVersion, DEV_SOURCE_VERSION))
   await tx.delete(unitTargets).where(inArray(unitTargets.unitCode, devCodes))
   // Children first (FK to parent).
   for (const level of [...UNIT_LEVELS].reverse()) {
@@ -98,7 +107,18 @@ async function seedUsers(tx: Tx) {
     idByKey.set(spec.key, row!.id)
   }
 
-  return DEV_USERS.length
+  return idByKey
+}
+
+/** Fake supporters on the dev PUs, credited to each state's dev PU lead; then pu_stats from scratch. */
+async function seedSupporters(tx: Tx, idByKey: Map<string, string>) {
+  const pus = generateDevGeography().units.filter(u => u.level === 'pu')
+  const { supporters: rows } = generateDevSupporters(pus, { 19: idByKey.get('Kano-PU_LEAD')!, 20: idByKey.get('Katsina-PU_LEAD')! })
+  for (let i = 0; i < rows.length; i += 500) {
+    await tx.insert(supporters).values(rows.slice(i, i + 500)).onConflictDoNothing({ target: supporters.id })
+  }
+  for (const state of ['19', '20']) await recomputePuStats(tx, state)
+  return rows.length
 }
 
 export async function seedDev(url: string, options: SeedOptions = {}): Promise<SeedResult> {
@@ -138,8 +158,9 @@ export async function seedDev(url: string, options: SeedOptions = {}): Promise<S
         }
       }
       const geo = realGeography ? { units: 0, targets: 0 } : await seedGeography(tx)
-      const userCount = await seedUsers(tx)
-      return { ...geo, users: userCount }
+      const idByKey = await seedUsers(tx)
+      const supporterCount = realGeography ? 0 : await seedSupporters(tx, idByKey)
+      return { ...geo, users: idByKey.size, supporters: supporterCount }
     })
   }
   finally {

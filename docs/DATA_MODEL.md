@@ -98,10 +98,19 @@ composite FK a lead can only sit at a unit of their role's level. CHECK: phone i
 
 Indexes: `pu_code text_pattern_ops`, `(phone)`, `(captured_by, captured_at)`, `(pu_code, created_at)`, GIST `gps`.
 
+CHECKs: `id` is a UUIDv7; `pu_code` has the PU shape (so a supporter sits on a PU, never a ward); phone is E.164 NG
+unless anonymised, and an anonymised row has no phone, address or GPS; name 1–120 chars; address ≤ 200;
+`consent_version` 1–20 chars (with `consent_at` NOT NULL, the DB refuses records without consent);
+`gps_accuracy_m ≥ 0`. Only `server/services/supporters.ts` reads the table (a unit test enforces it).
+
 **Anonymisation** sets: full_name → `'—'`, phone → `null` (phone becomes nullable only when status = anonymised, enforced by a CHECK), address → null, gps → null. Keeps pu_code, the enums and the dates for aggregate integrity.
 
 ### `flags`
 | id | supporter_id FK null | user_id FK null | pu_code | type enum | details jsonb | status enum `open\|dismissed\|confirmed` | reviewed_by | reviewed_at | created_at |
+
+Indexes: `pu_code text_pattern_ops`, `(status, created_at)`, `(supporter_id)`; partial unique `(supporter_id, type)` where
+open, so the flag engine can re-run. CHECK: `reviewed_at` is set exactly when the status is not `open`. `details`
+holds evidence only (distances, counts), never names or phones.
 
 Flag types: `gps_far`, `duplicate_phone`, `pu_over_capacity`, `rate_anomaly`, `gps_cluster`, `callback_failed`, `opt_out_spike`.
 
@@ -112,6 +121,11 @@ Flag types: `gps_far`, `duplicate_phone`, `pu_over_capacity`, `rate_anomaly`, `g
 
 ### `pu_stats` (maintained incrementally)
 `pu_code PK, total, verified, flagged_open, male, female, age_18_24 … age_65_plus, strong, leaning, undecided, has_pvc_yes, volunteers, opted_out, last_capture_at, updated_at`
+
+Every supporter row counts in `total` (removal-requested and anonymised too); `verified` = `sms_delivered` or
+`callback_verified`; `opted_out` = verification `opted_out`; `last_capture_at` = latest `captured_at`. Updated by
+`applyStatDelta` in the supporter write's transaction; `recomputePuStats` rebuilds from scratch (seed, reconcile).
+CHECK: every counter ≥ 0.
 
 ### `unit_daily_stats`
 `unit_code, day date, total, verified` — PK `(unit_code, day)`; written nightly for every unit at every level.

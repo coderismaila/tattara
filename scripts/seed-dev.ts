@@ -15,7 +15,7 @@ try {
   const result = await seedDev(url, { reset: process.argv.includes('--reset') })
   console.log(result.units === 0
     ? `Real geography present: seeded ${result.users} dev users only (PIN 123456).`
-    : `Dev seed applied: ${result.units} units, ${result.targets} targets, ${result.users} users (PIN 123456).`)
+    : `Dev seed applied: ${result.units} units, ${result.targets} targets, ${result.users} users (PIN 123456), ${result.supporters} supporters.`)
 }
 catch (error) {
   if (error instanceof SeedRefusedError) {

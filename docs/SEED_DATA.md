@@ -67,7 +67,11 @@ Flags: `--dry-run` (diff only), `--csv-only`, `--source-version <v>`.
 `scripts/seed-dev.ts` creates:
 - A fake mini-geography if real data is absent: 2 states × 3 LGAs × 4 wards × 10 PUs, codes in the real format.
 - Users for every role with PIN `123456` (dev only; guarded by `NODE_ENV !== 'production'`).
-- 5,000 fake supporters with faker (Hausa-like names list in `scripts/fixtures/names.ts`), some deliberately flag-worthy.
+- 5,000 fake supporters (`scripts/seed/dev-supporters.ts`, seeded PRNG so runs are identical; random Hausa name
+  combinations from `scripts/fixtures/names.ts`; phones `+234 800 01x xxxx`), credited to each state's dev PU lead.
+  Planted for the flag engine (5.1): one PU above 90% of its registered voters with an 80-capture burst in one hour,
+  a 25-record identical-GPS cluster, 40 fixes 5–15 km from their PU, 30 phone pairs and 10 shared-phone triples.
+  Also a few removal requests and anonymised opt-outs. `pu_stats` is rebuilt afterwards. Not seeded on real geography.
 
 ## 6. Refresh
 INEC occasionally changes PUs. The `/admin/import/units` endpoint runs the same normaliser with a **dry-run diff** (added / renamed / deactivated) before applying. Units are never hard-deleted: they're set `active=false`, and supporters keep their pu_code.

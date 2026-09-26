@@ -106,7 +106,7 @@ describe.skipIf(!dbAvailable)('INEC import → units', () => {
   })
 
   it('the dev seed adds only dev users on real geography', async () => {
-    expect(await seedDev(temp.url, { nodeEnv: 'test' })).toEqual({ units: 0, targets: 0, users: DEV_USERS.length })
+    expect(await seedDev(temp.url, { nodeEnv: 'test' })).toEqual({ units: 0, targets: 0, users: DEV_USERS.length, supporters: 0 })
     expect(await unitCount()).toBe(11)
     const [puLead] = await db.select().from(users).where(eq(users.unitCode, '19/01/01/001'))
     expect(puLead?.role).toBe('PU_LEAD')

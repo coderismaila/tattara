@@ -41,7 +41,7 @@ export interface DevGeography {
 }
 
 /** mulberry32: tiny seeded PRNG so every run produces identical data. */
-function prng(seed: number) {
+export function prng(seed: number) {
   let a = seed >>> 0
   return () => {
     a = (a + 0x6D2B79F5) >>> 0

@@ -156,3 +156,13 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - `/api/admin/users/dg` sends the link by SMS and never returns the token. `/api/admin/dg` shows the DG with a masked phone (the admin is above ward level). ADMIN-only routes use `requireAdmin` (403 `admin_only`).
 - `server/utils/sms/types.ts` avoids TypeScript parameter properties so scripts load it under Node's type stripping.
 **Consequences:** Replacing the only ADMIN means running the CLI again (there is no in-app admin management). The DG invites state leads from `/app/team` (ADR-025).
+
+### ADR-027 · 2026-09-26 · Accepted · Supporter storage rules
+**Decision:**
+- **Create is idempotent by the client's UUIDv7** (`INSERT … ON CONFLICT DO NOTHING`): the same id from the same lead on the same PU is `duplicate` (the stored row is returned, nothing is counted twice); the same id with a different PU or lead is `conflict`. Other outcomes: `accepted` or `rejected` with `invalid`, `no_consent`, `out_of_scope`, `pu_inactive` (the sync item reasons in API.md).
+- **Only the PU lead of the PU captures and edits** (SECURITY_PRIVACY §3). The PU, consent and capture fields can't be edited. Edits are last-write-wins on the server clock, and audited with the changed field names only.
+- **Ward and PU leads see full records; everyone else gets the masked shape** (initials, `+234 80* *** 4567`, no address or GPS). `device_id` and `updated_by` never leave the server.
+- **The database also refuses what the server must never accept**: no consent, a non-PU code, a non-E.164 phone on a live record, a non-v7 id, and PII left on an anonymised row.
+- **pu_stats:** every row counts (anonymisation keeps enums for aggregates); "verified" means the thank-you SMS was delivered or a call-back confirmed it (PRD "verified phones"), and the call-back pass rate is computed apart (5.3). Deltas are applied with UPDATE-then-INSERT, because `INSERT … ON CONFLICT` checks the non-negative CHECK against the proposed row, which a negative edit delta fails.
+- **Dev seed:** 5,000 deterministic fake supporters credited to each state's dev PU lead (the dev PUs have no leads of their own), with planted flag patterns for 5.1. Not seeded on real geography.
+**Consequences:** 3.5 adds the 3-per-phone limit on top of `createSupporter`, and 5.1 creates flags and maintains `flagged_open`. Supporter routes must serialise through `serializeSupporter`.

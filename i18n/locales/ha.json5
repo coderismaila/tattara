@@ -94,6 +94,8 @@
     home: 'Gida',
     // TODO(ha-review)
     settings: 'Saituna',
+    // TODO(ha-review)
+    team: 'Tawaga',
   },
   lang: {
     // TODO(ha-review)
@@ -114,5 +116,111 @@
     account: 'Asusu',
     // TODO(ha-review)
     signOutHelp: 'Idan kun fita a wannan wayar, sai kun yi amfani da PIN ɗinku kafin ku sake shiga.',
+  },
+  team: {
+    // TODO(ha-review)
+    title: 'Tawaga',
+    // TODO(ha-review)
+    intro: 'Shugabannin yankunan da ke ƙarƙashin {unit}.',
+    // TODO(ha-review)
+    region: 'Arewa maso Yamma',
+    // TODO(ha-review)
+    noLead: 'Babu shugaba tukuna',
+    status: {
+      // TODO(ha-review)
+      active: 'Mai aiki',
+      // TODO(ha-review)
+      invited: 'An gayyata',
+      // TODO(ha-review)
+      locked: 'An kulle',
+      // TODO(ha-review)
+      none: 'Babu',
+    },
+    // TODO(ha-review)
+    lastActive: 'Aiki na ƙarshe {when}',
+    // TODO(ha-review)
+    neverActive: 'Bai fara aiki ba tukuna',
+    // TODO(ha-review)
+    call: 'Kira {name}',
+    actions: {
+      // TODO(ha-review)
+      invite: 'Gayyaci shugaba',
+      // TODO(ha-review)
+      resend: 'Sake aiko da gayyata',
+      // TODO(ha-review)
+      inviteOther: 'Gayyaci wani daban',
+      // TODO(ha-review)
+      replace: 'Maye gurbi',
+      // TODO(ha-review)
+      deactivate: 'Dakatar',
+      // TODO(ha-review)
+      resetPin: 'Sake saita PIN',
+    },
+    // TODO(ha-review)
+    inviteTitle: 'Gayyaci shugaba na {unit}',
+    // TODO(ha-review)
+    replaceTitle: 'Maye gurbin shugaban {unit}',
+    // TODO(ha-review)
+    replaceWarning: 'Za a dakatar da {name} yanzu. Magoya bayan da ya rubuta za su ci gaba da kasancewa da sunansa.',
+    // TODO(ha-review)
+    fullName: 'Cikakken suna',
+    // TODO(ha-review)
+    phone: 'Lambar waya',
+    // TODO(ha-review)
+    send: 'Aika gayyata',
+    // TODO(ha-review)
+    inviteSent: 'An aika gayyata zuwa {phone}.',
+    // TODO(ha-review)
+    deactivateTitle: 'A dakatar da {name}?',
+    // TODO(ha-review)
+    deactivateIntro: "Za a fitar da shi a ko'ina kuma ba zai iya amfani da Tattara ba. Magoya bayan da ya rubuta za su ci gaba da kasancewa.",
+    // TODO(ha-review)
+    reason: 'Dalili',
+    // TODO(ha-review)
+    reasonHelp: 'Don rajistar bincike. Kada ku sa lambar waya.',
+    // TODO(ha-review)
+    confirmDeactivate: 'Dakatar',
+    // TODO(ha-review)
+    deactivated: 'An dakatar da {name}.',
+    // TODO(ha-review)
+    resetTitle: 'A sake saita PIN na {name}?',
+    // TODO(ha-review)
+    resetIntro: 'PIN ɗinsa na yanzu zai daina aiki, kuma zai sami sabuwar hanyar gayyata ta SMS don zaɓar sabo.',
+    // TODO(ha-review)
+    confirmReset: 'Sake saita PIN',
+    // TODO(ha-review)
+    resetDone: 'An aika sabuwar hanyar gayyata zuwa ga {name}.',
+    // TODO(ha-review)
+    cancel: 'Soke',
+    // TODO(ha-review)
+    notAllowed: 'Shugabannin mazaɓa, ƙaramar hukuma, jiha da DG ne kaɗai ke kula da tawaga.',
+    // TODO(ha-review)
+    empty: 'Babu yankuna a ƙarƙashin wannan.',
+    errors: {
+      // TODO(ha-review)
+      unitInvalid: 'Wannan yankin ba daidai ba ne.',
+      // TODO(ha-review)
+      nameRequired: 'Shigar da cikakken sunan shugaban.',
+      // TODO(ha-review)
+      nameTooLong: 'Sunan ya yi tsayi da yawa.',
+      // TODO(ha-review)
+      reasonRequired: 'Ba da taƙaitaccen dalili.',
+      // TODO(ha-review)
+      reasonTooLong: 'Dalilin ya zama ƙasa da haruffa 200.',
+      // TODO(ha-review)
+      reasonPii: 'Cire lambar wayar daga dalilin.',
+      // TODO(ha-review)
+      not_your_unit: 'Kuna iya kula da shugabannin yankunan da ke ƙarƙashinku kai tsaye kawai.',
+      // TODO(ha-review)
+      unit_has_active_lead: 'Wannan yankin yana da shugaba mai aiki. Yi amfani da Maye gurbi.',
+      // TODO(ha-review)
+      already_active: 'Wannan mutumin ne shugaba mai aiki a nan tuni.',
+      // TODO(ha-review)
+      phone_in_use: 'Wannan lambar wayar ta wani shugaba mai aiki ce a wani wuri.',
+      // TODO(ha-review)
+      already_deactivated: 'An riga an dakatar da wannan shugaban.',
+      // TODO(ha-review)
+      rate_limited: 'Gayyata sun yi yawa yanzu. Ku sake gwadawa bayan minti {minutes}.',
+    },
   },
 }

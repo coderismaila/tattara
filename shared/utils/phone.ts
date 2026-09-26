@@ -33,3 +33,12 @@ export function normalizePhone(input: string): string | null {
 export function isValidPhone(input: string): boolean {
   return normalizePhone(input) !== null
 }
+
+/**
+ * Mask an E.164 Nigerian number for display above the level allowed to see it (SECURITY_PRIVACY §3):
+ * `+2348031234567` → `+234 80* *** 4567`. Anything else is fully hidden.
+ */
+export function maskPhoneForDisplay(e164: string): string {
+  const m = /^\+234(\d{2})\d{4}(\d{4})$/.exec(e164)
+  return m ? `+234 ${m[1]}* *** ${m[2]}` : '***'
+}

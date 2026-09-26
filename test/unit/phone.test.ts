@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isValidPhone, normalizePhone } from '../../shared/utils/phone'
+import { isValidPhone, maskPhoneForDisplay, normalizePhone } from '../../shared/utils/phone'
 
 describe('normalizePhone', () => {
   it.each([
@@ -43,5 +43,16 @@ describe('normalizePhone', () => {
   ])('rejects %s', (_label, input) => {
     expect(normalizePhone(input)).toBeNull()
     expect(isValidPhone(input)).toBe(false)
+  })
+})
+
+describe('maskPhoneForDisplay', () => {
+  it('keeps the network prefix and last 4 digits only', () => {
+    expect(maskPhoneForDisplay('+2348031234567')).toBe('+234 80* *** 4567')
+  })
+
+  it('hides anything that is not an E.164 NG mobile', () => {
+    expect(maskPhoneForDisplay('08031234567')).toBe('***')
+    expect(maskPhoneForDisplay('')).toBe('***')
   })
 })

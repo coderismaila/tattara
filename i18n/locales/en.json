@@ -50,7 +50,8 @@
   "nav": {
     "label": "Main navigation",
     "home": "Home",
-    "settings": "Settings"
+    "settings": "Settings",
+    "team": "Team"
   },
   "lang": {
     "label": "Language",
@@ -64,5 +65,62 @@
     "languageHelp": "The app opens in this language on this phone.",
     "account": "Account",
     "signOutHelp": "Signing out on this phone means you will need your PIN to sign in again."
+  },
+  "team": {
+    "title": "Team",
+    "intro": "Leads of the units below {unit}.",
+    "region": "the North West",
+    "noLead": "No lead yet",
+    "status": {
+      "active": "Active",
+      "invited": "Invited",
+      "locked": "Locked",
+      "none": "None"
+    },
+    "lastActive": "Last active {when}",
+    "neverActive": "Not active yet",
+    "call": "Call {name}",
+    "actions": {
+      "invite": "Invite lead",
+      "resend": "Send invite again",
+      "inviteOther": "Invite someone else",
+      "replace": "Replace",
+      "deactivate": "Deactivate",
+      "resetPin": "Reset PIN"
+    },
+    "inviteTitle": "Invite a lead for {unit}",
+    "replaceTitle": "Replace the lead of {unit}",
+    "replaceWarning": "{name} will be deactivated now. Their supporters stay recorded under their name.",
+    "fullName": "Full name",
+    "phone": "Phone number",
+    "send": "Send invite",
+    "inviteSent": "Invite sent to {phone}.",
+    "deactivateTitle": "Deactivate {name}?",
+    "deactivateIntro": "They are signed out everywhere and can no longer use Tattara. Their supporters stay recorded.",
+    "reason": "Reason",
+    "reasonHelp": "For the audit log. Do not include phone numbers.",
+    "confirmDeactivate": "Deactivate",
+    "deactivated": "{name} was deactivated.",
+    "resetTitle": "Reset {name}'s PIN?",
+    "resetIntro": "Their current PIN stops working and they get a new invite link by SMS to choose a new one.",
+    "confirmReset": "Reset PIN",
+    "resetDone": "A new invite link was sent to {name}.",
+    "cancel": "Cancel",
+    "notAllowed": "Only ward, LGA, state leads and the DG manage a team.",
+    "empty": "There are no units below this one.",
+    "errors": {
+      "unitInvalid": "That unit is not valid.",
+      "nameRequired": "Enter the lead's full name.",
+      "nameTooLong": "The name is too long.",
+      "reasonRequired": "Give a short reason.",
+      "reasonTooLong": "Keep the reason under 200 characters.",
+      "reasonPii": "Remove the phone number from the reason.",
+      "not_your_unit": "You can only manage leads of the units directly below yours.",
+      "unit_has_active_lead": "This unit already has an active lead. Use Replace instead.",
+      "already_active": "This person is already the active lead here.",
+      "phone_in_use": "This phone number belongs to an active lead elsewhere.",
+      "already_deactivated": "This lead is already deactivated.",
+      "rate_limited": "Too many invites for now. Try again in {minutes} minutes."
+    }
   }
 }

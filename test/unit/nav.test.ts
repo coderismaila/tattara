@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { APP_NAV, isNavItemActive } from '../../app/utils/nav'
+import { APP_NAV, TEAM_ROLES, isNavItemActive, navItemsFor } from '../../app/utils/nav'
+import { canManageTeam } from '../../server/services/team'
+import { ROLES } from '../../shared/constants/roles'
 
 const home = APP_NAV.find(i => i.to === '/app')!
 const settings = APP_NAV.find(i => i.to === '/app/settings')!
@@ -22,5 +24,18 @@ describe('isNavItemActive', () => {
       expect(item.labelKey).toMatch(/^nav\./)
       expect(item.icon).toMatch(/^i-lucide-/)
     }
+  })
+})
+
+describe('navItemsFor', () => {
+  it('shows Team only to leads who manage a team', () => {
+    expect(navItemsFor('WARD_LEAD').map(i => i.to)).toEqual(['/app', '/app/team', '/app/settings'])
+    expect(navItemsFor('PU_LEAD').map(i => i.to)).toEqual(['/app', '/app/settings'])
+    expect(navItemsFor('ADMIN').map(i => i.to)).toEqual(['/app', '/app/settings'])
+    expect(navItemsFor(undefined).map(i => i.to)).toEqual(['/app', '/app/settings'])
+  })
+
+  it('TEAM_ROLES matches the server rule exactly', () => {
+    expect(ROLES.filter(canManageTeam)).toEqual([...TEAM_ROLES])
   })
 })

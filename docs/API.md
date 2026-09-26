@@ -18,10 +18,12 @@ Errors carry `data.reason` (and `data.issues` with i18n keys for 400 `invalid`).
 `requireAuth` (active user, same `session_version`, device not revoked, active within 30 days).
 
 ## Team (users below me)
-| GET | `/team` | WARD+ | `?unit=` (child units of scope) | children units with lead status + quality score |
-| POST | `/team/invite` | WARD+ | `{ unitCode, fullName, phone }` | unitCode must be a **direct child** of the caller's unit |
-| POST | `/team/:userId/deactivate` | WARD+ | `{ reason }` | audited; bumps session_version |
-| POST | `/team/:userId/reset-pin` | WARD+ | — | sends a new invite |
+| GET | `/team` | WARD+ | `?unit=` (a unit in scope, not a PU; default: mine) | `{ unit, canManage, members: [{ code, name, level, lead: { id, fullName, status: active\|locked\|invited, phone, lastSeenAt } \| null, qualityScore }] }`. Phones in full for my direct children only, masked deeper |
+| POST | `/team/invite` | WARD+ | `{ unitCode, fullName, phone, replace? }` | unitCode must be a **direct child** of the caller's unit (403 `not_your_unit`). 409 `unit_has_active_lead` unless `replace: true` (which deactivates the current lead), `already_active`, `phone_in_use`. Supersedes other pending invites for the unit; re-inviting the same pending person resends. 100/hour per inviter |
+| POST | `/team/:userId/deactivate` | WARD+ | `{ reason }` | direct children only (403, also for unknown ids); audited with the reason (a phone in it → 400); bumps session_version, revokes devices; 409 `already_deactivated` |
+| POST | `/team/:userId/reset-pin` | WARD+ | — | direct children only; back to invited with no PIN, sessions and devices revoked, new invite SMS; audited |
+
+WARD+ here means WARD_LEAD, LGA_LEAD, STATE_LEAD and DG (DG manages the state leads). ADMIN → DG is `/admin/users/dg` (2.6).
 
 ## Supporters
 | GET | `/supporters` | PU, WARD | `?q=&pu=&cursor=&limit=` | full phone for PU/WARD; 403 above ward |

@@ -21,6 +21,8 @@ export const RATE_LIMITS = {
   // Above the 5-wrong-PIN lockout so the lockout (with its clear message) always triggers first (ADR-024).
   login: { limit: 10, windowSec: 15 * 60 },
   otpSend: { limit: 3, windowSec: 60 * 60 },
+  // Per inviter: each invite is an SMS.
+  invite: { limit: 100, windowSec: 60 * 60 },
 } as const satisfies Record<string, RateLimitRule>
 
 /** Keys are hashed so phone numbers are never stored in the clear. */

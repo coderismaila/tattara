@@ -45,3 +45,19 @@ export function latestOtp(phone: string): string | null {
   }
   return null
 }
+
+/** Invite token from the latest invite SMS the fake provider "sent" to `phone` (E.164). */
+export function latestInviteToken(phone: string): string | null {
+  let lines: string[]
+  try {
+    lines = readFileSync(OUTBOX_FILE, 'utf8').trim().split('\n')
+  }
+  catch {
+    return null
+  }
+  for (const line of lines.reverse()) {
+    const msg = JSON.parse(line) as { to: string, body: string, purpose: string }
+    if (msg.to === phone && msg.purpose === 'invite') return /\/setup\?t=([\w-]{22})/.exec(msg.body)?.[1] ?? null
+  }
+  return null
+}

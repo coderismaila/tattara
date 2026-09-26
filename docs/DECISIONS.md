@@ -137,3 +137,13 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - **Server-rendered forms** keep their controls disabled until hydrated: typing before hydration was wiped, and a pre-hydration submit posted the form natively and lost the invite token (found by E2E; real on slow 3G phones).
 - **E2E** runs the production build on its own `tattara_e2e` DB with `NUXT_APP_ENV=test`, which lets the fake SMS provider start (it refuses production; Nitro inlines `NODE_ENV` at build time) and write codes to an outbox file.
 **Consequences:** New env: `NUXT_OTP_SECRET`, `NUXT_PUBLIC_SITE_URL`, optional `NUXT_APP_ENV`, `NUXT_SMS_FAKE_OUTBOX`. Offline session handling (idle lock, local PIN verifier, wipe) is still 4.5; until then `/app` needs a reachable server to confirm the session.
+
+### ADR-025 · 2026-09-26 · Accepted · Team management rules
+**Decision:**
+- A lead manages only the leads of the units **directly below** their own (ward → PU, LGA → ward, state → LGA, DG → state), checked on the server for every invite, deactivation and PIN reset. Out-of-reach and unknown user ids both answer 403 (no probing across units). ADMIN has no team (its only child, the DG, is 2.6).
+- `GET /team` may browse any non-PU unit in scope, but only the caller's own unit shows full lead phones and management actions; deeper levels show masked phones (`+234 80* *** 4567`, `maskPhoneForDisplay`).
+- **Replace** (PRD R-1) is `invite` with `replace: true`: the current active lead is deactivated in the same transaction; their records stay attributed to them. Without `replace`, inviting into a staffed unit is 409.
+- One pending invite per unit: a new invite deactivates older pending ones; re-inviting the same person resends the link. Re-inviting a deactivated lead's phone reuses their user row (the phone is unique); an active lead elsewhere is 409.
+- Deactivate and reset PIN both bump `session_version` and revoke all trusted devices (reset PIN: the lead re-trusts a device when they follow the new link). Reasons go in the audit log and pass the PII guard.
+- 100 invites/hour per inviter (each invite is an SMS). Nav items carry `roles`; `TEAM_ROLES` is unit-tested against the server's `canManageTeam`.
+**Consequences:** 5.5 fills `qualityScore`. 4.5 acts on revoked devices (wipe on next contact).

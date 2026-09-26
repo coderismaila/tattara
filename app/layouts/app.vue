@@ -2,8 +2,10 @@
 const { t } = useI18n()
 const route = useRoute()
 
+const { user } = useUserSession()
+
 const title = computed(() => t(route.meta.titleKey ?? 'app.name'))
-const items = computed(() => APP_NAV.map(item => ({
+const items = computed(() => navItemsFor(user.value?.role).map(item => ({
   ...item,
   active: isNavItemActive(item, route.path),
 })))

@@ -8,6 +8,7 @@ import type {
   SupportLevel,
   VerificationStatus,
 } from '../constants/enums'
+import type { ConsentVersion } from '../constants/consent'
 
 export interface GpsFix {
   lat: number
@@ -31,7 +32,7 @@ export interface SupporterInput {
   hasPvc: HasPvc
   volunteer: boolean
   consentAt: string
-  consentVersion: string
+  consentVersion: ConsentVersion
   consentLanguage: ConsentLanguage
   gps: GpsFix | null
   capturedAt: string

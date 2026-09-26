@@ -139,5 +139,20 @@
       "admin_only": "Only the administrator can do this.",
       "rate_limited": "Too many invites for now. Try again in {minutes} minutes."
     }
+  },
+  "supporter": {
+    "errors": {
+      "invalid": "Something in this record is not valid. Check it and try again.",
+      "nameRequired": "Enter the supporter's full name.",
+      "nameTooLong": "The name is too long.",
+      "addressTooLong": "Keep the address under 200 characters.",
+      "supportRequired": "Choose the level of support.",
+      "pvcRequired": "Choose whether they have a PVC.",
+      "consentRequired": "Read the consent notice and tick that they agree.",
+      "consentAfterCapture": "The consent time is after the save time. Check the phone's clock.",
+      "gpsInvalid": "The location reading is not valid.",
+      "puInvalid": "This polling unit is not valid.",
+      "nothingToSave": "Nothing was changed."
+    }
   }
 }

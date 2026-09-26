@@ -114,7 +114,7 @@ describe.skipIf(!dbAvailable)('supporters service', () => {
     })
 
     it('rejects missing consent, bad ids and bad phones', async () => {
-      expect(await createSupporter(db, who.kanoPu!, input({ consentVersion: '  ' }))).toEqual({ kind: 'rejected', reason: 'no_consent' })
+      expect(await createSupporter(db, who.kanoPu!, input({ consentVersion: '  ' as never }))).toEqual({ kind: 'rejected', reason: 'no_consent' })
       expect(await createSupporter(db, who.kanoPu!, input({ consentAt: 'not a date' }))).toEqual({ kind: 'rejected', reason: 'no_consent' })
       expect(await createSupporter(db, who.kanoPu!, input({ id: crypto.randomUUID() }))).toEqual({ kind: 'rejected', reason: 'invalid' })
       expect(await createSupporter(db, who.kanoPu!, input({ phone: '08031234567' }))).toEqual({ kind: 'rejected', reason: 'invalid' })

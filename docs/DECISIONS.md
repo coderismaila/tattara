@@ -166,3 +166,11 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - **pu_stats:** every row counts (anonymisation keeps enums for aggregates); "verified" means the thank-you SMS was delivered or a call-back confirmed it (PRD "verified phones"), and the call-back pass rate is computed apart (5.3). Deltas are applied with UPDATE-then-INSERT, because `INSERT … ON CONFLICT` checks the non-negative CHECK against the proposed row, which a negative edit delta fails.
 - **Dev seed:** 5,000 deterministic fake supporters credited to each state's dev PU lead (the dev PUs have no leads of their own), with planted flag patterns for 5.1. Not seeded on real geography.
 **Consequences:** 3.5 adds the 3-per-phone limit on top of `createSupporter`, and 5.1 creates flags and maintains `flagged_open`. Supporter routes must serialise through `serializeSupporter`.
+
+### ADR-028 · 2026-09-26 · Accepted · Supporter validation rules
+**Decision:**
+- **Strict objects.** Every supporter schema rejects unknown keys instead of stripping them, so a client (or a future change) can't slip in a field such as `pvcNumber`, `nin` or `religion`, and `capturedBy` / `verification` can only be set by the server.
+- **One field definition, three shapes:** the form (fields + a required consent tick), the sync input (fields + id, PU, consent and capture metadata) and the edit patch (editable fields only; omitted = unchanged, `null` clears). All messages are i18n keys.
+- **Consent:** the version must be a known one (`shared/constants/consent.ts`) and its language must equal `consentLanguage`. Consent may not be recorded more than 60 s after the capture time. Both times come from the phone's clock, so no check against server time (offline captures sync days later).
+- `SupporterInput.consentVersion` narrows to the known versions; stored records keep any past version string.
+**Consequences:** A new consent wording means adding a version (old records keep theirs). 3.3 adds the script text to `consent.ts`.

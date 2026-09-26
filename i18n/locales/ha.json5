@@ -253,4 +253,30 @@
       rate_limited: 'Gayyata sun yi yawa yanzu. Ku sake gwadawa bayan minti {minutes}.',
     },
   },
+  supporter: {
+    errors: {
+      // TODO(ha-review)
+      invalid: 'Akwai abin da ba daidai ba a wannan bayani. Duba ka sake gwadawa.',
+      // TODO(ha-review)
+      nameRequired: 'Shigar da cikakken sunan magoyin baya.',
+      // TODO(ha-review)
+      nameTooLong: 'Sunan ya yi tsayi da yawa.',
+      // TODO(ha-review)
+      addressTooLong: 'Adireshi kada ya wuce haruffa 200.',
+      // TODO(ha-review)
+      supportRequired: 'Zaɓi matakin goyon baya.',
+      // TODO(ha-review)
+      pvcRequired: 'Zaɓi ko yana da katin zaɓe (PVC).',
+      // TODO(ha-review)
+      consentRequired: 'Karanta masa sanarwar izini kuma ka tabbatar ya amince.',
+      // TODO(ha-review)
+      consentAfterCapture: 'Lokacin izini ya zo bayan lokacin ajiyewa. Duba agogon wayar.',
+      // TODO(ha-review)
+      gpsInvalid: 'Wurin da aka ɗauka ba daidai ba ne.',
+      // TODO(ha-review)
+      puInvalid: 'Wannan rumfar zaɓe ba daidai ba ce.',
+      // TODO(ha-review)
+      nothingToSave: 'Babu abin da aka canza.',
+    },
+  },
 }

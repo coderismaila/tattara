@@ -9,7 +9,7 @@ test.describe('home page', () => {
 
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Tattara')
     await expect(page.getByText('Rijistar magoya baya ta Arewa maso Yamma')).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Shiga' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Shiga' })).toBeVisible()
     await expect(page.locator('html')).toHaveAttribute('lang', 'ha')
   })
 })

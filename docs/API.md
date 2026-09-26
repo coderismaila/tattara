@@ -7,12 +7,15 @@ All routes are under `/api`, return JSON, and use cookie sessions. Every input i
 ## Auth
 | Method | Path | Who | Body / Query | Notes |
 |---|---|---|---|---|
-| POST | `/auth/login` | public | `{ phone, pin, deviceId }` | 200 session, or 202 `{ otpRequired: true }` for a new device |
-| POST | `/auth/otp/verify` | public | `{ phone, code, deviceId }` | binds device, sets session |
-| POST | `/auth/otp/resend` | public | `{ phone }` | rate-limited |
-| POST | `/auth/setup` | public | `{ token, pin, deviceId }` | from invite; activates user |
-| POST | `/auth/logout` | any | — | |
-| GET | `/auth/me` | any | — | `{ user, unit, scope }` |
+| POST | `/auth/login` | public | `{ phone, pin, deviceId }` | 200 session, or 202 `{ otpRequired: true }` for a new device. 401 `invalid_credentials` (same for unknown phone and wrong PIN), 423 `locked` + `retryAfterSec`, 429 `rate_limited` (10/15 min per phone, or 3 OTP sends/hour) |
+| POST | `/auth/otp/verify` | public | `{ phone, code, deviceId }` | binds device, sets session. 401 `code_invalid` / `code_expired` / `code_attempts`. The code only works for the device that passed the PIN check |
+| POST | `/auth/otp/resend` | public | `{ phone }` | always 202 (reveals nothing) unless 429; only resends for a pending PIN-verified login |
+| POST | `/auth/setup` | public | `{ token, pin, deviceId }` | from invite; activates user, trusts the device, bumps session_version. 400 `invite_invalid`, 410 `invite_expired`, 409 `unit_taken`; weak PINs rejected (400) |
+| POST | `/auth/logout` | any | — | clears the session |
+| GET | `/auth/me` | any | — | `{ user: { id, fullName, role, unitCode }, unit, scope }`; 401 once the session is revoked |
+
+Errors carry `data.reason` (and `data.issues` with i18n keys for 400 `invalid`). Every authenticated route calls
+`requireAuth` (active user, same `session_version`, device not revoked, active within 30 days).
 
 ## Team (users below me)
 | GET | `/team` | WARD+ | `?unit=` (child units of scope) | children units with lead status + quality score |

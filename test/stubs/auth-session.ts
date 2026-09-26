@@ -7,3 +7,4 @@ export const getUserSession = unavailable
 export const requireUserSession = unavailable
 export const setUserSession = unavailable
 export const clearUserSession = unavailable
+export const replaceUserSession = unavailable

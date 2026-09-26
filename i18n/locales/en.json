@@ -4,7 +4,45 @@
     "tagline": "Supporter registry for the North West"
   },
   "auth": {
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "phone": "Phone number",
+    "phoneHelp": "The number your invite was sent to",
+    "pin": "PIN",
+    "pinHelp": "Your 6-digit PIN",
+    "codeTitle": "Check your SMS",
+    "codeIntro": "This is a new phone for your account. Enter the 6-digit code we sent by SMS.",
+    "code": "Code",
+    "verify": "Continue",
+    "resend": "Send the code again",
+    "resent": "A new code is on its way.",
+    "back": "Back",
+    "setupTitle": "Set your PIN",
+    "setupIntro": "Choose a 6-digit PIN. You will use it with your phone number to sign in.",
+    "newPin": "New PIN",
+    "confirmPin": "Type the PIN again",
+    "setupSubmit": "Save PIN and continue",
+    "signingIn": "Signing in…",
+    "errors": {
+      "phoneInvalid": "Enter a Nigerian mobile number, for example 0803 123 4567.",
+      "pinFormat": "The PIN is 6 digits.",
+      "pinWeak": "That PIN is too easy to guess. Avoid repeated or sequential digits.",
+      "pinMismatch": "The two PINs are different. Type them again.",
+      "codeFormat": "The code is 6 digits.",
+      "deviceInvalid": "Something went wrong on this phone. Reload the page and try again.",
+      "tokenInvalid": "This invite link is not valid. Ask your lead to send a new one.",
+      "invalid_credentials": "The phone number or PIN is wrong.",
+      "locked": "Too many wrong PINs. Try again in {minutes} minutes.",
+      "rate_limited": "Too many tries. Wait {minutes} minutes and try again.",
+      "code_invalid": "That code is wrong. Check the SMS and try again.",
+      "code_expired": "That code has expired. Send a new one.",
+      "code_attempts": "Too many wrong codes. Send a new one.",
+      "invite_invalid": "This invite link is not valid or was already used. Ask your lead for a new one.",
+      "invite_expired": "This invite link has expired. Ask your lead to send a new one.",
+      "unit_taken": "Your unit already has an active lead. Ask your lead to check.",
+      "network": "No connection. Check your network and try again.",
+      "unknown": "Something went wrong. Try again."
+    }
   },
   "a11y": {
     "skipToContent": "Skip to content"
@@ -23,6 +61,8 @@
     "placeholder": "Your unit summary will appear here."
   },
   "settings": {
-    "languageHelp": "The app opens in this language on this phone."
+    "languageHelp": "The app opens in this language on this phone.",
+    "account": "Account",
+    "signOutHelp": "Signing out on this phone means you will need your PIN to sign in again."
   }
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { AuditPiiError, assertAuditMetaSafe } from '../../server/utils/audit'
+import { AuditPiiError, assertAuditMetaSafe } from '../../server/services/audit'
 
 describe('assertAuditMetaSafe', () => {
   it('accepts IDs, codes, counts and field names', () => {

@@ -24,3 +24,8 @@ export function createDb(url: string, options: CreateDbOptions = {}) {
 }
 
 export type Db = ReturnType<typeof createDb>['db']
+
+/** A transaction handle (the callback argument of db.transaction). */
+export type DbTx = Parameters<Parameters<Db['transaction']>[0]>[0]
+/** Either the database or a transaction: for helpers that just run queries. */
+export type DbLike = Db | DbTx

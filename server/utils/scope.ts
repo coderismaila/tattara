@@ -6,7 +6,7 @@ import { createError, type H3Event } from 'h3'
 import { ROLE_LEVEL, isRole, type Role } from '../../shared/constants/roles.ts'
 import { isValidPuCode, isWithin, scopePrefix, unitLevel } from '../../shared/utils/pu-code.ts'
 import type { SessionUser } from '../../shared/types/auth.ts'
-import { requireUserSession } from '../auth/session.ts'
+import { requireAuth } from './auth.ts'
 
 export interface Scope {
   role: Role
@@ -38,9 +38,9 @@ export function scopeForUser(user: Pick<SessionUser, 'role' | 'unitCode'>): Scop
   return { role: user.role, unitCode: code, prefix: scopePrefix(code) }
 }
 
-/** The caller's scope. 401 without a session. */
+/** The caller's scope. 401 without a valid session (see requireAuth). */
 export async function getScope(event: H3Event): Promise<Scope> {
-  const { user } = await requireUserSession(event)
+  const { user } = await requireAuth(event)
   return scopeForUser(user)
 }
 

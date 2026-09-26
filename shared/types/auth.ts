@@ -12,3 +12,12 @@ export interface SessionUser {
   /** Must equal users.session_version; bumping it revokes sessions (2.4). */
   sessionVersion: number
 }
+
+/** Server-only session data (nuxt-auth-utils `secure`): never sent to the client. */
+export interface SecureSession {
+  /** The device this session was established on (user_devices.device_id). */
+  deviceId: string
+  /** Epoch ms of the last activity refresh; sessions end after 30 days without one. */
+  refreshedAt: number
+  loggedInAt: number
+}

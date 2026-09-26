@@ -46,7 +46,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
   **AC:** in dev, sends appear in the console and the DB; provider errors retry with backoff.
 - [x] **2.3 Scope utils** `server/utils/scope.ts` (`getScope`, `requireScope`, `scopeWhere`) + `audit.ts`.
   **AC:** 100% unit test coverage on scope.ts.
-- [ ] **2.4 Auth flows:** login (phone+PIN), new-device OTP, invite setup, logout, `/auth/me`, lockout, rate limits.
+- [x] **2.4 Auth flows:** login (phone+PIN), new-device OTP, invite setup, logout, `/auth/me`, lockout, rate limits.
   **AC:** e2e: invited PU lead sets a PIN → logs in → OTP on second device → locked after 5 bad PINs.
 - [ ] **2.5 Team management:** `/team` routes + Team page; the invite form only allows direct child units; deactivate/replace.
   **AC:** a ward lead cannot invite into another ward (403, tested); deactivation revokes the session on next request.

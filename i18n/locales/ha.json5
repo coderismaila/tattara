@@ -9,6 +9,79 @@
   auth: {
     // TODO(ha-review)
     signIn: 'Shiga',
+    // TODO(ha-review)
+    signOut: 'Fita',
+    // TODO(ha-review)
+    phone: 'Lambar waya',
+    // TODO(ha-review)
+    phoneHelp: 'Lambar da aka aiko muku gayyata da ita',
+    pin: 'PIN',
+    // TODO(ha-review)
+    pinHelp: 'PIN ɗinku mai lamba 6',
+    // TODO(ha-review)
+    codeTitle: 'Duba saƙon SMS ɗinku',
+    // TODO(ha-review)
+    codeIntro: 'Wannan sabuwar waya ce ga asusunku. Shigar da lambar tabbatarwa mai lamba 6 da muka aiko ta SMS.',
+    // TODO(ha-review)
+    code: 'Lambar tabbatarwa',
+    // TODO(ha-review)
+    verify: 'Ci gaba',
+    // TODO(ha-review)
+    resend: 'Sake aiko da lambar',
+    // TODO(ha-review)
+    resent: 'Sabuwar lamba tana kan hanya.',
+    // TODO(ha-review)
+    back: 'Koma baya',
+    // TODO(ha-review)
+    setupTitle: 'Zaɓi PIN ɗinku',
+    // TODO(ha-review)
+    setupIntro: 'Zaɓi PIN mai lamba 6. Da shi da lambar wayarku za ku riƙa shiga.',
+    // TODO(ha-review)
+    newPin: 'Sabon PIN',
+    // TODO(ha-review)
+    confirmPin: 'Sake rubuta PIN ɗin',
+    // TODO(ha-review)
+    setupSubmit: 'Ajiye PIN ku ci gaba',
+    // TODO(ha-review)
+    signingIn: 'Ana shiga…',
+    errors: {
+      // TODO(ha-review)
+      phoneInvalid: 'Shigar da lambar wayar Najeriya, misali 0803 123 4567.',
+      // TODO(ha-review)
+      pinFormat: 'PIN lamba 6 ne.',
+      // TODO(ha-review)
+      pinWeak: 'Wannan PIN ɗin yana da sauƙin tsammani. Kada ku maimaita lamba ko ku jera su a jere.',
+      // TODO(ha-review)
+      pinMismatch: 'PIN ɗin guda biyu ba ɗaya ba ne. Ku sake rubutawa.',
+      // TODO(ha-review)
+      codeFormat: 'Lambar tabbatarwa lamba 6 ce.',
+      // TODO(ha-review)
+      deviceInvalid: 'An sami matsala a wannan wayar. Ku sake loda shafin ku gwada.',
+      // TODO(ha-review)
+      tokenInvalid: 'Wannan hanyar gayyata ba ta aiki. Ku roƙi shugabanku ya aiko sabuwa.',
+      // TODO(ha-review)
+      invalid_credentials: 'Lambar waya ko PIN ba daidai ba ne.',
+      // TODO(ha-review)
+      locked: 'An yi kuskuren PIN da yawa. Ku sake gwadawa bayan minti {minutes}.',
+      // TODO(ha-review)
+      rate_limited: 'An yi ƙoƙari da yawa. Ku jira minti {minutes} ku sake gwadawa.',
+      // TODO(ha-review)
+      code_invalid: 'Wannan lambar ba daidai ba ce. Ku duba SMS ɗin ku sake gwadawa.',
+      // TODO(ha-review)
+      code_expired: 'Wannan lambar ta ƙare. Ku nemi sabuwa.',
+      // TODO(ha-review)
+      code_attempts: 'An yi kuskuren lamba da yawa. Ku nemi sabuwa.',
+      // TODO(ha-review)
+      invite_invalid: 'Wannan gayyatar ba ta aiki ko an riga an yi amfani da ita. Ku roƙi shugabanku sabuwa.',
+      // TODO(ha-review)
+      invite_expired: 'Wannan gayyatar ta ƙare. Ku roƙi shugabanku ya aiko sabuwa.',
+      // TODO(ha-review)
+      unit_taken: 'Yankinku yana da shugaba mai aiki tuni. Ku tambayi shugabanku.',
+      // TODO(ha-review)
+      network: 'Babu hanyar sadarwa. Ku duba network ɗinku ku sake gwadawa.',
+      // TODO(ha-review)
+      unknown: 'An sami matsala. Ku sake gwadawa.',
+    },
   },
   a11y: {
     // TODO(ha-review)
@@ -37,5 +110,9 @@
   settings: {
     // TODO(ha-review)
     languageHelp: 'Manhajar za ta buɗe da wannan harshe a wannan wayar.',
+    // TODO(ha-review)
+    account: 'Asusu',
+    // TODO(ha-review)
+    signOutHelp: 'Idan kun fita a wannan wayar, sai kun yi amfani da PIN ɗinku kafin ku sake shiga.',
   },
 }

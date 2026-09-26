@@ -57,6 +57,23 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # E2E recreates its own tattara_e2e database through this admin connection (test/e2e/global-setup.ts).
+    services:
+      db:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_USER: tattara
+          POSTGRES_PASSWORD: tattara
+          POSTGRES_DB: tattara
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U tattara -d tattara"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+    env:
+      NUXT_DATABASE_URL: postgres://tattara:tattara@localhost:5432/tattara
     steps:
       - uses: actions/checkout@v4
 

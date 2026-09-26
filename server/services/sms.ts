@@ -1,7 +1,7 @@
 // SMS queue: enqueue outbound messages; process due ones through a provider with retries and backoff.
 // Delivery is at-least-once: a worker that dies mid-send leaves the message to be retried after its lease.
 import { and, eq, inArray, lte, sql } from 'drizzle-orm'
-import type { Db } from '../db/client.ts'
+import type { Db, DbLike } from '../db/client.ts'
 import { smsQueue, type SmsQueueRow } from '../db/schema/index.ts'
 import type { SmsPurpose } from '../../shared/constants/enums.ts'
 import { normalizePhone } from '../../shared/utils/phone.ts'
@@ -40,7 +40,7 @@ export interface EnqueueSmsInput {
   createdBy?: string
 }
 
-export async function enqueueSms(db: Db, input: EnqueueSmsInput): Promise<SmsQueueRow> {
+export async function enqueueSms(db: DbLike, input: EnqueueSmsInput): Promise<SmsQueueRow> {
   const to = normalizePhone(input.to)
   if (!to) throw new InvalidSmsRecipientError('Recipient is not a valid Nigerian mobile number')
   const [row] = await db.insert(smsQueue).values({

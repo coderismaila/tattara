@@ -26,11 +26,23 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     databaseUrl: '',
+    // NUXT_APP_ENV: optional override of the build-time NODE_ENV (only 'test' is meaningful: E2E on a prod build).
+    appEnv: '',
     // NUXT_SMS_*: provider fake | termii; Termii's base URL is account-specific (dashboard).
-    sms: { provider: 'fake', apiKey: '', senderId: '', baseUrl: '', webhookSecret: '' },
+    // fakeOutbox (NUXT_SMS_FAKE_OUTBOX): dev/test only, the fake provider also writes messages to this file (e2e).
+    sms: { provider: 'fake', apiKey: '', senderId: '', baseUrl: '', webhookSecret: '', fakeOutbox: '' },
     // nuxt-auth-utils reads session.password (NUXT_SESSION_PASSWORD), ≥ 32 chars
-    session: { password: '' },
-    public: { appVersion: '', gpsFlagMeters: 3000 },
+    session: {
+      password: '',
+      // h3 sessions don't slide (expiry = creation + maxAge), so the seal/cookie lives a year and requireAuth enforces
+      // the real rule: 30 days since last activity, active user, same session_version, device not revoked (ADR-024).
+      maxAge: 60 * 60 * 24 * 365,
+      cookie: { sameSite: 'lax', httpOnly: true },
+    },
+    // HMAC key for OTP codes at rest (NUXT_OTP_SECRET, ≥ 32 chars).
+    otpSecret: '',
+    // siteUrl: base for links sent by SMS (invites), NUXT_PUBLIC_SITE_URL.
+    public: { appVersion: '', gpsFlagMeters: 3000, siteUrl: 'http://localhost:3000' },
   },
 
   alias: {

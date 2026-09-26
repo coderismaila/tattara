@@ -62,12 +62,20 @@ Also note blockers and anything the next session must know.
   `server/auth/session.ts` (never `#imports`). Node tests that touch sessions must `vi.mock('…/server/auth/session')`
   (unmocked calls hit `test/stubs/` and throw). Audit with `audit(event, { action, targetType, targetId, scopeCode, meta })`;
   meta containing PII throws `AuditPiiError`. **2.4** fills the session user (`SessionUser`: id, role, unitCode, sessionVersion).
-- **2.4:** first real use of `@node-rs/argon2` in a Nitro route; verify it works in the production build (native module).
+- **Auth (2.4):** `@node-rs/argon2` verified in the production build (every E2E login uses it). Local sign-in:
+  `pnpm dev` → `/login`, a seeded phone (e.g. `08000000104`) + PIN `123456`; a new browser needs the SMS code, which
+  the **fake** provider prints in the dev console. Invites/PIN resets: `sendInvite(db, userId, createdBy, cfg)` (2.5).
+  **2.5:** deactivate = `status: 'deactivated'` + bump `session_version` (requireAuth then rejects the old session).
+- ⚠ **Your local `.env` has `NUXT_SMS_PROVIDER=termii` with live credentials.** With it, `pnpm dev` sends **real SMS**
+  (charged), including to the dev seed's made-up `+234800000xxxx` numbers, which may belong to real people. Keep
+  `fake` for development; use `termii` only to test delivery to your own phone. Tests and E2E force `fake`.
+- New env vars: `NUXT_OTP_SECRET` (required, ≥ 32 chars; set in your `.env`), `NUXT_PUBLIC_SITE_URL` (invite links).
 - Migrations need hand-review: drizzle-kit may misorder constraints (0002) or quote custom types (0001).
 - drizzle-kit quotes custom geography types in generated SQL; hand-fix to `geography(Point, 4326)` (ADR-017).
 - Hausa strings live in `i18n/locales/ha.json5` (ADR-008).
 
 ## Log
+- 2026-09-26 · 2.4 · Auth: login (phone+PIN, timing-equal, lockout 5→15 min + supervisor SMS), device OTP (HMAC, device-bound, resend), invite setup (weak-PIN check), logout, `/auth/me`; `requireAuth` on every request; Postgres rate limits; origin check; `/login` + `/setup` pages (Hausa/English, disabled until hydrated); services made Nitro-free; E2E AC green twice on the prod build · see commit `feat(auth)`
 - 2026-09-26 · 2.3 · `scope.ts` (`scopeForUser`, `getScope`, `canAccess`, `requireScope`, `scopeWhere` as an index-friendly `~>=~`/`~<~` range; ADMIN denied unless `allowAdmin`), `audit.ts` (`audit`/`recordAudit` with a PII guard), session helpers via `#auth-session`; 100% coverage gate on scope.ts in CI; generic-plan index use verified · see commit `feat(auth)`
 - 2026-09-26 · 2.2 · SMS: `SmsProvider` (fake with masked logs, termii with unicode for Hausa), `sms_queue` + `enqueueSms`/`processSmsQueue` (SKIP LOCKED lease, backoff, DB clock, OTP/invite redaction), `sms:process` task every minute; verified in dev (console + DB, schedule fires) and prod build · see commit `feat(sms)`
 - 2026-09-25 · 1.3 · Closed: data fetched by script; registered voters moved to field collection by PU leads (new task 3.7, PRD US-24); importer now never overwrites a stored registered-voters figure with NULL · see commit `feat(import)`

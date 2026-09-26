@@ -92,7 +92,10 @@ export const otpCodes = pgTable('otp_codes', {
   id: uuid().primaryKey().$defaultFn(newId),
   phone: text().notNull(),
   purpose: otpPurpose().notNull(),
+  /** HMAC-SHA256 of the code keyed by NUXT_OTP_SECRET (a DB leak alone can't brute-force 6 digits). */
   codeHash: text().notNull(),
+  /** Device that passed the PIN check; the code only works for it (2.4). */
+  deviceId: text(),
   expiresAt: timestamp({ withTimezone: true }).notNull(),
   attempts: integer().notNull().default(0),
   consumedAt: timestamp({ withTimezone: true }),

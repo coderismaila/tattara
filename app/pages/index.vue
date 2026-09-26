@@ -12,8 +12,8 @@ useHead({ title: () => t('app.name') })
     <p class="text-muted">
       {{ t('app.tagline') }}
     </p>
-    <!-- TODO(2.4): link to /login once it exists -->
     <UButton
+      to="/login"
       size="xl"
       class="min-h-12"
       :label="t('auth.signIn')"

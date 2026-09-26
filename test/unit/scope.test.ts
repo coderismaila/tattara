@@ -6,10 +6,10 @@ import { canAccess, getScope, requireScope, scopeForUser, scopeWhere, type Scope
 import type { Role } from '../../shared/constants/roles'
 
 const session = vi.hoisted(() => ({ user: null as null | { role: string, unitCode: string | null } }))
-vi.mock('../../server/auth/session', () => ({
-  requireUserSession: vi.fn(async () => {
+vi.mock('../../server/utils/auth', () => ({
+  requireAuth: vi.fn(async () => {
     if (!session.user) throw Object.assign(new Error('Unauthorized'), { statusCode: 401 })
-    return { user: session.user }
+    return { user: session.user, deviceId: 'd' }
   }),
 }))
 

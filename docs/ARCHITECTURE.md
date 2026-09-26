@@ -187,7 +187,7 @@ produces a `duplicate_phone` flag, not a rejection (unless > 3 per number, then 
 - **Session length:** 30 days sliding, so offline users aren't logged out mid-drive. Incrementing `sessionVersion` in the DB
   invalidates sessions on the next online request (used on deactivate/PIN reset).
 - **Invite setup:** an invite token (random 128-bit, hashed in DB, 72 h expiry) is delivered by SMS as a short code + link.
-- **Rate limits:** login 5/15 min per phone, OTP sends 3/hour per phone, sync push 120/min per user.
+- **Rate limits:** login 10/15 min per phone (above the 5-wrong-PIN lockout, ADR-024), OTP sends 3/hour per phone, sync push 120/min per user.
 
 ## 7. Aggregation for dashboards
 

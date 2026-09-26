@@ -1,4 +1,10 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { fileURLToPath } from 'node:url'
+
+// nuxt-auth-utils exposes its session helpers only via Nitro auto-imports (disabled under compat 5) and its package
+// exports block deep imports; this alias points at the file through the node_modules link instead (ADR-023).
+const authUtilsSession = fileURLToPath(new URL('./node_modules/nuxt-auth-utils/dist/runtime/server/utils/session', import.meta.url))
+
 export default defineNuxtConfig({
   modules: [
     '@nuxt/ui',
@@ -25,6 +31,10 @@ export default defineNuxtConfig({
     // nuxt-auth-utils reads session.password (NUXT_SESSION_PASSWORD), ≥ 32 chars
     session: { password: '' },
     public: { appVersion: '', gpsFlagMeters: 3000 },
+  },
+
+  alias: {
+    '#auth-session': authUtilsSession,
   },
 
   // Authenticated app routes are a client-only SPA shell (behind auth, must work offline).
@@ -56,6 +66,13 @@ export default defineNuxtConfig({
         '../drizzle.config.*',
         '../scripts/**/*',
       ],
+      // Tests and scripts import server code, which uses these aliases; Nuxt only maps them in the app/server contexts.
+      compilerOptions: {
+        paths: {
+          '#auth-session': ['../node_modules/nuxt-auth-utils/dist/runtime/server/utils/session'],
+          '~~/*': ['../*'],
+        },
+      },
     },
   },
 

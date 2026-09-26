@@ -57,12 +57,18 @@ Also note blockers and anything the next session must know.
     Termii support; commonly `https://v3.api.termii.com`), and **request a Sender ID early** (3–11 chars, e.g.
     `Tattara`; pending → active after Termii review; ask whether a political sender ID needs extra paperwork for DND
     routes). Put them in `.env` / the host's secrets, never in `.env.example`. Dev/tests keep `NUXT_SMS_PROVIDER=fake`.
+- **Scope (2.3), for every route from here on:** `requireScope(event, code)` for single records, `scopeWhere(col, scope)`
+  in list queries; pass `{ allowAdmin: true }` only on aggregate/geography routes. Session helpers: import from
+  `server/auth/session.ts` (never `#imports`). Node tests that touch sessions must `vi.mock('…/server/auth/session')`
+  (unmocked calls hit `test/stubs/` and throw). Audit with `audit(event, { action, targetType, targetId, scopeCode, meta })`;
+  meta containing PII throws `AuditPiiError`. **2.4** fills the session user (`SessionUser`: id, role, unitCode, sessionVersion).
 - **2.4:** first real use of `@node-rs/argon2` in a Nitro route; verify it works in the production build (native module).
 - Migrations need hand-review: drizzle-kit may misorder constraints (0002) or quote custom types (0001).
 - drizzle-kit quotes custom geography types in generated SQL; hand-fix to `geography(Point, 4326)` (ADR-017).
 - Hausa strings live in `i18n/locales/ha.json5` (ADR-008).
 
 ## Log
+- 2026-09-26 · 2.3 · `scope.ts` (`scopeForUser`, `getScope`, `canAccess`, `requireScope`, `scopeWhere` as an index-friendly `~>=~`/`~<~` range; ADMIN denied unless `allowAdmin`), `audit.ts` (`audit`/`recordAudit` with a PII guard), session helpers via `#auth-session`; 100% coverage gate on scope.ts in CI; generic-plan index use verified · see commit `feat(auth)`
 - 2026-09-26 · 2.2 · SMS: `SmsProvider` (fake with masked logs, termii with unicode for Hausa), `sms_queue` + `enqueueSms`/`processSmsQueue` (SKIP LOCKED lease, backoff, DB clock, OTP/invite redaction), `sms:process` task every minute; verified in dev (console + DB, schedule fires) and prod build · see commit `feat(sms)`
 - 2026-09-25 · 1.3 · Closed: data fetched by script; registered voters moved to field collection by PU leads (new task 3.7, PRD US-24); importer now never overwrites a stored registered-voters figure with NULL · see commit `feat(import)`
 - 2026-09-25 · 1.5 · Boundary join (`pnpm geo:build`): Jaro-Winkler names + spatial vote from INEC points, manual crosswalk, unmatched/review CSVs; mapshaper-simplified `public/geo/*` (all under size targets) + ATTRIBUTION; ward polygon points + `boundary_ref` fed to the importer (every unit now located) · see commit `feat(geo)`

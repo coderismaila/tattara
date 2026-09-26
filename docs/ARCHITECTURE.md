@@ -141,9 +141,17 @@ The INEC PU code `SS/LL/WW/PPP` **is** the hierarchy. Every geographic unit has 
 - A record is in scope iff `record.puCode` equals the unitCode (PU lead) or starts with the scope prefix.
 - Postgres: `pu_code text` with a `text_pattern_ops` btree index makes `LIKE '19/05/%'` fast.
 - `server/utils/scope.ts` exposes:
-  - `getScope(event) → { role, unitCode, prefix }`
-  - `requireScope(event, code)` throws 403 if `code` is outside scope
-  - `scopeWhere(column, scope)` returns a Drizzle SQL fragment for list queries
+  - `getScope(event) → { role, unitCode, prefix }` (401 without a session; a lead whose unit doesn't match their
+    role gets 403, never a wider scope)
+  - `requireScope(event, code, { allowAdmin? })` throws 403 if `code` is outside scope (malformed codes too)
+  - `canAccess(scope, code, { allowAdmin? })`, the pure check behind it
+  - `scopeWhere(column, scope, { allowAdmin? })` returns a Drizzle SQL fragment for list queries: `true` for the region,
+    else `column ~>=~ unit AND column ~<~ unit||'0'`, a range that keeps using the `text_pattern_ops` index with
+    bind parameters (a parameterised `LIKE` can lose it on generic plans)
+  - **ADMIN is denied by default** (SECURITY §3: no default PII access); aggregate/geography routes pass `allowAdmin: true`.
+- `server/utils/audit.ts`: `audit(event, …)` / `recordAudit(db, actor, …)`; meta is checked for PII (names, phones,
+  addresses, GPS, PINs, OTPs, phone-like values) and rejected.
+- Session helpers come from `server/auth/session.ts` (alias `#auth-session`, ADR-023), never from `#imports`.
 
 Codes are stored zero-padded exactly as INEC publishes them. `shared/utils/pu-code.ts` has
 `parse`, `format`, `parent`, `level`, `isWithin(code, prefix)`, all unit-tested.

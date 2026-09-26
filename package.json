@@ -27,7 +27,8 @@
     "data:fetch:inec-coords": "node scripts/fetch/inec-pus.ts --coords",
     "data:fetch:grid3": "node scripts/fetch/grid3-boundaries.ts",
     "db:seed": "node scripts/import-inec-pus.ts",
-    "geo:build": "node scripts/import-grid3-boundaries.ts"
+    "geo:build": "node scripts/import-grid3-boundaries.ts",
+    "test:coverage": "vitest run --project unit --project integration --coverage"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.1",
@@ -35,6 +36,7 @@
     "@nuxtjs/i18n": "10.6.0",
     "@vite-pwa/nuxt": "1.1.1",
     "drizzle-orm": "^0.45.3",
+    "h3": "^1.15.11",
     "libphonenumber-js": "^1.13.14",
     "nuxt": "^4.5.2",
     "nuxt-auth-utils": "0.5.30",
@@ -53,6 +55,7 @@
     "@nuxt/eslint": "1.17.0",
     "@nuxt/test-utils": "4.3.2",
     "@playwright/test": "^1.63.0",
+    "@vitest/coverage-v8": "5.0.1",
     "@vue/test-utils": "^2.5.1",
     "dotenv": "^18.0.3",
     "drizzle-kit": "^0.31.11",

@@ -58,7 +58,7 @@ test.describe.serial('supporters', () => {
       await expect(page.getByRole('radio', { name: 'Kaɗan' })).toBeChecked()
       await page.getByTestId('edit-save').click()
 
-      await expect(page.getByText('An ajiye canje-canje')).toBeVisible()
+      await expect(page.getByText('An ajiye canje-canje', { exact: true })).toBeVisible() // not the toast's hidden announcer
       await expect(page.getByTestId('supporter-name')).toHaveText('Ladi Zzyzx Garba')
       await expect(page.getByTestId('supporter-details')).toContainText('Kaɗan')
     })

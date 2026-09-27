@@ -62,6 +62,8 @@ useHead({ title })
       <slot />
     </main>
 
+    <CommonPwaPrompts />
+
     <!-- Mobile bottom navigation -->
     <nav
       class="fixed inset-x-0 bottom-0 z-20 border-t border-default bg-default pb-[env(safe-area-inset-bottom)] md:hidden"

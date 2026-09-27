@@ -1,7 +1,7 @@
 // AC 2.6: the admin invites (here: replaces) the DG, who sets a PIN and signs in; nobody else can call the admin routes.
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
-import { AUTH_STATE_FILE, DEV_PIN, E2E_PORT, latestInviteToken, latestOtp } from './support/env'
+import { AUTH_STATE_FILE, DEV_PIN, E2E_PORT, latestInviteToken, latestOtp, newOtp } from './support/env'
 
 const ORIGIN = { Origin: `http://localhost:${E2E_PORT}` }
 const ADMIN_PHONE = '+2348000000001'
@@ -13,9 +13,10 @@ test.describe.serial('admin bootstrap', () => {
     await page.goto('/login')
     await page.getByTestId('login-phone').fill('08000000001')
     await page.getByTestId('login-pin').fill(DEV_PIN)
+    const before = latestOtp(ADMIN_PHONE) // the access setup signed the admin in earlier
     await page.getByTestId('login-submit').click()
     await expect(page.getByTestId('login-code')).toBeVisible()
-    await expect.poll(() => latestOtp(ADMIN_PHONE)).toMatch(/^\d{6}$/)
+    await expect.poll(() => newOtp(ADMIN_PHONE, before)).toMatch(/^\d{6}$/)
     await page.getByTestId('login-code').fill(latestOtp(ADMIN_PHONE)!)
     await page.getByTestId('code-submit').click()
     await expect(page).toHaveURL(/\/app$/)

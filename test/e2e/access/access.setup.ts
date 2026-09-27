@@ -4,7 +4,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { expect, test as setup, type APIRequestContext } from '@playwright/test'
 import { newId } from '../../../shared/utils/uuid'
-import { DEV_PIN, E2E_PORT, latestOtp } from '../support/env'
+import { DEV_PIN, E2E_PORT, latestOtp, newOtp } from '../support/env'
 import { ACCESS_FIXTURE_FILE, CALLER_PHONE, callerStateFile, type Caller } from './callers'
 import type { AccessFixture } from './matrix'
 
@@ -17,9 +17,10 @@ setup.describe.configure({ mode: 'serial' })
 async function signIn(api: APIRequestContext, caller: Exclude<Caller, 'anon'>) {
   const phone = CALLER_PHONE[caller]
   const e164 = `+234${phone.slice(1)}`
+  const before = latestOtp(e164)
   const login = await api.post('/api/auth/login', { headers: ORIGIN, data: { phone, pin: DEV_PIN, deviceId: DEVICE_ID } })
   expect(login.status(), `${caller} login`).toBe(202) // new device → OTP
-  await expect.poll(() => latestOtp(e164), { message: `${caller} OTP` }).toMatch(/^\d{6}$/)
+  await expect.poll(() => newOtp(e164, before), { message: `${caller} OTP` }).toMatch(/^\d{6}$/)
   const verify = await api.post('/api/auth/otp/verify', { headers: ORIGIN, data: { phone, code: latestOtp(e164), deviceId: DEVICE_ID } })
   expect(verify.status(), `${caller} OTP verify`).toBe(200)
   mkdirSync(dirname(callerStateFile(caller)), { recursive: true })

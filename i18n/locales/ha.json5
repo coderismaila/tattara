@@ -531,4 +531,22 @@
       notAllowed: 'Ba za ka iya canza adadin wannan rumfa ba.',
     },
   },
+  pwa: {
+    // TODO(ha-review)
+    updateTitle: 'Sabon sigar Tattara ya shirya',
+    // TODO(ha-review)
+    updateBody: 'Sake lodawa don amfani da shi. Duk abin da ka ajiye yana nan a wayarka.',
+    // TODO(ha-review)
+    reload: 'Sake lodawa',
+    // TODO(ha-review)
+    later: 'Daga baya',
+    // TODO(ha-review)
+    installTitle: 'Saka Tattara a wayarka',
+    // TODO(ha-review)
+    installBody: 'Buɗe shi daga allon gida kamar kowace manhaja, ko babu intanet.',
+    // TODO(ha-review)
+    install: 'Saka a waya',
+    // TODO(ha-review)
+    notNow: 'Ba yanzu ba',
+  },
 }

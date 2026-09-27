@@ -37,6 +37,18 @@ export interface E2EFixture {
 
 export const readFixture = (): E2EFixture => JSON.parse(readFileSync(FIXTURE_FILE, 'utf8')) as E2EFixture
 
+interface OutboxMessage { to: string, body: string, purpose: string }
+
+/** One outbox line, or null for a line the server is still writing (the file is appended while tests read it). */
+function parseLine(line: string): OutboxMessage | null {
+  try {
+    return JSON.parse(line) as OutboxMessage
+  }
+  catch {
+    return null
+  }
+}
+
 /** Latest OTP the fake SMS provider "sent" to `phone` (E.164). */
 export function latestOtp(phone: string): string | null {
   let lines: string[]
@@ -47,7 +59,8 @@ export function latestOtp(phone: string): string | null {
     return null
   }
   for (const line of lines.reverse()) {
-    const msg = JSON.parse(line) as { to: string, body: string, purpose: string }
+    const msg = parseLine(line)
+    if (!msg) continue
     if (msg.to === phone && msg.purpose === 'otp') return /\b(\d{6})\b/.exec(msg.body)?.[1] ?? null
   }
   return null
@@ -63,8 +76,15 @@ export function latestInviteToken(phone: string): string | null {
     return null
   }
   for (const line of lines.reverse()) {
-    const msg = JSON.parse(line) as { to: string, body: string, purpose: string }
+    const msg = parseLine(line)
+    if (!msg) continue
     if (msg.to === phone && msg.purpose === 'invite') return /\/setup\?t=([\w-]{22})/.exec(msg.body)?.[1] ?? null
   }
   return null
+}
+
+/** The latest OTP for `phone` if it differs from `before` (an older code already in the outbox), else null. */
+export function newOtp(phone: string, before: string | null): string | null {
+  const code = latestOtp(phone)
+  return code === before ? null : code
 }

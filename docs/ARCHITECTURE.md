@@ -180,6 +180,12 @@ produces a `duplicate_phone` flag, not a rejection (unless > 3 per number, then 
 
 **Storage safety:** call `navigator.storage.persist()` after login; show a warning in Settings if denied.
 
+**Service worker (`service-worker/sw.ts`, task 4.1, ADR-034):** Workbox `injectManifest`. Precaches the build's own
+assets (JS, CSS, fonts, icons, the prerendered `/`); `/app` page loads are network-first (3 s timeout) with the cached
+`/app` shell as the offline fallback (SSR is off there, so every `/app` page is the same shell); `/geo/*` is cache-first
+with expiry; `/api/*` is network-only and never stored. Updates wait for the lead to tap Reload. The matchers live
+in `service-worker/routes.ts` (unit-tested).
+
 ## 6. Auth
 
 - `nuxt-auth-utils` sealed cookie session: `{ userId, role, unitCode, deviceId, sessionVersion }`.

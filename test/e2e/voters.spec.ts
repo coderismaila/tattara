@@ -2,16 +2,17 @@
 // sees the figure on the Team page and corrects it; Home shows the ward's sum and "reported for X of Y".
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
-import { AUTH_STATE_FILE, DEV_PIN, VOTERS_PU, VOTERS_USER_PHONE, latestOtp } from './support/env'
+import { AUTH_STATE_FILE, DEV_PIN, VOTERS_PU, VOTERS_USER_PHONE, latestOtp, newOtp } from './support/env'
 
 test.describe.serial('registered voters from the field', () => {
   test('the PU lead is prompted once, records the figure and can update it', async ({ page }) => {
     await page.goto('/login')
     await page.getByTestId('login-phone').fill(VOTERS_USER_PHONE)
     await page.getByTestId('login-pin').fill(DEV_PIN)
-    await page.getByTestId('login-submit').click()
     const e164 = `+234${VOTERS_USER_PHONE.slice(1)}`
-    await expect.poll(() => latestOtp(e164)).toMatch(/^\d{6}$/)
+    const before = latestOtp(e164)
+    await page.getByTestId('login-submit').click()
+    await expect.poll(() => newOtp(e164, before)).toMatch(/^\d{6}$/)
     await page.getByTestId('login-code').fill(latestOtp(e164)!)
     await page.getByTestId('code-submit').click()
     await expect(page).toHaveURL(/\/app$/)

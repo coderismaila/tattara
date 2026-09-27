@@ -17,7 +17,15 @@ Also note blockers and anything the next session must know.
   `pnpm-workspace.yaml`; harmless (neither needs its script).
 - Build warns that Nitro's `runtime/utils/cache-driver.mjs` can't be resolved. **6.1:** verify cached handlers
   (60 s stats cache) actually cache in a production build.
-- PWA is a minimal generateSW placeholder (manifest + sw.js build fine); 4.1 replaces it with injectManifest.
+- **PWA (4.1):** `service-worker/sw.ts` (injectManifest). Icons come from `pnpm icons` (renders `public/icons/*.png`
+  with Playwright's Chromium). The service worker only runs in a production build (`pnpm build && pnpm preview`).
+  - **Obligation for 4.2:** offline, `/app` pages now open without a confirmed session (auth middleware skips the
+    login redirect when `navigator.onLine` is false). Before 4.2 keeps supporters in Dexie, 4.5's local PIN lock
+    must gate that data (or 4.2 ships with it).
+  - **Size budget:** the precache is ~1.6 MB raw / ~775 KB over the wire (one-time download; ~430 KB are the Noto Sans
+    fonts for Hausa letters). Review in 7.x before adding more to the app shell.
+  - **👤 Before the pilot:** install from Chrome on a real Android Go phone (Add to home screen), open it in airplane
+    mode, and check the icon on the home screen. Playwright can't click Chrome's own install UI.
 - DB: `pnpm db:up && pnpm db:migrate`. Integration tests (`pnpm test:integration`) need the DB; they skip locally
   without it and fail in CI. `pg_trgm` is enabled by migration 0007 (3.4).
 - **1.3 data (see `data/SOURCES.md`):** fetched by `pnpm data:fetch:inec` / `data:fetch:grid3`.
@@ -119,3 +127,4 @@ Also note blockers and anything the next session must know.
 - 2026-09-27 · 3.5 · Shared-phone rule: max 3 supporters per number system-wide (`MAX_SUPPORTERS_PER_PHONE`), enforced on create and phone edits under a per-number advisory lock (5 concurrent saves → exactly 3); 2nd/3rd use accepted (flagged in 5.1); `phone_limit` in push results and PATCH 409; `GET /supporters/check-phone` (counts only, PU leads, 60/min) + inline notice on capture when the phone field is left · see commit `feat(supporters)`
 - 2026-09-27 · 3.6 · Access-control suite: `test/e2e/access/` matrix of all 18 routes × 11 callers (status + field checks: full vs masked phones, counts-only check-phone, no token/PIN/device keys in any response), real HTTP on the production build, runs first in E2E; unit meta-test keeps the matrix in step with `server/api/`; verified it catches a wrong status and unmasked phones · see commit `test(access)`
 - 2026-09-27 · 3.7 · Registered voters from the field: migration 0008 (`registered_voters_reported_by/_at`, CHECK); `setRegisteredVoters` (own PU lead or ward lead, 0–10,000, audited from/to) + `registeredVotersSummary` (PU figure, or sum + reported X of Y); `GET/PUT /api/units/:code/registered-voters` (dashed codes, `all`); importer never overwrites a reported figure; Home card + once-per-device prompt (PU) / totals (ward+), Team page correct button; access matrix 20 routes · see commit `feat(units)`
+- 2026-09-27 · 4.1 · PWA: injectManifest service worker (precache app, `/app` network-first with cached shell fallback, `/geo` cache-first, `/api` never cached), manifest with 192/512/maskable PNG icons (`pnpm icons`), install and update prompts (`CommonPwaPrompts`), offline `/app` opens without the login redirect; E2E: manifest + icon sizes, shell opens offline after a first visit, no `/api` entries in any cache · see commit `feat(pwa)`

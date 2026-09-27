@@ -296,5 +296,15 @@
       "votersTooMany": "That is more than any polling unit holds. Check the number.",
       "notAllowed": "You can't change this polling unit's figure."
     }
+  },
+  "pwa": {
+    "updateTitle": "A new version of Tattara is ready",
+    "updateBody": "Reload to use it. Anything you have saved stays on the phone.",
+    "reload": "Reload",
+    "later": "Later",
+    "installTitle": "Add Tattara to your phone",
+    "installBody": "Open it from your home screen like any app, even without network.",
+    "install": "Add to phone",
+    "notNow": "Not now"
   }
 }

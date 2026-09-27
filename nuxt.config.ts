@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import { fileURLToPath } from 'node:url'
+import { PRECACHE_GLOBS, PRECACHE_IGNORES } from './service-worker/routes'
 
 // nuxt-auth-utils exposes its session helpers only via Nitro auto-imports (disabled under compat 5) and its package
 // exports block deep imports; this alias points at the file through the node_modules link instead (ADR-023).
@@ -116,18 +117,38 @@ export default defineNuxtConfig({
     clientBundle: { scan: true },
   },
 
-  // Minimal PWA config for now. Task 4.1 switches to injectManifest with a custom
-  // service-worker/sw.ts, runtime caching rules and the install/update prompts.
+  // PWA (task 4.1, ADR-034): custom service worker (service-worker/sw.ts) with Workbox. Precaches the app, serves the
+  // /app shell offline, caches /geo on use, never caches /api. Updates wait for "Reload" (prompt).
   pwa: {
+    strategies: 'injectManifest',
+    srcDir: fileURLToPath(new URL('./service-worker', import.meta.url)),
+    filename: 'sw.ts',
     registerType: 'prompt',
+    injectManifest: {
+      globPatterns: PRECACHE_GLOBS,
+      globIgnores: PRECACHE_IGNORES,
+    },
+    client: {
+      // Our own install card replaces Chrome's mini-infobar; "Not now" is remembered under this key.
+      installPrompt: 'tattara:hideInstall',
+    },
     manifest: {
+      id: '/app',
       name: 'Tattara',
       short_name: 'Tattara',
+      description: 'Supporter registry for polling unit, ward and LGA teams.',
       lang: 'ha',
       start_url: '/app',
+      scope: '/',
       display: 'standalone',
+      orientation: 'portrait',
       theme_color: '#1F3A68',
       background_color: '#F5F2EC',
+      icons: [
+        { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+        { src: '/icons/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      ],
     },
   },
 })

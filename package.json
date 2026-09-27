@@ -29,7 +29,8 @@
     "db:seed": "node scripts/import-inec-pus.ts",
     "geo:build": "node scripts/import-grid3-boundaries.ts",
     "test:coverage": "vitest run --project unit --project integration --coverage",
-    "admin:create": "node scripts/create-user.ts"
+    "admin:create": "node scripts/create-user.ts",
+    "icons": "node scripts/make-icons.ts"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.1",
@@ -69,7 +70,12 @@
     "mapshaper": "^0.7.67",
     "typescript": "^6.0.3",
     "vitest": "^5.0.1",
-    "vue-tsc": "^3.3.11"
+    "vue-tsc": "^3.3.11",
+    "workbox-core": "7.4.1",
+    "workbox-expiration": "7.4.1",
+    "workbox-precaching": "7.4.1",
+    "workbox-routing": "7.4.1",
+    "workbox-strategies": "7.4.1"
   },
   "lint-staged": {
     "*.{ts,mts,mjs,js,vue}": "eslint --fix"

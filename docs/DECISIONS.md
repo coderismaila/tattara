@@ -222,3 +222,14 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - **Prompt once per device** (a `localStorage` flag keyed by PU code, not supporter data); the Home card keeps offering it until recorded.
 - **Unit codes in URLs use dashes** (`19-05-03`, `all` = region), since codes contain slashes. The stats routes (6.1) follow the same convention.
 **Consequences:** 5.1 and coverage % skip unreported PUs; 6.4's target split falls back to PU count (see PROGRESS).
+
+### ADR-034 · 2026-09-27 · Accepted · Service worker caching rules and the offline shell
+**Decision:**
+- **`injectManifest` with our own `service-worker/sw.ts`** (Workbox 7): the rules are explicit code, and 4.3 adds a Background Sync trigger there.
+- **Precache** the build's own assets (`js, css, html, woff2, ico, png, svg, webmanifest`), not the `/geo` boundary files (large; cache-first on use, 30-day expiry).
+- **`/app` page loads: network-first (3 s), fallback to the cached `/app` shell.** SSR is off under `/app`, so every page is the same shell; it's fetched at install time so the first offline start works whichever page the lead opens. HTML is never user-specific there.
+- **`/api/*` is network-only and never stored** (SECURITY_PRIVACY §7). A unit test checks the matcher and the registration; an E2E test checks Cache Storage after browsing supporters.
+- **Prompts, not surprises:** `registerType: 'prompt'`: a new version waits for "Reload"; our own install card replaces Chrome's mini-infobar, and "Not now" is remembered (`tattara:hideInstall`).
+- **Offline, the auth middleware lets `/app` open without a confirmed session** (it can't reach the server). Safe today because every screen loads data from the API; 4.5's local PIN lock must gate on-device data before 4.2 stores supporters.
+- **Icons are generated** from a shape-only SVG by `scripts/make-icons.ts` (Playwright's Chromium), so no image tooling dependency.
+**Consequences:** the service worker only exists in production builds (E2E covers it). 4.2 adds Dexie; 4.3 the sync trigger; 4.5 the offline session and lock.

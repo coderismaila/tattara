@@ -71,7 +71,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
 
 ## Phase 4 — Offline-first & PWA
 
-- [ ] **4.1 PWA setup** (`@vite-pwa/nuxt`, injectManifest, custom `sw.ts`): precache the app shell, runtime-cache `/geo/*` (CacheFirst), never cache `/api/supporters*`. Install prompt UX, update prompt ("New version — reload").
+- [x] **4.1 PWA setup** (`@vite-pwa/nuxt`, injectManifest, custom `sw.ts`): precache the app shell, runtime-cache `/geo/*` (CacheFirst), never cache `/api/supporters*`. Install prompt UX, update prompt ("New version — reload").
   **AC:** installable on Android Chrome; app shell loads in airplane mode after the first visit.
 - [ ] **4.2 Dexie layer** `app/offline/db.ts`, `outbox.ts`; capture writes locally first.
 - [ ] **4.3 Sync engine** `app/offline/sync.ts` + `/api/sync/push` + `/api/sync/pull`; backoff; Background Sync trigger from the SW; `navigator.storage.persist()`.

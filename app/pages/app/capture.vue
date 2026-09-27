@@ -5,6 +5,7 @@ import { CURRENT_CONSENT_VERSION, consentScript } from '~~/shared/constants/cons
 import { supporterFormSchema, type SupporterForm, type SupporterFormOutput } from '~~/shared/schemas/supporter'
 import type { SupporterInput, SyncItemResult } from '~~/shared/types/supporter'
 import { newId } from '~~/shared/utils/uuid'
+import { normalizePhone } from '~~/shared/utils/phone'
 
 // Add supporter (UX §4.1, PRD US-4…US-7). One scroll, a big Save, only name/phone/support/PVC/consent required.
 // Phase 3 saves online through /api/sync/push; 4.2 moves this to local-first (Dexie + outbox).
@@ -95,7 +96,40 @@ function onError(event: FormErrorEvent) {
   nextTick(() => focusWhenEnabled(target))
 }
 
-const REJECT_KEYS = new Set(['invalid', 'no_consent', 'out_of_scope', 'pu_inactive'])
+// ── Duplicate phone notice (US-7): checked online when the phone field is left; silent if offline. ──
+interface PhoneCheck { countInSystem: number, samePu: boolean, limitReached: boolean }
+const phoneCheck = ref<{ phone: string, result: PhoneCheck } | null>(null)
+
+async function checkPhoneNumber() {
+  const phone = normalizePhone(state.phone)
+  if (!phone) {
+    phoneCheck.value = null
+    return
+  }
+  if (phoneCheck.value?.phone === phone) return
+  try {
+    const result = await $fetch<PhoneCheck>('/api/supporters/check-phone', { query: { phone } })
+    // Ignore a late answer for a number the lead has since changed.
+    if (normalizePhone(state.phone) === phone) phoneCheck.value = { phone, result }
+  }
+  catch {
+    // Offline or rate-limited: no notice. The server still enforces the limit on save.
+  }
+}
+watch(() => state.phone, (value) => {
+  if (phoneCheck.value && normalizePhone(value) !== phoneCheck.value.phone) phoneCheck.value = null
+})
+
+const phoneNotice = computed(() => {
+  const check = phoneCheck.value?.result
+  if (!check || check.countInSystem === 0) return null
+  const n = check.countInSystem
+  if (check.limitReached) return { color: 'error' as const, text: t('capture.errors.phone_limit') }
+  if (check.samePu) return { color: 'warning' as const, text: t('capture.phoneCheck.samePu', { count: n }, n) }
+  return { color: 'warning' as const, text: t('capture.phoneCheck.elsewhere', { count: n }, n) }
+})
+
+const REJECT_KEYS = new Set(['invalid', 'no_consent', 'out_of_scope', 'pu_inactive', 'phone_limit'])
 
 async function onSubmit(event: FormSubmitEvent<SupporterFormOutput>) {
   if (!unit.value) return
@@ -122,6 +156,7 @@ async function onSubmit(event: FormSubmitEvent<SupporterFormOutput>) {
       toast.add({ title: t('capture.saved'), color: 'success', icon: 'i-lucide-check' })
       Object.assign(state, blank())
       consentAt.value = null
+      phoneCheck.value = null
       form.value?.clear()
       focusName()
     }
@@ -216,7 +251,23 @@ async function onSubmit(event: FormSubmitEvent<SupporterFormOutput>) {
             class="w-full"
             size="xl"
             data-testid="capture-phone"
+            @blur="checkPhoneNumber"
           />
+          <p
+            v-if="phoneNotice"
+            role="status"
+            class="mt-2 flex items-start gap-2 text-base text-highlighted"
+            data-testid="capture-phone-notice"
+          >
+            <!-- Only the icon is coloured: amber/red text on white would fail WCAG contrast in sunlight. -->
+            <UIcon
+              :name="phoneNotice.color === 'error' ? 'i-lucide-circle-alert' : 'i-lucide-triangle-alert'"
+              class="mt-0.5 size-5 shrink-0"
+              :class="phoneNotice.color === 'error' ? 'text-error' : 'text-warning'"
+              aria-hidden="true"
+            />
+            {{ phoneNotice.text }}
+          </p>
           <template #error="{ error }">
             {{ typeof error === 'string' ? t(error) : '' }}
           </template>

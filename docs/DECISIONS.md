@@ -194,3 +194,12 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - **Removal request (US-8):** PU or ward lead in scope; status `removal_requested`, audited with the reason (PII-guarded). The record stays counted in `pu_stats` (anonymisation, 5.2, keeps the enums too).
 - **Edit:** the detail page sends only the fields that changed; ward leads are read-only (PATCH 403).
 **Consequences:** 5.2's anonymise job picks up `removal_requested` records. The offline list (4.x) will search the Dexie copy with the same rules.
+
+### ADR-031 · 2026-09-27 · Accepted · Duplicate phones: flag, and refuse only a 4th use
+**Decision:**
+- **The only hard rule is the limit (PRD R-5):** at most 3 supporters per phone number system-wide. A 4th capture is `rejected: phone_limit`, and an edit onto a full number is 409 `phone_limit`, with or without the "shared phone" tick. A 2nd or 3rd use is accepted (flags, not blocks); 5.1 raises `duplicate_phone` flags for review.
+- **Concurrency:** create and phone edits take a transaction-scoped advisory lock on a hash of the number (`pg_advisory_xact_lock(hashtextextended(phone, 0))`) before counting, so simultaneous syncs can't pass the limit. A re-sent record is recognised by id before the count, so retries stay `duplicate`, never `phone_limit`.
+- **Anonymised records don't count** (their phone is removed), so an opt-out frees the number.
+- **`check-phone` returns counts only** (`countInSystem`, `samePu`, `limitReached`): no names, PUs or ids, PU leads only, 60/min per user, because even a count tells whether a number is known.
+- **Capture notice:** checked when the phone field is left, calm and inline (text in the normal colour, only the icon amber/red, for contrast in sunlight); silent when offline. The local (Dexie) same-PU check arrives with 4.2.
+**Consequences:** 5.1's `duplicate_phone` flag covers 2–3 uses; the Sync screen (4.4) explains `phone_limit` rejections.

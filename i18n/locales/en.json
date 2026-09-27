@@ -238,7 +238,12 @@
       "network": "Could not reach the server. Check your connection and save again.",
       "not_allowed": "Only polling unit leads add supporters.",
       "rate_limited": "Too many saves in a short time. Wait a minute and save again.",
-      "unknown": "Something went wrong. Save again."
+      "unknown": "Something went wrong. Save again.",
+      "phone_limit": "This phone number is already used by 3 supporters. Check the number or use another one."
+    },
+    "phoneCheck": {
+      "samePu": "Already used by 1 supporter in your polling unit. If it's a shared family phone, tick “Shared phone”. | Already used by {count} supporters in your polling unit. If it's a shared family phone, tick “Shared phone”.",
+      "elsewhere": "Already used by 1 supporter elsewhere in Tattara. Check the number. | Already used by {count} supporters elsewhere in Tattara. Check the number."
     }
   },
   "supporters": {

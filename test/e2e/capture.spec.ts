@@ -2,9 +2,21 @@
 // the active language. Saving goes through POST /api/sync/push (PU leads only).
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Locator, type Page } from '@playwright/test'
+import { newId } from '../../shared/utils/uuid'
 import { AUTH_STATE_FILE, E2E_PORT, PU_AUTH_STATE_FILE } from './support/env'
 
 const ORIGIN = { Origin: `http://localhost:${E2E_PORT}` }
+
+/** Save `count` supporters with `phone` on the PU lead's PU through the push route. */
+async function seedPhone(page: Page, phone: string, count: number) {
+  const now = new Date().toISOString()
+  const items = Array.from({ length: count }, () => ({
+    id: newId(), puCode: '19/01/01/001', fullName: 'Iyali Daya', phone, sharedPhone: true, supportLevel: 'strong', hasPvc: 'yes',
+    consentAt: now, consentVersion: 'c1-ha', consentLanguage: 'ha', capturedAt: now, deviceId: '4b0c6d1e-2f3a-4b5c-8d7e-9f0a1b2c3d4e',
+  }))
+  const res = await page.request.post('/api/sync/push', { headers: ORIGIN, data: { items } })
+  expect((await res.json()).results.every((r: { result: string }) => r.result === 'accepted')).toBe(true)
+}
 
 /** Press Tab until `target` (or an element inside it) has focus. Keyboard only, no clicks. */
 async function tabTo(page: Page, target: Locator, maxPresses = 40) {
@@ -87,6 +99,30 @@ test.describe('capture (PU lead)', () => {
     await expect(page.getByTestId('capture-consent-text')).toContainText('Do you agree?')
   })
 
+  test('warns when the phone is already used, and refuses a 4th supporter on one number', async ({ page }) => {
+    await seedPhone(page, '+2348031007001', 1)
+    await seedPhone(page, '+2348031007003', 3)
+    await page.goto('/app/capture')
+    await expect(page.getByTestId('capture-name')).toBeEnabled()
+
+    await page.getByTestId('capture-phone').fill('0803 100 7001')
+    await page.getByTestId('capture-name').focus() // leave the phone field
+    await expect(page.getByTestId('capture-phone-notice')).toContainText('Wannan lambar tana da magoya baya 1 a rumfarka')
+
+    await page.getByTestId('capture-phone').fill('08031007003')
+    await expect(page.getByTestId('capture-phone-notice')).toHaveCount(0) // a changed number clears the old notice
+    await page.getByTestId('capture-name').focus()
+    await expect(page.getByTestId('capture-phone-notice')).toContainText('Magoya baya 3 sun riga sun yi amfani da wannan lambar')
+
+    // Saving anyway is refused by the server with the same explanation.
+    await page.getByTestId('capture-name').fill('Na Hudu')
+    await page.getByTestId('capture-support').getByText('Sosai', { exact: true }).click()
+    await page.getByTestId('capture-pvc').getByText('E', { exact: true }).click()
+    await page.getByRole('checkbox', { name: /Ya amince/ }).click()
+    await page.getByTestId('capture-submit').click()
+    await expect(page.getByTestId('capture-error')).toContainText('Magoya baya 3 sun riga sun yi amfani da wannan lambar')
+  })
+
   test('no axe violations on /app/capture', async ({ page }) => {
     await page.goto('/app/capture')
     await expect(page.getByTestId('capture-name')).toBeEnabled()
@@ -102,6 +138,7 @@ test.describe('capture for other roles', () => {
   test('sync push is refused and the page explains why', async ({ page }) => {
     const res = await page.request.post('/api/sync/push', { headers: ORIGIN, data: { items: [{}] } })
     expect(res.status()).toBe(403)
+    expect((await page.request.get('/api/supporters/check-phone?phone=08031007001')).status()).toBe(403)
     await page.goto('/app/capture')
     await expect(page.getByText('Shugabannin rumfa ne kaɗai ke ƙara magoya baya.')).toBeVisible()
   })

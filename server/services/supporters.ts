@@ -2,9 +2,10 @@
 // The only module that reads or writes `supporters` directly (a test enforces it). Writes keep pu_stats in step in
 // the same transaction. Duplicate-phone limits (3.5) and flags (5.1) build on top of this.
 import { and, desc, eq, lt, ne, sql, type SQL } from 'drizzle-orm'
-import type { Db, DbLike } from '../db/client.ts'
+import type { Db, DbLike, DbTx } from '../db/client.ts'
 import { puStats, supporters, units, type Supporter } from '../db/schema/index.ts'
 import type { Role } from '../../shared/constants/roles.ts'
+import { MAX_SUPPORTERS_PER_PHONE } from '../../shared/constants/supporters.ts'
 import type { SessionUser } from '../../shared/types/auth.ts'
 import { supporterInputSchema, type SupporterListQuery } from '../../shared/schemas/supporter.ts'
 import {
@@ -194,7 +195,7 @@ export function serializeSupporter(row: Supporter, viewerRole: Role): SupporterD
 
 // ── Create ──────────────────────────────────────────────────────────────────
 
-export type CreateRejectReason = 'invalid' | 'no_consent' | 'out_of_scope' | 'pu_inactive'
+export type CreateRejectReason = 'invalid' | 'no_consent' | 'out_of_scope' | 'pu_inactive' | 'phone_limit'
 export type CreateSupporterResult
   = | { kind: 'accepted', supporter: Supporter }
     | { kind: 'duplicate', supporter: Supporter }
@@ -204,6 +205,21 @@ export type CreateSupporterResult
 const parseDate = (iso: string): Date | null => {
   const d = new Date(iso)
   return Number.isNaN(d.getTime()) ? null : d
+}
+
+/**
+ * Serialise writes that use `phone` until the transaction ends, so concurrent captures (two phones syncing at once)
+ * can't push a number past the limit. A transaction-scoped advisory lock on a hash of the number.
+ */
+async function lockPhone(tx: DbTx, phone: string): Promise<void> {
+  await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${phone}, 0))`)
+}
+
+/** Supporters using `phone`, optionally not counting one record (the one being edited). Anonymised ones have no phone. */
+async function countPhone(db: DbLike, phone: string, exceptId?: string): Promise<number> {
+  const [row] = await db.select({ n: sql<number>`count(*)::int` }).from(supporters)
+    .where(exceptId ? and(eq(supporters.phone, phone), ne(supporters.id, exceptId)) : eq(supporters.phone, phone))
+  return row?.n ?? 0
 }
 
 /** Only a PU lead adds supporters, and only on their own PU (SECURITY_PRIVACY §3). */
@@ -229,6 +245,18 @@ export async function createSupporter(db: Db, caller: Caller, input: SupporterIn
     const [unit] = await tx.select({ active: units.active }).from(units).where(and(eq(units.code, input.puCode), eq(units.level, 'pu')))
     if (!unit?.active) return { kind: 'rejected', reason: 'pu_inactive' } as const
 
+    // A re-sent record is recognised before the phone rule, so retries never turn into phone_limit.
+    const [existing] = await tx.select().from(supporters).where(eq(supporters.id, input.id))
+    if (existing) {
+      return existing.puCode === input.puCode && existing.capturedBy === caller.id
+        ? { kind: 'duplicate', supporter: existing } as const
+        : { kind: 'conflict' } as const
+    }
+
+    // Shared phones are fine (a duplicate becomes a flag, 5.1), but never more than the limit per number (PRD R-5).
+    await lockPhone(tx, input.phone)
+    if (await countPhone(tx, input.phone) >= MAX_SUPPORTERS_PER_PHONE) return { kind: 'rejected', reason: 'phone_limit' } as const
+
     const [inserted] = await tx.insert(supporters).values({
       id: input.id,
       puCode: input.puCode,
@@ -253,11 +281,11 @@ export async function createSupporter(db: Db, caller: Caller, input: SupporterIn
     }).onConflictDoNothing({ target: supporters.id }).returning()
 
     if (!inserted) {
-      const [existing] = await tx.select().from(supporters).where(eq(supporters.id, input.id))
-      if (existing && existing.puCode === input.puCode && existing.capturedBy === caller.id) {
-        return { kind: 'duplicate', supporter: existing } as const
-      }
-      return { kind: 'conflict' } as const
+      // The same id arrived concurrently (two pushes of one outbox item).
+      const [raced] = await tx.select().from(supporters).where(eq(supporters.id, input.id))
+      return raced && raced.puCode === input.puCode && raced.capturedBy === caller.id
+        ? { kind: 'duplicate', supporter: raced } as const
+        : { kind: 'conflict' } as const
     }
     await applyStatDelta(tx, inserted.puCode, statContribution(inserted), inserted.capturedAt)
     return { kind: 'accepted', supporter: inserted } as const
@@ -278,6 +306,7 @@ export type UpdateSupporterResult
     | { kind: 'forbidden' }
     | { kind: 'anonymised' }
     | { kind: 'invalid' }
+    | { kind: 'phone_limit' }
 
 /**
  * Edit a supporter (US-8): the PU lead of the supporter's PU only. Last write wins on the server clock (ARCHITECTURE
@@ -303,6 +332,10 @@ export async function updateSupporter(db: Db, caller: Caller, id: string, patch:
     }
     const changed = Object.keys(values) as SupporterEditableField[]
     if (changed.length === 0) return { kind: 'ok', supporter: before, changed } as const
+    if (values.phone) {
+      await lockPhone(tx, values.phone)
+      if (await countPhone(tx, values.phone, id) >= MAX_SUPPORTERS_PER_PHONE) return { kind: 'phone_limit' } as const
+    }
 
     const [after] = await tx.update(supporters)
       .set({ ...values, updatedAt: sql`now()`, updatedBy: caller.id })
@@ -440,4 +473,29 @@ export async function requestRemoval(db: Db, caller: Caller, id: string, reason:
     meta: { reason },
   })
   return { kind: 'ok', supporter: updated }
+}
+
+// ── Phone check (US-7) ──────────────────────────────────────────────────────
+
+export interface PhoneCheck {
+  /** Supporters already using this number, anywhere. */
+  countInSystem: number
+  /** Whether any of them are on the caller's own PU. */
+  samePu: boolean
+  /** A new capture with this number would be refused (phone_limit). */
+  limitReached: boolean
+}
+
+/**
+ * How many supporters already use `phone` (E.164), for the capture form's inline warning. Counts only: no names,
+ * PUs or ids leave the server. PU leads only.
+ */
+export async function checkPhone(db: DbLike, caller: Caller, phone: string): Promise<PhoneCheck | null> {
+  if (caller.role !== 'PU_LEAD' || !caller.unitCode) return null
+  const [row] = await db.select({
+    n: sql<number>`count(*)::int`,
+    samePu: sql<boolean>`coalesce(bool_or(${supporters.puCode} = ${caller.unitCode}), false)`,
+  }).from(supporters).where(eq(supporters.phone, phone))
+  const countInSystem = row?.n ?? 0
+  return { countInSystem, samePu: !!row?.samePu, limitReached: countInSystem >= MAX_SUPPORTERS_PER_PHONE }
 }

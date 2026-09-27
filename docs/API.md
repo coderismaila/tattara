@@ -28,9 +28,9 @@ WARD+ here means WARD_LEAD, LGA_LEAD, STATE_LEAD and DG (DG manages the state le
 ## Supporters
 | GET | `/supporters` | PU, WARD | `?q=&pu=&cursor=&limit=` | `{ items, nextCursor }`, newest first (cursor = last id; UUIDv7 is time-ordered), limit 50 (max 200). `q`: name contains, full phone, or ≥ 4 trailing digits. PU lead: own PU; ward lead: own ward, `pu` must be in it (else 403). Anonymised records left out. 403 above ward |
 | GET | `/supporters/:id` | PU, WARD | | `{ supporter, canEdit }`; unknown, anonymised and out-of-scope ids all 404 |
-| PATCH | `/supporters/:id` | PU (own PU) | editable fields only (`supporterPatchSchema`) | `{ supporter, changed }`; LWW; audited field diff (names of fields only); ward lead 403; others 404 |
+| PATCH | `/supporters/:id` | PU (own PU) | editable fields only (`supporterPatchSchema`) | `{ supporter, changed }`; LWW; audited field diff (names of fields only); 409 `phone_limit` when the new number already has 3 supporters; ward lead 403; others 404 |
 | POST | `/supporters/:id/removal` | PU, WARD | `{ reason }` | status → removal_requested (still counted in pu_stats); audited with the reason (a phone in it → 400); 409 `already_requested`; 404 out of scope |
-| GET | `/supporters/check-phone` | PU | `?phone=` | `{ countInSystem, samePu: bool }` — no names returned |
+| GET | `/supporters/check-phone` | PU | `?phone=` | `{ countInSystem, samePu, limitReached }`: counts only (no names, PUs or ids); 60/min per user; other roles 403 |
 
 ## Sync
 | POST | `/sync/push` | PU | `{ items: SupporterInput[≤50] }` | `{ results }` in item order: `{ id, result: accepted\|duplicate, serverUpdatedAt }`, `{ id \| null, result: rejected, reason, issues? }` (issues = `{ path, message: i18n key }`, never values) or `{ id, result: conflict }`. Each item validated alone (one bad item never blocks the rest). Other roles 403 `not_allowed`; 400 for > 50 items; 120/min per user. Live since 3.3 (the capture page sends one item) |
@@ -74,5 +74,5 @@ Stats never include names or phones. `:code` is `all` for the region (DG).
 
 ## Conventions
 - Pagination: cursor-based (`cursor` = last id), default 50, max 200.
-- `/sync/push` item result reasons: `invalid`, `no_consent`, `out_of_scope`, `phone_limit`, `pu_inactive`.
+- `/sync/push` item result reasons: `invalid`, `no_consent`, `out_of_scope`, `phone_limit` (a 4th supporter on one number, PRD R-5), `pu_inactive`.
 - All mutating routes are CSRF-safe via SameSite=Lax cookies + an `Origin` header check.

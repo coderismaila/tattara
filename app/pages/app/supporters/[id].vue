@@ -79,14 +79,17 @@ async function saveEdit(event: FormSubmitEvent<SupporterFields>) {
   saving.value = true
   saveError.value = null
   try {
-    await $fetch(`/api/supporters/${id.value}`, { method: 'PATCH', body: patch })
+    // A plain string: the typed-route matcher would otherwise pick the GET-only /api/supporters/check-phone.
+    const url: string = `/api/supporters/${id.value}`
+    await $fetch(url, { method: 'PATCH', body: patch })
     toast.add({ title: t('supporterDetail.saved'), color: 'success', icon: 'i-lucide-check' })
     editing.value = false
     await refresh()
   }
   catch (e) {
     const status = (e as { statusCode?: number }).statusCode
-    saveError.value = !status ? 'capture.errors.network' : status === 404 ? 'supporterDetail.notFound' : 'capture.errors.invalid'
+    const reason = (e as { data?: { data?: { reason?: string } } }).data?.data?.reason
+    saveError.value = !status ? 'capture.errors.network' : status === 404 ? 'supporterDetail.notFound' : reason === 'phone_limit' ? 'capture.errors.phone_limit' : 'capture.errors.invalid'
   }
   finally {
     saving.value = false

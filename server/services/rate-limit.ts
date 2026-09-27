@@ -25,6 +25,8 @@ export const RATE_LIMITS = {
   invite: { limit: 100, windowSec: 60 * 60 },
   // Per user (ARCHITECTURE §6): the sync engine pushes ≤ 50 items per request.
   syncPush: { limit: 120, windowSec: 60 },
+  // It tells whether a number is known, so keep it to what a lead typing numbers needs.
+  checkPhone: { limit: 60, windowSec: 60 },
 } as const satisfies Record<string, RateLimitRule>
 
 /** Keys are hashed so phone numbers are never stored in the clear. */

@@ -98,5 +98,5 @@ export interface MaskedSupporterDto {
 /** Per-item result of POST /api/sync/push (API.md). */
 export type SyncItemResult
   = | { id: string, result: 'accepted' | 'duplicate', serverUpdatedAt: string }
-    | { id: string | null, result: 'rejected', reason: 'invalid' | 'no_consent' | 'out_of_scope' | 'pu_inactive', issues?: { path: string, message: string }[] }
+    | { id: string | null, result: 'rejected', reason: 'invalid' | 'no_consent' | 'out_of_scope' | 'pu_inactive' | 'phone_limit', issues?: { path: string, message: string }[] }
     | { id: string, result: 'conflict' }

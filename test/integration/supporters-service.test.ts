@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createDb, type Db } from '../../server/db/client'
 import { runMigrations } from '../../server/db/migrate'
 import { auditLog, puStats, supporters, units, users } from '../../server/db/schema'
-import { createSupporter, getSupporter, pushSupporters, recomputePuStats, updateSupporter } from '../../server/services/supporters'
+import { checkPhone, createSupporter, getSupporter, pushSupporters, recomputePuStats, updateSupporter } from '../../server/services/supporters'
 import { seedDev } from '../../scripts/seed/run'
 import type { SessionUser } from '../../shared/types/auth'
 import type { SupporterInput } from '../../shared/types/supporter'
@@ -222,6 +222,82 @@ describe.skipIf(!dbAvailable)('supporters service', () => {
         { path: 'phone', message: 'auth.errors.phoneInvalid' },
       ]))
       expect(JSON.stringify(r)).not.toContain('08031234567')
+    })
+  })
+
+  describe('shared phones (max 3 per number, PRD R-5)', () => {
+    it('accepts up to 3 supporters on one number, shared tick or not, and refuses the 4th', async () => {
+      const phone = newPhone()
+      expect((await createSupporter(db, who.kanoPu!, input({ phone }))).kind).toBe('accepted')
+      expect((await createSupporter(db, who.kanoPu!, input({ phone }))).kind).toBe('accepted') // no tick: flagged later (5.1)
+      expect((await createSupporter(db, who.kanoPu!, input({ phone, sharedPhone: true }))).kind).toBe('accepted')
+      expect(await createSupporter(db, who.kanoPu!, input({ phone, sharedPhone: true }))).toEqual({ kind: 'rejected', reason: 'phone_limit' })
+    })
+
+    it('a re-sent record is still a duplicate, not phone_limit', async () => {
+      const phone = newPhone()
+      const first = input({ phone })
+      await createSupporter(db, who.kanoPu!, first)
+      await createSupporter(db, who.kanoPu!, input({ phone }))
+      await createSupporter(db, who.kanoPu!, input({ phone }))
+      expect(await createSupporter(db, who.kanoPu!, first)).toMatchObject({ kind: 'duplicate' })
+    })
+
+    it('never lets concurrent captures pass the limit', async () => {
+      const phone = newPhone()
+      const results = await Promise.all(Array.from({ length: 5 }, () => createSupporter(db, who.kanoPu!, input({ phone, sharedPhone: true }))))
+      expect(results.filter(r => r.kind === 'accepted')).toHaveLength(3)
+      expect(results.filter(r => r.kind === 'rejected' && r.reason === 'phone_limit')).toHaveLength(2)
+      const [row] = await db.select({ n: sql<number>`count(*)::int` }).from(supporters).where(eq(supporters.phone, phone))
+      expect(row!.n).toBe(3)
+    })
+
+    it('anonymised records free their number', async () => {
+      const phone = newPhone()
+      const ids: string[] = []
+      for (let i = 0; i < 3; i++) {
+        const r = await createSupporter(db, who.kanoPu!, input({ phone }))
+        if (r.kind !== 'accepted') throw new Error(r.kind)
+        ids.push(r.supporter.id)
+      }
+      await db.update(supporters).set({ status: 'anonymised', fullName: '—', phone: null, address: null, gps: null }).where(eq(supporters.id, ids[0]!))
+      expect((await createSupporter(db, who.kanoPu!, input({ phone }))).kind).toBe('accepted')
+    })
+
+    it('an edit cannot move a supporter onto a full number; keeping its own number is fine', async () => {
+      const full = newPhone()
+      for (let i = 0; i < 3; i++) await createSupporter(db, who.kanoPu!, input({ phone: full }))
+      const other = await createSupporter(db, who.kanoPu!, input())
+      if (other.kind !== 'accepted') throw new Error(other.kind)
+      expect(await updateSupporter(db, who.kanoPu!, other.supporter.id, { phone: full })).toEqual({ kind: 'phone_limit' })
+
+      const [one] = await db.select().from(supporters).where(eq(supporters.phone, full)).limit(1)
+      expect(await updateSupporter(db, who.kanoPu!, one!.id, { phone: full, volunteer: true })).toMatchObject({ kind: 'ok', changed: ['volunteer'] })
+    })
+
+    it('push reports phone_limit per item', async () => {
+      const phone = newPhone()
+      const items = Array.from({ length: 4 }, () => input({ phone, sharedPhone: true }))
+      const results = await pushSupporters(db, who.kanoPu!, items)
+      expect(results.map(r => r.result === 'rejected' ? r.reason : r.result)).toEqual(['accepted', 'accepted', 'accepted', 'phone_limit'])
+    })
+  })
+
+  describe('checkPhone', () => {
+    it('counts uses anywhere and says whether any are on the caller PU, without identifying anyone', async () => {
+      const phone = newPhone()
+      expect(await checkPhone(db, who.kanoPu!, phone)).toEqual({ countInSystem: 0, samePu: false, limitReached: false })
+
+      await createSupporter(db, who.katsinaPu!, input({ phone, puCode: '20/01/01/001' }))
+      expect(await checkPhone(db, who.kanoPu!, phone)).toEqual({ countInSystem: 1, samePu: false, limitReached: false })
+
+      await createSupporter(db, who.kanoPu!, input({ phone }))
+      await createSupporter(db, who.kanoPu!, input({ phone }))
+      expect(await checkPhone(db, who.kanoPu!, phone)).toEqual({ countInSystem: 3, samePu: true, limitReached: true })
+    })
+
+    it('is for PU leads only', async () => {
+      for (const caller of [who.kanoWard!, who.dg!]) expect(await checkPhone(db, caller, newPhone())).toBeNull()
     })
   })
 

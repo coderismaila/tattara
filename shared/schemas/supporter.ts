@@ -130,3 +130,6 @@ export const removalRequestSchema = z.strictObject({
 })
 
 export type SupporterListQuery = z.output<typeof supporterListQuerySchema>
+
+/** GET /api/supporters/check-phone?phone= */
+export const checkPhoneQuerySchema = z.object({ phone: phoneSchema })

@@ -18,6 +18,8 @@ export default defineEventHandler(async (event) => {
       return { supporter: serializeSupporter(result.supporter, user.role), changed: result.changed }
     case 'invalid':
       throw createError({ statusCode: 400, statusMessage: 'Bad Request', data: { reason: 'invalid' } })
+    case 'phone_limit':
+      throw createError({ statusCode: 409, statusMessage: 'Conflict', data: { reason: 'phone_limit' } })
     case 'forbidden':
     case 'anonymised':
       throw supporterNotFound()

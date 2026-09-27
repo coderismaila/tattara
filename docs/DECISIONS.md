@@ -212,3 +212,13 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - **Ordering:** `access-setup → access → setup → android-chrome`. The matrix needs every seeded user intact, and later specs deactivate a PU lead, replace the DG and lock an account; the chain also stops two logins of one user racing for OTPs.
 - **Meta-test** (unit project, runs in CI's check job): the matrix keys must equal the route files under `server/api/`, so a new route can't ship without an entry, and a removed route can't leave a stale one.
 **Consequences:** 3.7 and the stats routes (6.1) add their entries in the same change. Checked that the suite fails on a wrong status and on unmasked phones.
+
+### ADR-033 · 2026-09-27 · Accepted · Registered voters come from the field
+**Decision:**
+- **The field figure wins.** A PU's `registered_voters` reported by a lead (reported_by/at set) is never overwritten by an INEC import, even one carrying a number; unreported PUs still take an imported figure, and NULL never overwrites anything.
+- **Who:** the PU's own lead, or the lead of its ward (to correct it). Nobody above ward edits it; the admin and everyone in scope may read aggregates.
+- **Range 0–10,000** per PU (large urban PUs are split into voting points). A figure below the PU's supporter count is accepted; 5.1 flags `pu_over_capacity` instead (flags, not blocks).
+- **Aggregates are sums over PUs with a figure, plus "reported for X of Y PUs"**, computed on read; importer-written ward/LGA values are ignored once leads report.
+- **Prompt once per device** (a `localStorage` flag keyed by PU code, not supporter data); the Home card keeps offering it until recorded.
+- **Unit codes in URLs use dashes** (`19-05-03`, `all` = region), since codes contain slashes. The stats routes (6.1) follow the same convention.
+**Consequences:** 5.1 and coverage % skip unreported PUs; 6.4's target split falls back to PU count (see PROGRESS).

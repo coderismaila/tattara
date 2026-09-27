@@ -61,7 +61,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
 - [x] **3.4 Supporter list + detail + edit** (PU & ward), search by name/phone, cursor pagination.
 - [x] **3.5 Phone duplicate check** (`/supporters/check-phone`) + the shared-phone rule (max 3).
 - [x] **3.6 Access-control test suite** table-driven over every supporter/user/stats route × role × in/out-of-scope.
-- [ ] **3.7 Registered voters from the field** (PRD US-24). PU lead enters/updates their PU's registered-voter count
+- [x] **3.7 Registered voters from the field** (PRD US-24). PU lead enters/updates their PU's registered-voter count
   (from the register displayed at the PU); ward lead can correct within their ward. Store on `units.registered_voters`
   with `registered_voters_reported_by` / `_at` (migration); audited; route `PUT /units/:code/registered-voters` via
   `requireScope`. Home prompts the PU lead once if missing. Ward+ see sums plus "reported for X of Y PUs".

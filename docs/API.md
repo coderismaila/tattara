@@ -66,6 +66,14 @@ Stats never include names or phones. `:code` is `all` for the region (DG).
 | POST | `/exports/:id/approve` | ADMIN | | generates a watermarked CSV, 24 h link |
 | GET | `/exports/:id/download` | requester | | single-use, audited |
 
+## Units
+| Method | Path | Who | Body / Query | Notes |
+|---|---|---|---|---|
+| GET | `/units/:code/registered-voters` | anyone whose scope contains `:code` (admin included: aggregates) | | PU: `{ registeredVoters, reportedAt }`; ward and above: sum over PUs with a figure + `pusWithFigure` / `totalPus` ("reported for X of Y"). `:code` = `all` for the region (DG, admin) |
+| PUT | `/units/:code/registered-voters` | the PU's own lead, or its ward lead | `{ registeredVoters: 0–10000 }` | records who and when; audited `{ from, to }`; others 403 |
+
+Unit codes in URL paths use dashes: `19/05/03` → `19-05-03` (`toUrlCode` / `fromUrlCode` in `shared/utils/pu-code.ts`); `all` = the region.
+
 ## Admin
 | POST | `/admin/import/units` | ADMIN | multipart | validates + dry-run diff, then apply |
 | GET | `/admin/dg` | ADMIN | | `{ dg: { id, fullName, status: active\|locked\|invited, phone (masked), lastSeenAt } \| null }` (active DG, else the pending invite) |

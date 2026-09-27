@@ -57,6 +57,13 @@
       "when": 1790490068420,
       "tag": "0007_supporter_search",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790503383668,
+      "tag": "0008_registered_voters_reports",
+      "breakpoints": true
     }
   ]
 }

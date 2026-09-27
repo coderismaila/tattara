@@ -495,4 +495,40 @@
     // TODO(ha-review)
     alreadyRequested: 'An riga an nemi a cire.',
   },
+  units: {
+    voters: {
+      // TODO(ha-review)
+      title: 'Masu rajistar zaɓe',
+      // TODO(ha-review)
+      notRecorded: 'Ba a rubuta ba tukuna',
+      // TODO(ha-review)
+      help: 'Ƙidaya sunayen da ke kan rajistar masu zaɓe da aka liƙa a rumfar zaɓe.',
+      // TODO(ha-review)
+      record: 'Rubuta adadin',
+      // TODO(ha-review)
+      update: 'Sabunta',
+      // TODO(ha-review)
+      correct: 'Gyara adadin masu zaɓe',
+      // TODO(ha-review)
+      coverage: 'An rubuta na rumfuna {reported} cikin {total}',
+      // TODO(ha-review)
+      dialogTitle: 'Masu rajistar zaɓe · {name}',
+      // TODO(ha-review)
+      dialogIntro: 'INEC ba ta fitar da wannan na kowace rumfa, don haka adadin daga gare ka yake.',
+      // TODO(ha-review)
+      label: 'Adadin masu rajistar zaɓe',
+      // TODO(ha-review)
+      save: 'Ajiye',
+      // TODO(ha-review)
+      saved: 'An ajiye adadin masu zaɓe',
+    },
+    errors: {
+      // TODO(ha-review)
+      votersInvalid: 'Shigar da cikakken lamba, 0 ko fiye.',
+      // TODO(ha-review)
+      votersTooMany: 'Wannan ya fi abin da kowace rumfa ke ɗauka. Duba lambar.',
+      // TODO(ha-review)
+      notAllowed: 'Ba za ka iya canza adadin wannan rumfa ba.',
+    },
+  },
 }

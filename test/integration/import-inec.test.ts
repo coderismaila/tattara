@@ -112,6 +112,24 @@ describe.skipIf(!dbAvailable)('INEC import → units', () => {
     expect(puLead?.role).toBe('PU_LEAD')
   })
 
+  it('keeps a lead-reported figure even when the import brings a different number', async () => {
+    const [puLead] = await db.select().from(users).where(eq(users.unitCode, '19/01/01/001'))
+    await db.update(units).set({ registeredVoters: 734, registeredVotersReportedBy: puLead!.id, registeredVotersReportedAt: new Date() })
+      .where(eq(units.code, '19/01/01/001'))
+    const withVoters = normaliseInec({
+      hierarchy: HIERARCHY,
+      coords: new Map([['19/01/01/001', { lat: 12.0, lng: 8.5 }]]),
+      voters: new Map([['19/01/01/001', 900], ['19/01/01/002', 500]]),
+      sourceVersion: 'inec-test-4',
+    }).units
+
+    const dry = await writeUnits(db, withVoters, { dryRun: true })
+    await writeUnits(db, withVoters)
+    expect((await get('19/01/01/001'))!.registeredVoters).toBe(734) // the field wins
+    expect((await get('19/01/01/002'))!.registeredVoters).toBe(500) // not reported: the import fills it
+    expect(dry.updated).toBeGreaterThanOrEqual(1) // 002 changed; 001 isn't counted as a change
+  })
+
   it('refuses to import into a database holding fake dev geography', async () => {
     const devDb = await createTempDatabase()
     try {

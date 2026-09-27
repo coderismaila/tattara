@@ -1,8 +1,10 @@
 // Geography (DATA_MODEL §1): one table for every level, keyed by the INEC code `SS/LL/WW/PPP`.
 import { sql } from 'drizzle-orm'
-import { boolean, check, index, integer, pgTable, text, timestamp, unique, type AnyPgColumn } from 'drizzle-orm/pg-core'
+import { boolean, check, index, integer, pgTable, text, timestamp, unique, uuid, type AnyPgColumn } from 'drizzle-orm/pg-core'
 import { unitLevel } from './enums.ts'
 import { geographyPoint } from './types.ts'
+// Circular with users.ts (users.unit_code → units): safe, both references are lazy callbacks.
+import { users } from './users.ts'
 
 export const units = pgTable('units', {
   code: text().primaryKey(),
@@ -11,6 +13,9 @@ export const units = pgTable('units', {
   name: text().notNull(),
   nameNormalised: text().notNull(),
   registeredVoters: integer(),
+  /** Who reported `registeredVoters` from the field (PU/ward lead, task 3.7) and when. NULL for imported figures. */
+  registeredVotersReportedBy: uuid().references((): AnyPgColumn => users.id),
+  registeredVotersReportedAt: timestamp({ withTimezone: true }),
   location: geographyPoint(),
   /** True when `location` is a fallback (e.g. ward centroid), not an INEC PU coordinate. */
   locationEstimated: boolean().notNull().default(false),
@@ -38,6 +43,9 @@ export const units = pgTable('units', {
   end, false)`),
   check('units_name_not_blank', sql`length(trim(${t.name})) > 0`),
   check('units_registered_voters_non_negative', sql`${t.registeredVoters} is null or ${t.registeredVoters} >= 0`),
+  // A field report always has both who and when (and a figure); imported figures have neither.
+  check('units_registered_voters_reported', sql`(${t.registeredVotersReportedBy} is null) = (${t.registeredVotersReportedAt} is null)
+    and (${t.registeredVotersReportedAt} is null or ${t.registeredVoters} is not null)`),
 ])
 
 export type Unit = typeof units.$inferSelect

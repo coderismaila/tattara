@@ -24,6 +24,9 @@ export const DEV_PIN = '123456'
 export const SHELL_USER_PHONE = '08000000103'
 /** Seeded Kano PU lead: signed in once by auth.setup.ts for the capture tests. */
 export const PU_USER_PHONE = '08000000104'
+/** Active PU lead created by global-setup on a PU with no registered-voter figure (3.7). */
+export const VOTERS_USER_PHONE = '08031000004'
+export const VOTERS_PU = '19/01/01/004'
 /** Seeded Katsina ward lead: the lockout test's target (kept apart from everyone else's attempts). */
 export const LOCKOUT_USER_PHONE = '08000000203'
 

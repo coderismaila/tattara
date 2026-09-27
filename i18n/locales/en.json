@@ -275,5 +275,26 @@
     "confirmRemoval": "Request removal",
     "removalRequested": "Removal requested",
     "alreadyRequested": "Removal was already requested."
+  },
+  "units": {
+    "voters": {
+      "title": "Registered voters",
+      "notRecorded": "Not recorded yet",
+      "help": "Count the names on the voters' register displayed at the polling unit.",
+      "record": "Record the number",
+      "update": "Update",
+      "correct": "Correct voters",
+      "coverage": "Reported for {reported} of {total} polling units",
+      "dialogTitle": "Registered voters · {name}",
+      "dialogIntro": "INEC does not publish this per polling unit, so the number comes from you.",
+      "label": "Number of registered voters",
+      "save": "Save",
+      "saved": "Registered voters saved"
+    },
+    "errors": {
+      "votersInvalid": "Enter a whole number, 0 or more.",
+      "votersTooMany": "That is more than any polling unit holds. Check the number.",
+      "notAllowed": "You can't change this polling unit's figure."
+    }
   }
 }

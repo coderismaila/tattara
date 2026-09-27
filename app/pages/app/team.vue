@@ -4,7 +4,7 @@ import type { TeamMember } from '~~/shared/types/team'
 
 definePageMeta({ layout: 'app', titleKey: 'nav.team' })
 
-const { t, locale } = useI18n()
+const { t, n, locale } = useI18n()
 const toast = useToast()
 
 const { data, error, refresh } = await useFetch('/api/team', { key: 'team' })
@@ -89,6 +89,15 @@ async function submitReset() {
   const lead = dialog.value!.member.lead!
   await run(() => $fetch(`/api/team/${lead.id}/reset-pin`, { method: 'POST' }), t('team.resetDone', { name: lead.fullName }))
 }
+
+// Registered voters (US-24): the ward lead can correct a PU's figure.
+const votersTarget = ref<TeamMember | null>(null)
+const votersOpen = computed({
+  get: () => votersTarget.value !== null,
+  set: (isOpen) => {
+    if (!isOpen) votersTarget.value = null
+  },
+})
 
 const dialogTitle = computed(() => {
   const d = dialog.value
@@ -191,10 +200,29 @@ const dialogTitle = computed(() => {
           {{ t('team.noLead') }}
         </p>
 
+        <p
+          v-if="member.level === 'pu'"
+          class="text-sm"
+          :data-testid="`team-voters-${member.code}`"
+        >
+          {{ t('units.voters.title') }}:
+          <span class="tabular font-semibold">{{ member.registeredVoters === null ? t('units.voters.notRecorded') : n(member.registeredVoters) }}</span>
+        </p>
+
         <div
           v-if="data.canManage"
           class="flex flex-wrap gap-2"
         >
+          <UButton
+            v-if="member.level === 'pu'"
+            class="min-h-12"
+            variant="outline"
+            color="neutral"
+            icon="i-lucide-clipboard-list"
+            :label="t('units.voters.correct')"
+            :data-testid="`team-voters-edit-${member.code}`"
+            @click="votersTarget = member"
+          />
           <UButton
             v-if="!member.lead"
             class="min-h-12"
@@ -244,6 +272,15 @@ const dialogTitle = computed(() => {
         </div>
       </li>
     </ul>
+
+    <UnitsVotersDialog
+      v-if="votersTarget"
+      v-model:open="votersOpen"
+      :pu-code="votersTarget.code"
+      :pu-name="votersTarget.name"
+      :current="votersTarget.registeredVoters"
+      @saved="refresh()"
+    />
 
     <UModal
       v-model:open="dialogOpen"

@@ -4,11 +4,12 @@ import { dirname } from 'node:path'
 import postgres from 'postgres'
 import { createDb } from '../../server/db/client'
 import { runMigrations } from '../../server/db/migrate'
-import { users } from '../../server/db/schema'
+import { units, users } from '../../server/db/schema'
+import { hashPin } from '../../server/utils/pin'
 import { createInvite } from '../../server/services/auth'
 import { seedDev } from '../../scripts/seed/run'
 import { eq } from 'drizzle-orm'
-import { ADMIN_DB_URL, E2E_DB_URL, FIXTURE_FILE, OUTBOX_FILE, type E2EFixture } from './support/env'
+import { ADMIN_DB_URL, DEV_PIN, E2E_DB_URL, FIXTURE_FILE, OUTBOX_FILE, VOTERS_PU, VOTERS_USER_PHONE, type E2EFixture } from './support/env'
 
 export default async function globalSetup() {
   const admin = postgres(ADMIN_DB_URL, { max: 1, onnotice: () => {} })
@@ -33,6 +34,19 @@ export default async function globalSetup() {
       invitedBy: ward!.id,
     }).returning({ id: users.id })
     const inviteToken = await createInvite(db, lead!.id, ward!.id)
+
+    // Registered voters (3.7): an active PU lead whose PU has no figure yet, so Home prompts them.
+    await db.update(units).set({ registeredVoters: null }).where(eq(units.code, VOTERS_PU))
+    await db.insert(users).values({
+      fullName: 'E2E Voters PU Lead',
+      phone: `+234${VOTERS_USER_PHONE.slice(1)}`,
+      role: 'PU_LEAD',
+      unitCode: VOTERS_PU,
+      unitLevel: 'pu',
+      status: 'active',
+      pinHash: await hashPin(DEV_PIN),
+      invitedBy: ward!.id,
+    })
 
     mkdirSync(dirname(FIXTURE_FILE), { recursive: true })
     rmSync(OUTBOX_FILE, { force: true })

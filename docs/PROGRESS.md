@@ -78,6 +78,10 @@ Also note blockers and anything the next session must know.
     labels and keyboard use, not the screen reader itself), and legal + native review of the consent script (7.4).
 - **Access matrix (3.6):** every new route needs an entry in `test/e2e/access/matrix.ts` (the unit meta-test fails
   otherwise). Run it alone: `E2E_SKIP_BUILD=1 npx playwright test --project=access` (after `pnpm build`).
+- **Registered voters (3.7) — obligations for later tasks:** 5.1 `pu_over_capacity` and every coverage % must skip PUs
+  with `registered_voters IS NULL`; 6.4's default target split falls back to PU count when figures are missing;
+  stats routes use `/api/units/:code/...`-style dashed codes (`toUrlCode`). Only PU figures are meaningful: ward/LGA
+  `registered_voters` values written by the importer are stale once leads report; always sum PUs.
 - **First admin (2.6):** `pnpm admin:create --role ADMIN --name "…" --phone 0806…` prints a 72-hour setup link
   (open it on that phone, choose a PIN); add `--sms` to also text it. The admin then invites the DG at `/app/admin`.
   In production run the same command on the server with its `NUXT_DATABASE_URL` / `NUXT_PUBLIC_SITE_URL`.
@@ -114,3 +118,4 @@ Also note blockers and anything the next session must know.
 - 2026-09-27 · 3.4 · Supporter list `/app/supporters` (search: name contains / full phone / last ≥ 4 digits; ward lead PU filter; cursor paging by UUIDv7 id) + detail/edit `/app/supporters/[id]` (PU lead edits changed fields only; ward lead read-only) + removal request (audited, no hard delete); routes GET/PATCH `/supporters/:id`, GET `/supporters`, POST `/supporters/:id/removal`; migration 0007 `pg_trgm` + trigram indexes; `SupporterChoiceGroup` + `useSupporterOptions` shared with capture · see commit `feat(supporters)`
 - 2026-09-27 · 3.5 · Shared-phone rule: max 3 supporters per number system-wide (`MAX_SUPPORTERS_PER_PHONE`), enforced on create and phone edits under a per-number advisory lock (5 concurrent saves → exactly 3); 2nd/3rd use accepted (flagged in 5.1); `phone_limit` in push results and PATCH 409; `GET /supporters/check-phone` (counts only, PU leads, 60/min) + inline notice on capture when the phone field is left · see commit `feat(supporters)`
 - 2026-09-27 · 3.6 · Access-control suite: `test/e2e/access/` matrix of all 18 routes × 11 callers (status + field checks: full vs masked phones, counts-only check-phone, no token/PIN/device keys in any response), real HTTP on the production build, runs first in E2E; unit meta-test keeps the matrix in step with `server/api/`; verified it catches a wrong status and unmasked phones · see commit `test(access)`
+- 2026-09-27 · 3.7 · Registered voters from the field: migration 0008 (`registered_voters_reported_by/_at`, CHECK); `setRegisteredVoters` (own PU lead or ward lead, 0–10,000, audited from/to) + `registeredVotersSummary` (PU figure, or sum + reported X of Y); `GET/PUT /api/units/:code/registered-voters` (dashed codes, `all`); importer never overwrites a reported figure; Home card + once-per-device prompt (PU) / totals (ward+), Team page correct button; access matrix 20 routes · see commit `feat(units)`

@@ -42,7 +42,7 @@ export async function listTeam(db: Db, caller: Caller, unitCode?: string): Promi
     unit = row
   }
 
-  const children = await db.select({ code: units.code, name: units.name, level: units.level }).from(units)
+  const children = await db.select({ code: units.code, name: units.name, level: units.level, registeredVoters: units.registeredVoters }).from(units)
     .where(and(eq(units.active, true), target === '' ? eq(units.level, 'state') : eq(units.parentCode, target)))
     .orderBy(units.code)
 
@@ -70,6 +70,7 @@ export async function listTeam(db: Db, caller: Caller, unitCode?: string): Promi
       code: c.code,
       name: c.name,
       level: c.level,
+      registeredVoters: c.level === 'pu' ? c.registeredVoters : null,
       qualityScore: null,
       lead: lead
         ? {

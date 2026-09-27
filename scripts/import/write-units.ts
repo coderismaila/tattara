@@ -37,6 +37,7 @@ export async function writeUnits(db: Db, rows: NormalisedUnit[], options: { dryR
     code: units.code,
     name: units.name,
     registeredVoters: units.registeredVoters,
+    reportedAt: units.registeredVotersReportedAt,
     location: units.location,
     locationEstimated: units.locationEstimated,
     boundaryRef: units.boundaryRef,
@@ -54,8 +55,8 @@ export async function writeUnits(db: Db, rows: NormalisedUnit[], options: { dryR
     }
     if (!e.active) diff.reactivated++
     const changed = e.name !== r.name
-      // A NULL from the import never replaces a stored figure (PU leads report them from the field, task 3.7).
-      || (r.registeredVoters !== null && e.registeredVoters !== r.registeredVoters)
+      // A NULL from the import never replaces a stored figure, and a field-reported figure is never replaced (task 3.7).
+      || (r.registeredVoters !== null && e.reportedAt === null && e.registeredVoters !== r.registeredVoters)
       || e.locationEstimated !== r.locationEstimated
       || e.boundaryRef !== r.boundaryRef
       || !sameLocation(e.location, r.location)
@@ -76,8 +77,9 @@ export async function writeUnits(db: Db, rows: NormalisedUnit[], options: { dryR
           set: {
             name: sql`excluded.name`,
             nameNormalised: sql`excluded.name_normalised`,
-            // Keep field-reported figures: only a non-NULL imported value overwrites.
-            registeredVoters: sql`coalesce(excluded.registered_voters, ${units.registeredVoters})`,
+            // Field-reported figures (PU/ward leads, task 3.7) always win; otherwise only a non-NULL imported value overwrites.
+            registeredVoters: sql`case when ${units.registeredVotersReportedAt} is not null then ${units.registeredVoters}
+              else coalesce(excluded.registered_voters, ${units.registeredVoters}) end`,
             location: sql`excluded.location`,
             locationEstimated: sql`excluded.location_estimated`,
             boundaryRef: sql`excluded.boundary_ref`,

@@ -15,6 +15,8 @@ export interface TeamMember {
     phone: string
     lastSeenAt: string | null
   }
+  /** PU rows: the registered-voter figure (US-24), NULL until reported. Always NULL above PU level. */
+  registeredVoters: number | null
   /** Lead quality score (task 5.5). */
   qualityScore: number | null
 }

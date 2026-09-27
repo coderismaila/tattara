@@ -100,3 +100,22 @@ export function isWithin(code: string, scopeUnitCode: string): boolean {
   if (!isValidPuCode(scopeUnitCode)) return false
   return code === scopeUnitCode || code.startsWith(scopePrefix(scopeUnitCode))
 }
+
+/** The region as a whole in URLs (`/api/units/all/…`), for DG/admin aggregates. */
+export const REGION_URL_CODE = 'all'
+
+/**
+ * A unit code for a URL path segment: `19/05/03` → `19-05-03` (codes are digits and slashes only). `''` (region) →
+ * `all`. Round-trips with `fromUrlCode`.
+ */
+export function toUrlCode(code: string): string {
+  return code === '' ? REGION_URL_CODE : code.replaceAll('/', '-')
+}
+
+/** The unit code from a URL segment, `''` for the region, or null when it isn't a valid code. */
+export function fromUrlCode(segment: string | undefined): string | null {
+  if (segment === REGION_URL_CODE) return ''
+  if (!segment || !/^[\d-]+$/.test(segment)) return null
+  const code = segment.replaceAll('-', '/')
+  return isValidPuCode(code) ? code : null
+}

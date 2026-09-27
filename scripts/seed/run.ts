@@ -46,6 +46,9 @@ async function deleteDevData(tx: Tx) {
   await tx.delete(invites).where(inArray(invites.userId, devUserIds))
   await tx.delete(otpCodes).where(like(otpCodes.phone, `${DEV_PHONE_PREFIX}%`))
   await tx.update(unitTargets).set({ setBy: null }).where(inArray(unitTargets.setBy, devUserIds))
+  // A dev user may have reported a PU's registered voters (3.7): keep the figure, forget the reporter.
+  await tx.update(units).set({ registeredVotersReportedBy: null, registeredVotersReportedAt: null })
+    .where(inArray(units.registeredVotersReportedBy, devUserIds))
   // Break the invited_by chain, then delete.
   await tx.update(users).set({ invitedBy: null }).where(like(users.phone, `${DEV_PHONE_PREFIX}%`))
   await tx.delete(users).where(like(users.phone, `${DEV_PHONE_PREFIX}%`))

@@ -169,6 +169,28 @@ export const ACCESS_MATRIX = {
     ),
   },
 
+  // ── Units: registered voters from the field (US-24) ─────────────────────────
+  // Aggregates for the Kano ward: anyone whose scope contains it (admin included); a PU lead's scope doesn't.
+  'GET /api/units/:code/registered-voters': {
+    request: () => ({ method: 'GET', path: '/api/units/19-01-01/registered-voters' }),
+    expect: only({ admin: 200, dg: 200, kanoState: 200, kanoLga: 200, kanoWard: 200 }),
+    check: (_caller, body) => {
+      ensure(body.level === 'ward' && body.totalPus === 10, 'the ward summary covers its 10 PUs')
+      ensure(body.pusWithFigure <= body.totalPus, 'reported ≤ total')
+      ensure(!('registeredVotersReportedBy' in body), 'who reported stays on the server')
+    },
+  },
+  // The PU's own lead (19/01/01/001) or its ward lead (19/01/01/003); denied callers aim at 19/01/01/007.
+  'PUT /api/units/:code/registered-voters': {
+    request: (_fx, caller) => ({
+      method: 'PUT',
+      path: `/api/units/${caller === 'kanoPu' ? '19-01-01-001' : caller === 'kanoWard' ? '19-01-01-003' : '19-01-01-007'}/registered-voters`,
+      body: { registeredVoters: 420 },
+    }),
+    expect: only({ kanoPu: 200, kanoWard: 200 }),
+    check: (_caller, body) => ensure(body.registeredVoters === 420 && typeof body.reportedAt === 'string', 'figure and report time saved'),
+  },
+
   // ── Sync ───────────────────────────────────────────────────────────────────
   // Every caller pushes one item for the Kano PU: only its lead's is accepted; the Katsina PU lead gets out_of_scope.
   'POST /api/sync/push': {

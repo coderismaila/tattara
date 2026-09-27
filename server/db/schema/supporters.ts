@@ -58,6 +58,9 @@ export const supporters = pgTable('supporters', {
   index('supporters_captured_by_at_idx').on(t.capturedBy, t.capturedAt),
   index('supporters_pu_code_created_idx').on(t.puCode, t.createdAt),
   index('supporters_gps_gist_idx').using('gist', t.gps),
+  // Search (3.4): name "contains" and phone endings, via pg_trgm (enabled in migration 0007).
+  index('supporters_full_name_trgm_idx').using('gin', sql`lower(${t.fullName}) gin_trgm_ops`),
+  index('supporters_phone_trgm_idx').using('gin', t.phone.op('gin_trgm_ops')),
 
   check('supporters_id_uuid_v7', sql`substr(${t.id}::text, 15, 1) = '7'`),
   // Supporters sit on a polling unit, never on a ward or above (units' own CHECK ties the shape to the level).

@@ -26,10 +26,10 @@ Errors carry `data.reason` (and `data.issues` with i18n keys for 400 `invalid`).
 WARD+ here means WARD_LEAD, LGA_LEAD, STATE_LEAD and DG (DG manages the state leads). ADMIN → DG is `/admin/users/dg`.
 
 ## Supporters
-| GET | `/supporters` | PU, WARD | `?q=&pu=&cursor=&limit=` | full phone for PU/WARD; 403 above ward |
-| GET | `/supporters/:id` | PU, WARD | | |
-| PATCH | `/supporters/:id` | PU (own PU) | partial supporter | LWW; audited field diff (names of fields only) |
-| POST | `/supporters/:id/removal` | PU, WARD | `{ reason }` | status → removal_requested |
+| GET | `/supporters` | PU, WARD | `?q=&pu=&cursor=&limit=` | `{ items, nextCursor }`, newest first (cursor = last id; UUIDv7 is time-ordered), limit 50 (max 200). `q`: name contains, full phone, or ≥ 4 trailing digits. PU lead: own PU; ward lead: own ward, `pu` must be in it (else 403). Anonymised records left out. 403 above ward |
+| GET | `/supporters/:id` | PU, WARD | | `{ supporter, canEdit }`; unknown, anonymised and out-of-scope ids all 404 |
+| PATCH | `/supporters/:id` | PU (own PU) | editable fields only (`supporterPatchSchema`) | `{ supporter, changed }`; LWW; audited field diff (names of fields only); ward lead 403; others 404 |
+| POST | `/supporters/:id/removal` | PU, WARD | `{ reason }` | status → removal_requested (still counted in pu_stats); audited with the reason (a phone in it → 400); 409 `already_requested`; 404 out of scope |
 | GET | `/supporters/check-phone` | PU | `?phone=` | `{ countInSystem, samePu: bool }` — no names returned |
 
 ## Sync

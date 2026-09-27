@@ -108,3 +108,25 @@ export const syncPushSchema = z.strictObject({
     .max(SYNC_PUSH_MAX_ITEMS, 'supporter.errors.tooManyItems'),
 })
 export type SupporterFormOutput = z.output<typeof supporterFormSchema>
+
+// ── List and removal (3.4) ──────────────────────────────────────────────────
+
+export const SUPPORTER_LIST_DEFAULT_LIMIT = 50
+export const SUPPORTER_LIST_MAX_LIMIT = 200
+
+/** GET /api/supporters query: search text (name, full phone or ≥ 4 trailing digits), PU filter, cursor, limit. */
+export const supporterListQuerySchema = z.object({
+  q: z.string().trim().max(80, 'supporter.errors.invalid').optional().transform(v => v || undefined),
+  pu: z.string().refine(c => isValidPuCode(c) && unitLevel(c) === 'pu', 'supporter.errors.puInvalid').optional(),
+  cursor: z.string().refine(isUuidV7, 'supporter.errors.invalid').optional(),
+  limit: z.coerce.number('supporter.errors.invalid').int('supporter.errors.invalid')
+    .min(1, 'supporter.errors.invalid').max(SUPPORTER_LIST_MAX_LIMIT, 'supporter.errors.invalid')
+    .default(SUPPORTER_LIST_DEFAULT_LIMIT),
+})
+
+/** POST /api/supporters/:id/removal: the reason goes to the audit log (no phone numbers). */
+export const removalRequestSchema = z.strictObject({
+  reason: z.string().trim().min(3, 'supporter.errors.reasonRequired').max(200, 'supporter.errors.reasonTooLong'),
+})
+
+export type SupporterListQuery = z.output<typeof supporterListQuerySchema>

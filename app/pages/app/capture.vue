@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from '@nuxt/ui'
-import { AGE_BANDS, GENDERS, HAS_PVC, SUPPORT_LEVELS, type AgeBand, type ConsentLanguage, type Gender, type HasPvc, type SupportLevel } from '~~/shared/constants/enums'
+import type { AgeBand, ConsentLanguage, Gender, HasPvc, SupportLevel } from '~~/shared/constants/enums'
 import { CURRENT_CONSENT_VERSION, consentScript } from '~~/shared/constants/consent'
 import { supporterFormSchema, type SupporterForm, type SupporterFormOutput } from '~~/shared/schemas/supporter'
 import type { SupporterInput, SyncItemResult } from '~~/shared/types/supporter'
@@ -59,20 +59,13 @@ const script = computed(() => consentScript(consentVersion.value, config.public.
 const consentAt = ref<string | null>(null)
 watch(() => state.consentGiven, ticked => (consentAt.value = ticked ? new Date().toISOString() : null))
 
-const options = <T extends string>(values: readonly T[], prefix: string) =>
-  computed(() => values.map(value => ({ value, label: t(`${prefix}.${value}`) })))
-const genderItems = options(GENDERS, 'supporter.gender')
-const ageItems = options(AGE_BANDS, 'supporter.ageBand')
-const supportItems = options(SUPPORT_LEVELS, 'supporter.supportLevel')
-const pvcItems = options(HAS_PVC, 'supporter.hasPvc')
+const { genderItems, ageItems, supportItems, pvcItems } = useSupporterOptions()
 
 const form = useTemplateRef('form')
 const nameInput = useTemplateRef('nameInput')
 const saving = ref(false)
 const saveError = ref<string | null>(null)
 const savedThisSession = useState('capture:savedThisSession', () => 0)
-
-const chipUi = { fieldset: 'flex flex-wrap gap-2', item: 'min-h-12 rounded-xl px-4 has-data-[state=checked]:bg-millet-500 has-data-[state=checked]:text-ink' }
 
 const gpsLabel = computed(() => {
   const fix = gps.fix.value
@@ -260,16 +253,10 @@ async function onSubmit(event: FormSubmitEvent<SupporterFormOutput>) {
           name="gender"
           :data-capture-field="'gender'"
         >
-          <URadioGroup
+          <SupporterChoiceGroup
             v-model="state.gender"
             :legend="t('supporter.fields.gender')"
-            :aria-label="t('supporter.fields.gender')"
             :items="genderItems"
-            orientation="horizontal"
-            variant="table"
-            indicator="hidden"
-            size="xl"
-            :ui="chipUi"
             data-testid="capture-gender"
           />
         </UFormField>
@@ -278,16 +265,10 @@ async function onSubmit(event: FormSubmitEvent<SupporterFormOutput>) {
           name="ageBand"
           :data-capture-field="'ageBand'"
         >
-          <URadioGroup
+          <SupporterChoiceGroup
             v-model="state.ageBand"
             :legend="t('supporter.fields.ageBand')"
-            :aria-label="t('supporter.fields.ageBand')"
             :items="ageItems"
-            orientation="horizontal"
-            variant="table"
-            indicator="hidden"
-            size="xl"
-            :ui="chipUi"
             data-testid="capture-age"
           />
         </UFormField>
@@ -296,17 +277,11 @@ async function onSubmit(event: FormSubmitEvent<SupporterFormOutput>) {
           name="supportLevel"
           :data-capture-field="'supportLevel'"
         >
-          <URadioGroup
+          <SupporterChoiceGroup
             v-model="state.supportLevel"
             :legend="t('supporter.fields.supportLevel')"
-            :aria-label="t('supporter.fields.supportLevel')"
             :items="supportItems"
-            orientation="horizontal"
-            variant="table"
-            indicator="hidden"
-            size="xl"
             required
-            :ui="chipUi"
             data-testid="capture-support"
           />
           <template #error="{ error }">
@@ -318,17 +293,11 @@ async function onSubmit(event: FormSubmitEvent<SupporterFormOutput>) {
           name="hasPvc"
           :data-capture-field="'hasPvc'"
         >
-          <URadioGroup
+          <SupporterChoiceGroup
             v-model="state.hasPvc"
             :legend="t('supporter.fields.hasPvc')"
-            :aria-label="t('supporter.fields.hasPvc')"
             :items="pvcItems"
-            orientation="horizontal"
-            variant="table"
-            indicator="hidden"
-            size="xl"
             required
-            :ui="chipUi"
             data-testid="capture-pvc"
           />
           <template #error="{ error }">

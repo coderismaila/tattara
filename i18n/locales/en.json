@@ -53,7 +53,8 @@
     "settings": "Settings",
     "team": "Team",
     "admin": "Admin",
-    "capture": "Add supporter"
+    "capture": "Add supporter",
+    "supporters": "Supporters"
   },
   "lang": {
     "label": "Language",
@@ -154,7 +155,10 @@
       "gpsInvalid": "The location reading is not valid.",
       "puInvalid": "This polling unit is not valid.",
       "nothingToSave": "Nothing was changed.",
-      "tooManyItems": "Too many records in one send. Try again."
+      "tooManyItems": "Too many records in one send. Try again.",
+      "reasonRequired": "Give a short reason.",
+      "reasonTooLong": "Keep the reason under 200 characters.",
+      "reasonPii": "Remove the phone number from the reason."
     },
     "fields": {
       "fullName": "Full name",
@@ -188,6 +192,18 @@
       "yes": "Yes",
       "no": "No",
       "unsure": "Not sure"
+    },
+    "status": {
+      "active": "Active",
+      "removal_requested": "Removal requested",
+      "anonymised": "Removed"
+    },
+    "verification": {
+      "unverified": "Not yet verified",
+      "sms_delivered": "SMS delivered",
+      "callback_verified": "Confirmed by call",
+      "callback_failed": "Call-back failed",
+      "opted_out": "Opted out"
     }
   },
   "capture": {
@@ -224,5 +240,35 @@
       "rate_limited": "Too many saves in a short time. Wait a minute and save again.",
       "unknown": "Something went wrong. Save again."
     }
+  },
+  "supporters": {
+    "title": "Supporters",
+    "search": "Search",
+    "searchHelp": "A name, a phone number, or its last 4 digits.",
+    "puFilter": "Polling unit",
+    "allPus": "All polling units",
+    "empty": "No supporters yet.",
+    "noResults": "No supporters match this search.",
+    "showMore": "Show more",
+    "notAllowed": "Only polling unit and ward leads see supporter lists."
+  },
+  "supporterDetail": {
+    "back": "All supporters",
+    "notFound": "This supporter was not found, or is not in your area.",
+    "pu": "Polling unit",
+    "added": "Added",
+    "verification": "Verification",
+    "yes": "Yes",
+    "no": "No",
+    "edit": "Edit",
+    "save": "Save changes",
+    "cancel": "Cancel",
+    "saved": "Changes saved",
+    "requestRemoval": "Request removal",
+    "removalTitle": "Request removal?",
+    "removalIntro": "The supporter's details will be removed from Tattara. Records are never deleted outright: they are anonymised.",
+    "confirmRemoval": "Request removal",
+    "removalRequested": "Removal requested",
+    "alreadyRequested": "Removal was already requested."
   }
 }

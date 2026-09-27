@@ -19,7 +19,7 @@ Also note blockers and anything the next session must know.
   (60 s stats cache) actually cache in a production build.
 - PWA is a minimal generateSW placeholder (manifest + sw.js build fine); 4.1 replaces it with injectManifest.
 - DB: `pnpm db:up && pnpm db:migrate`. Integration tests (`pnpm test:integration`) need the DB; they skip locally
-  without it and fail in CI. `pg_trgm` is available but not enabled: add it in the 3.4 (search) migration.
+  without it and fail in CI. `pg_trgm` is enabled by migration 0007 (3.4).
 - **1.3 data (see `data/SOURCES.md`):** fetched by `pnpm data:fetch:inec` / `data:fetch:grid3`.
   - Done: INEC hierarchy, 41,671 PUs (all 7 states match PRD counts exactly); GRID3 states (7), LGAs (186), wards v3.0 (2,004).
   - **PU coordinates partial:** 26,550 found, 3,856 returned none, 11,265 not yet asked. INEC started answering
@@ -73,6 +73,7 @@ Also note blockers and anything the next session must know.
 - **Capture (3.3):** `/app/capture` saves online through `POST /api/sync/push` (server side already final); 4.2/4.3
   switch the page to Dexie + outbox and add the client sync engine. Set `NUXT_PUBLIC_ORG_NAME` to the organisation
   named in the consent script (blank = "the party"). E2E web-server timeout is now 10 min (the build can take ~6).
+  On a busy laptop, build once and reuse it: `pnpm build && E2E_SKIP_BUILD=1 pnpm test:e2e` (CI still builds in the run).
   - **👤 Before the pilot:** a manual TalkBack pass on `/app/capture` on a real Android Go phone (e2e checks roles,
     labels and keyboard use, not the screen reader itself), and legal + native review of the consent script (7.4).
 - **First admin (2.6):** `pnpm admin:create --role ADMIN --name "…" --phone 0806…` prints a 72-hour setup link
@@ -108,3 +109,4 @@ Also note blockers and anything the next session must know.
 - 2026-09-26 · 3.1 · Supporters schema: `supporters` (consent/phone/anonymisation/PU CHECKs), `flags`, `pu_stats` (migration 0006); `server/services/supporters.ts` (create: idempotent by client id, own-PU only; update: LWW, audited field names; `serializeSupporter` masking; incremental `pu_stats` = recompute); dev seed + 5,000 supporters with planted flag patterns; meta-test: no supporter selects outside services · see commit `feat(supporters)`
 - 2026-09-26 · 3.2 · `shared/schemas/supporter.ts`: `supporterFieldsSchema` / `supporterFormSchema` (consent tick) / `supporterInputSchema` (UUIDv7, PU code, known consent version matching its language, consent ≤ capture + 60 s, GPS ranges) / `supporterPatchSchema` (editable fields only); strict objects reject unknown keys; `shared/constants/consent.ts` versions; `supporter.errors.*` in ha/en; output type = `SupporterInput` (type-checked) · see commit `feat(supporters)`
 - 2026-09-26 · 3.3 · Capture page `/app/capture` (PU leads; nav): UForm + `supporterFormSchema` with translated errors, chip radio groups, consent notice (HA/EN, tick time = consentAt), silent GPS (`useSilentGps`, fixes ≤ 2 min), sticky Save, clear + refocus + session counter; `POST /api/sync/push` + `pushSupporters` (per-item results, 120/min); consent scripts in `shared/constants/consent.ts` + `NUXT_PUBLIC_ORG_NAME`; E2E keyboard-only save, errors in ha/en, 403 for others, axe clean · see commit `feat(capture)`
+- 2026-09-27 · 3.4 · Supporter list `/app/supporters` (search: name contains / full phone / last ≥ 4 digits; ward lead PU filter; cursor paging by UUIDv7 id) + detail/edit `/app/supporters/[id]` (PU lead edits changed fields only; ward lead read-only) + removal request (audited, no hard delete); routes GET/PATCH `/supporters/:id`, GET `/supporters`, POST `/supporters/:id/removal`; migration 0007 `pg_trgm` + trigram indexes; `SupporterChoiceGroup` + `useSupporterOptions` shared with capture · see commit `feat(supporters)`

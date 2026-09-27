@@ -58,7 +58,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
 - [x] **3.2 Shared Zod schema** `shared/schemas/supporter.ts` (consent required, enums, max lengths).
 - [x] **3.3 Capture page** per UX §4.1 using Nuxt UI `UForm` + chip groups; consent script from `shared/constants/consent.ts`; silent GPS.
   **AC:** keyboard-only and TalkBack usable; required-field errors in the active language.
-- [ ] **3.4 Supporter list + detail + edit** (PU & ward), search by name/phone, cursor pagination.
+- [x] **3.4 Supporter list + detail + edit** (PU & ward), search by name/phone, cursor pagination.
 - [ ] **3.5 Phone duplicate check** (`/supporters/check-phone`) + the shared-phone rule (max 3).
 - [ ] **3.6 Access-control test suite** table-driven over every supporter/user/stats route × role × in/out-of-scope.
 - [ ] **3.7 Registered voters from the field** (PRD US-24). PU lead enters/updates their PU's registered-voter count

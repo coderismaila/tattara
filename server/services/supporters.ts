@@ -1,12 +1,12 @@
 // Supporter records (PRD §6.2, ARCHITECTURE §5 and §7, SECURITY_PRIVACY §3–4). Pure (DB injected).
 // The only module that reads or writes `supporters` directly (a test enforces it). Writes keep pu_stats in step in
 // the same transaction. Duplicate-phone limits (3.5) and flags (5.1) build on top of this.
-import { and, eq, sql, type SQL } from 'drizzle-orm'
+import { and, desc, eq, lt, ne, sql, type SQL } from 'drizzle-orm'
 import type { Db, DbLike } from '../db/client.ts'
 import { puStats, supporters, units, type Supporter } from '../db/schema/index.ts'
 import type { Role } from '../../shared/constants/roles.ts'
 import type { SessionUser } from '../../shared/types/auth.ts'
-import { supporterInputSchema } from '../../shared/schemas/supporter.ts'
+import { supporterInputSchema, type SupporterListQuery } from '../../shared/schemas/supporter.ts'
 import {
   SUPPORTER_EDITABLE_FIELDS,
   type MaskedSupporterDto,
@@ -16,10 +16,10 @@ import {
   type SupporterInput,
   type SupporterPatch,
 } from '../../shared/types/supporter.ts'
-import { maskPhoneForDisplay } from '../../shared/utils/phone.ts'
+import { maskPhoneForDisplay, normalizePhone } from '../../shared/utils/phone.ts'
 import { isValidPuCode, isWithin, unitLevel } from '../../shared/utils/pu-code.ts'
 import { isUuidV7 } from '../../shared/utils/uuid.ts'
-import { recordAudit } from './audit.ts'
+import { assertAuditMetaSafe, recordAudit } from './audit.ts'
 
 type Caller = Pick<SessionUser, 'id' | 'role' | 'unitCode'>
 
@@ -360,4 +360,84 @@ export async function pushSupporters(db: Db, caller: Caller, items: readonly unk
     }
   }
   return results
+}
+
+// ── List and search (US-8) ──────────────────────────────────────────────────
+
+export type ListSupportersResult
+  = | { kind: 'ok', items: Supporter[], nextCursor: string | null }
+    | { kind: 'forbidden' }
+
+/** `col` is the unit itself or anything under it (the text_pattern_ops range, as scopeWhere). */
+const underUnit = (col: typeof supporters.puCode, unitCode: string) =>
+  sql`(${col} ~>=~ ${unitCode} and ${col} ~<~ ${`${unitCode}0`})`
+
+/** Escape LIKE wildcards with `!` (the ESCAPE character used below; `!` avoids backslash-quoting pitfalls). */
+const escapeLike = (text: string) => text.replace(/[!%_]/g, c => `!${c}`)
+
+/**
+ * The search condition for `q`: a full phone number matches exactly; 4+ digits match the end of the number
+ * (leads often remember "…4567"); anything else is a case-insensitive "name contains". Uses the trigram indexes.
+ */
+export function searchCondition(q: string): SQL {
+  const compact = q.replace(/[\s\-()]/g, '')
+  if (/^\+?\d+$/.test(compact)) {
+    const phone = normalizePhone(compact)
+    if (phone) return eq(supporters.phone, phone)
+    const digits = compact.replace(/^\+/, '')
+    if (digits.length >= 4) return sql`${supporters.phone} like ${`%${digits}`}`
+  }
+  return sql`lower(${supporters.fullName}) like ${`%${escapeLike(q.toLowerCase())}%`} escape '!'`
+}
+
+/**
+ * Supporters a PU lead (own PU) or ward lead (own ward, optionally one PU) may see in full, newest first.
+ * UUIDv7 ids are time-ordered, so the cursor is the last id returned. Anonymised records are left out.
+ */
+export async function listSupporters(db: DbLike, caller: Caller, query: SupporterListQuery): Promise<ListSupportersResult> {
+  if (!FULL_VIEW_ROLES.includes(caller.role) || !caller.unitCode) return { kind: 'forbidden' }
+  if (query.pu && !isWithin(query.pu, caller.unitCode)) return { kind: 'forbidden' }
+
+  const conditions: SQL[] = [
+    query.pu ? eq(supporters.puCode, query.pu) : underUnit(supporters.puCode, caller.unitCode),
+    ne(supporters.status, 'anonymised'),
+  ]
+  if (query.q) conditions.push(searchCondition(query.q))
+  if (query.cursor) conditions.push(lt(supporters.id, query.cursor))
+
+  const rows = await db.select().from(supporters).where(and(...conditions)).orderBy(desc(supporters.id)).limit(query.limit + 1)
+  const items = rows.slice(0, query.limit)
+  return { kind: 'ok', items, nextCursor: rows.length > query.limit ? items[items.length - 1]!.id : null }
+}
+
+// ── Removal request (US-8: no hard delete) ──────────────────────────────────
+
+export type RequestRemovalResult
+  = | { kind: 'ok', supporter: Supporter }
+    | { kind: 'not_found' }
+    | { kind: 'already_requested' }
+
+/**
+ * Mark a supporter for removal (the anonymise job, 5.2, acts on it). PU or ward lead in scope. The record keeps
+ * counting in pu_stats until anonymised (it still counts then; only the PII goes). Audited with the reason.
+ */
+export async function requestRemoval(db: Db, caller: Caller, id: string, reason: string): Promise<RequestRemovalResult> {
+  assertAuditMetaSafe({ reason })
+  const row = await getSupporter(db, caller, id)
+  if (!row || row.status === 'anonymised') return { kind: 'not_found' }
+  if (row.status === 'removal_requested') return { kind: 'already_requested' }
+
+  const [updated] = await db.update(supporters)
+    .set({ status: 'removal_requested', updatedAt: sql`now()`, updatedBy: caller.id })
+    .where(and(eq(supporters.id, id), eq(supporters.status, 'active')))
+    .returning()
+  if (!updated) return { kind: 'already_requested' }
+  await recordAudit(db, { id: caller.id, role: caller.role, ip: null }, {
+    action: 'supporter.removal_request',
+    targetType: 'supporter',
+    targetId: id,
+    scopeCode: updated.puCode,
+    meta: { reason },
+  })
+  return { kind: 'ok', supporter: updated }
 }

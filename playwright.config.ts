@@ -23,7 +23,8 @@ export default defineConfig({
     { name: 'android-chrome', use: { ...devices['Pixel 5'] }, dependencies: ['setup'] },
   ],
   webServer: {
-    command: 'pnpm build && node .output/server/index.mjs',
+    // E2E_SKIP_BUILD=1 reuses an existing `pnpm build` output (the build can outlast the timeout on a busy laptop).
+    command: process.env.E2E_SKIP_BUILD ? 'node .output/server/index.mjs' : 'pnpm build && node .output/server/index.mjs',
     url: `http://localhost:${E2E_PORT}`,
     // Always a fresh server: a reused one could point at another database or send real SMS.
     reuseExistingServer: false,

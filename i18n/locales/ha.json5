@@ -101,6 +101,9 @@
 
     // TODO(ha-review)
     capture: 'Ƙara magoyi',
+
+    // TODO(ha-review)
+    supporters: 'Magoya baya',
   },
   lang: {
     // TODO(ha-review)
@@ -257,6 +260,26 @@
     },
   },
   supporter: {
+    status: {
+      // TODO(ha-review)
+      active: 'Mai aiki',
+      // TODO(ha-review)
+      removal_requested: 'An nemi cirewa',
+      // TODO(ha-review)
+      anonymised: 'An cire',
+    },
+    verification: {
+      // TODO(ha-review)
+      unverified: 'Ba a tabbatar ba tukuna',
+      // TODO(ha-review)
+      sms_delivered: 'SMS ya isa',
+      // TODO(ha-review)
+      callback_verified: 'An tabbatar ta waya',
+      // TODO(ha-review)
+      callback_failed: 'Kiran tabbatarwa bai yi nasara ba',
+      // TODO(ha-review)
+      opted_out: 'Ya fita',
+    },
     fields: {
       // TODO(ha-review)
       fullName: 'Cikakken suna',
@@ -314,6 +337,12 @@
       unsure: 'Ban sani ba',
     },
     errors: {
+      // TODO(ha-review)
+      reasonRequired: 'Ba da gajeren dalili.',
+      // TODO(ha-review)
+      reasonTooLong: 'Dalili kada ya wuce haruffa 200.',
+      // TODO(ha-review)
+      reasonPii: 'Cire lambar waya daga dalilin.',
       // TODO(ha-review)
       tooManyItems: 'Bayanai sun yi yawa a aika ɗaya. Sake gwadawa.',
       // TODO(ha-review)
@@ -401,5 +430,61 @@
       // TODO(ha-review)
       unknown: 'Wani abu ya faru. Sake ajiyewa.',
     },
+  },
+  supporters: {
+    // TODO(ha-review)
+    title: 'Magoya baya',
+    // TODO(ha-review)
+    search: 'Nema',
+    // TODO(ha-review)
+    searchHelp: 'Suna, lambar waya, ko lambobinta 4 na ƙarshe.',
+    // TODO(ha-review)
+    puFilter: 'Rumfar zaɓe',
+    // TODO(ha-review)
+    allPus: 'Duk rumfuna',
+    // TODO(ha-review)
+    empty: 'Babu magoya baya tukuna.',
+    // TODO(ha-review)
+    noResults: 'Babu magoyin baya da ya dace da wannan nema.',
+    // TODO(ha-review)
+    showMore: 'Nuna ƙari',
+    // TODO(ha-review)
+    notAllowed: 'Shugabannin rumfa da na mazaɓa ne kaɗai ke ganin jerin magoya baya.',
+  },
+  supporterDetail: {
+    // TODO(ha-review)
+    back: 'Duk magoya baya',
+    // TODO(ha-review)
+    notFound: 'Ba a sami wannan magoyin baya ba, ko ba ya yankinka.',
+    // TODO(ha-review)
+    pu: 'Rumfar zaɓe',
+    // TODO(ha-review)
+    added: 'An ƙara',
+    // TODO(ha-review)
+    verification: 'Tabbatarwa',
+    // TODO(ha-review)
+    yes: 'E',
+    // TODO(ha-review)
+    no: 'A\'a',
+    // TODO(ha-review)
+    edit: 'Gyara',
+    // TODO(ha-review)
+    save: 'Ajiye canje-canje',
+    // TODO(ha-review)
+    cancel: 'Soke',
+    // TODO(ha-review)
+    saved: 'An ajiye canje-canje',
+    // TODO(ha-review)
+    requestRemoval: 'Nemi a cire',
+    // TODO(ha-review)
+    removalTitle: 'A nemi a cire?',
+    // TODO(ha-review)
+    removalIntro: 'Za a cire bayanan magoyin baya daga Tattara. Ba a goge bayani kai tsaye: ana ɓoye sunansa da lambarsa.',
+    // TODO(ha-review)
+    confirmRemoval: 'Nemi a cire',
+    // TODO(ha-review)
+    removalRequested: 'An nemi a cire',
+    // TODO(ha-review)
+    alreadyRequested: 'An riga an nemi a cire.',
   },
 }

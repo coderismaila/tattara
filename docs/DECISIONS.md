@@ -185,3 +185,12 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - Form controls stay disabled until hydrated (as login/setup, ADR-024); after a failed save, focus moves to the first field with an error. UForm disables its controls while validating, so focus is retried until the field is enabled again.
 - **SMS sent-now fix (found by E2E):** Nitro's `runTask` joins a run already in progress, so an OTP queued during that run waited for the next minute tick (two leads signing in together). `sendQueuedSmsNow` now runs the task once more after an in-flight run.
 **Consequences:** 3.5 adds the inline duplicate-phone warning. 4.2 replaces the online save with a local write; the result handling (accepted/duplicate/rejected reasons) moves to the Sync screen (4.4).
+
+### ADR-030 · 2026-09-27 · Accepted · Supporter list, search and removal requests
+**Decision:**
+- **Search:** one box. A value that normalises to a full Nigerian mobile matches the phone exactly; 4+ digits match the end of the number (leads remember "…4567"); anything else is a case-insensitive "name contains". Backed by `pg_trgm` GIN indexes on `lower(full_name)` and `phone` (migration 0007). LIKE wildcards in the search are escaped with `!`.
+- **Paging:** newest first by `id` descending. UUIDv7 ids are time-ordered, so the cursor is the last id returned (no offset, stable while new records arrive).
+- **Visibility:** PU lead: own PU; ward lead: own ward, optionally one PU of it. Everyone above ward gets 403 on the list; single-record routes answer 404 for unknown, anonymised and out-of-scope ids alike. Anonymised records never appear.
+- **Removal request (US-8):** PU or ward lead in scope; status `removal_requested`, audited with the reason (PII-guarded). The record stays counted in `pu_stats` (anonymisation, 5.2, keeps the enums too).
+- **Edit:** the detail page sends only the fields that changed; ward leads are read-only (PATCH 403).
+**Consequences:** 5.2's anonymise job picks up `removal_requested` records. The offline list (4.x) will search the Dexie copy with the same rules.

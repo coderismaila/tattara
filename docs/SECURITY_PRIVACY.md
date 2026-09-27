@@ -51,6 +51,10 @@ ADMIN has no default read access to supporter PII; break-glass access requires a
   API routes never return raw DB rows.
 - **Tests (required):** for every supporter/user/stats route, a table-driven test asserts that
   each role in and out of scope gets the correct status and fields. See IMPLEMENTATION_PLAN task 3.6.
+  The matrix is `test/e2e/access/matrix.ts` (every route × 11 callers: signed out, admin, DG, the Kano chain in
+  scope, the Katsina chain out of scope), run over real HTTP against the production build by the `access`
+  Playwright project. `test/unit/access-matrix.test.ts` fails when a file under `server/api/` has no entry.
+  **A new route needs a matrix entry in the same change.**
 
 ## 5. Authentication and sessions
 - PINs hashed with argon2id (memory ≥ 19 MiB). Never log PINs or OTPs.

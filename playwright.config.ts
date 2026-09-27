@@ -17,10 +17,14 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   projects: [
-    // Signs the app-shell user in once and saves the session (test-results/auth-state.json).
-    { name: 'setup', testMatch: /auth\.setup\.ts/, use: { ...devices['Pixel 5'] } },
+    // Access-control matrix (task 3.6) runs FIRST: later specs deactivate users, replace the DG and lock an account,
+    // and the matrix needs every seeded user intact. The chain also keeps two logins of one user from racing for OTPs.
+    { name: 'access-setup', testMatch: /access[\\/]access\.setup\.ts/ },
+    { name: 'access', testMatch: /access[\\/]access\.spec\.ts/, dependencies: ['access-setup'] },
+    // Signs the shared test users in once and saves their sessions (test-results/*-state.json).
+    { name: 'setup', testMatch: /auth\.setup\.ts/, use: { ...devices['Pixel 5'] }, dependencies: ['access'] },
     // Chromium only: the target is Android Chrome. Pixel 5 is the closest stock device profile.
-    { name: 'android-chrome', use: { ...devices['Pixel 5'] }, dependencies: ['setup'] },
+    { name: 'android-chrome', use: { ...devices['Pixel 5'] }, testIgnore: /access[\\/]/, dependencies: ['setup'] },
   ],
   webServer: {
     // E2E_SKIP_BUILD=1 reuses an existing `pnpm build` output (the build can outlast the timeout on a busy laptop).

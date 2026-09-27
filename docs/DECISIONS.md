@@ -203,3 +203,12 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - **`check-phone` returns counts only** (`countInSystem`, `samePu`, `limitReached`): no names, PUs or ids, PU leads only, 60/min per user, because even a count tells whether a number is known.
 - **Capture notice:** checked when the phone field is left, calm and inline (text in the normal colour, only the icon amber/red, for contrast in sunlight); silent when offline. The local (Dexie) same-PU check arrives with 4.2.
 **Consequences:** 5.1's `duplicate_phone` flag covers 2–3 uses; the Sync screen (4.4) explains `phone_limit` rejections.
+
+### ADR-032 · 2026-09-27 · Accepted · Access-control matrix over real HTTP
+**Decision:**
+- **The access suite calls the production build over HTTP** (a Playwright project), not the services: it exercises the real session cookies, `requireAuth`, the origin check, route-level role checks and the serialisers together, which is where a leak would happen.
+- **Matrix shape:** one entry per route file, keyed `METHOD /api/path`, with an expected status for all 11 callers (a `Record`, so a missing caller is a type error) and optional field checks. Every response is also scanned for forbidden keys (`pinHash`, `token`, `deviceId`, …).
+- **Mutating routes** run denied callers first, then allowed ones on their own throwaway fixtures, so each case is independent.
+- **Ordering:** `access-setup → access → setup → android-chrome`. The matrix needs every seeded user intact, and later specs deactivate a PU lead, replace the DG and lock an account; the chain also stops two logins of one user racing for OTPs.
+- **Meta-test** (unit project, runs in CI's check job): the matrix keys must equal the route files under `server/api/`, so a new route can't ship without an entry, and a removed route can't leave a stale one.
+**Consequences:** 3.7 and the stats routes (6.1) add their entries in the same change. Checked that the suite fails on a wrong status and on unmasked phones.

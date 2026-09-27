@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createDb, type Db } from '../../server/db/client'
 import { runMigrations } from '../../server/db/migrate'
 import { auditLog, puStats, supporters, units, users } from '../../server/db/schema'
-import { createSupporter, getSupporter, recomputePuStats, updateSupporter } from '../../server/services/supporters'
+import { createSupporter, getSupporter, pushSupporters, recomputePuStats, updateSupporter } from '../../server/services/supporters'
 import { seedDev } from '../../scripts/seed/run'
 import type { SessionUser } from '../../shared/types/auth'
 import type { SupporterInput } from '../../shared/types/supporter'
@@ -36,7 +36,7 @@ const input = (over: Partial<SupporterInput> = {}): SupporterInput => ({
   consentLanguage: 'ha',
   gps: { lat: 12.0, lng: 8.52, accuracyM: 12.4 },
   capturedAt: '2026-09-26T08:00:05.000Z',
-  deviceId: 'device-test',
+  deviceId: '4b0c6d1e-2f3a-4b5c-8d7e-9f0a1b2c3d4e',
   ...over,
 })
 
@@ -187,6 +187,42 @@ describe.skipIf(!dbAvailable)('supporters service', () => {
     expect((await getSupporter(db, who.kanoWard!, id))?.id).toBe(id)
     expect(await getSupporter(db, who.katsinaWard!, id)).toBeNull()
     expect(await getSupporter(db, who.dg!, id)).toBeNull()
+  })
+
+  describe('pushSupporters', () => {
+    it('handles each item on its own and answers in order', async () => {
+      const good = input()
+      await createSupporter(db, who.kanoPu!, good)
+      const fresh = input()
+      const noConsent = { ...input(), consentVersion: 'c9-ha' }
+      const junk = { id: 'not-an-id', fullName: 'X' }
+      const elsewhere = input({ puCode: '19/01/01/002' })
+
+      const results = await pushSupporters(db, who.kanoPu!, [fresh, good, noConsent, junk, elsewhere, null])
+      expect(results.map(r => [r.result, 'reason' in r ? r.reason : null])).toEqual([
+        ['accepted', null],
+        ['duplicate', null],
+        ['rejected', 'no_consent'],
+        ['rejected', 'invalid'],
+        ['rejected', 'out_of_scope'],
+        ['rejected', 'invalid'],
+      ])
+      expect(results[0]).toMatchObject({ id: fresh.id, serverUpdatedAt: expect.any(String) })
+      expect(results[2]!.id).toBe(noConsent.id)
+      expect(results[3]!.id).toBeNull()
+    })
+
+    it('reports issues as i18n keys and paths, never the submitted values', async () => {
+      const bad = input({ fullName: 'M', phone: 'call 08031234567' as never })
+      const [r] = await pushSupporters(db, who.kanoPu!, [bad])
+      expect(r).toMatchObject({ result: 'rejected', reason: 'invalid' })
+      const issues = (r as { issues: { path: string, message: string }[] }).issues
+      expect(issues).toEqual(expect.arrayContaining([
+        { path: 'fullName', message: 'supporter.errors.nameRequired' },
+        { path: 'phone', message: 'auth.errors.phoneInvalid' },
+      ]))
+      expect(JSON.stringify(r)).not.toContain('08031234567')
+    })
   })
 
   it('incremental pu_stats equal a full recompute', async () => {

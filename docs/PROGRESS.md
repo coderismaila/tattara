@@ -70,6 +70,11 @@ Also note blockers and anything the next session must know.
   `getSupporter`, `serializeSupporter`); it keeps `pu_stats` in step. The phone limit (3.5) and flags (5.1) are not in
   it yet. Routes must map `rejected` reasons to the sync item results (`invalid`, `no_consent`, `out_of_scope`,
   `pu_inactive`). Dev DB has 5,000 supporters: re-run `pnpm db:seed:dev` after `pnpm db:migrate`.
+- **Capture (3.3):** `/app/capture` saves online through `POST /api/sync/push` (server side already final); 4.2/4.3
+  switch the page to Dexie + outbox and add the client sync engine. Set `NUXT_PUBLIC_ORG_NAME` to the organisation
+  named in the consent script (blank = "the party"). E2E web-server timeout is now 10 min (the build can take ~6).
+  - **👤 Before the pilot:** a manual TalkBack pass on `/app/capture` on a real Android Go phone (e2e checks roles,
+    labels and keyboard use, not the screen reader itself), and legal + native review of the consent script (7.4).
 - **First admin (2.6):** `pnpm admin:create --role ADMIN --name "…" --phone 0806…` prints a 72-hour setup link
   (open it on that phone, choose a PIN); add `--sms` to also text it. The admin then invites the DG at `/app/admin`.
   In production run the same command on the server with its `NUXT_DATABASE_URL` / `NUXT_PUBLIC_SITE_URL`.
@@ -102,3 +107,4 @@ Also note blockers and anything the next session must know.
 - 2026-09-26 · 2.6 · Admin bootstrap: `pnpm admin:create` (only way to create an ADMIN; also DG, `--replace`, `--sms`); `GET /admin/dg` + `POST /admin/users/dg` (ADMIN only, one active DG, replace/supersede/resend, SMS invite, token never returned); `/app/admin` page + nav; E2E admin → DG → PIN, 403 for others, axe clean · see commit `feat(admin)`
 - 2026-09-26 · 3.1 · Supporters schema: `supporters` (consent/phone/anonymisation/PU CHECKs), `flags`, `pu_stats` (migration 0006); `server/services/supporters.ts` (create: idempotent by client id, own-PU only; update: LWW, audited field names; `serializeSupporter` masking; incremental `pu_stats` = recompute); dev seed + 5,000 supporters with planted flag patterns; meta-test: no supporter selects outside services · see commit `feat(supporters)`
 - 2026-09-26 · 3.2 · `shared/schemas/supporter.ts`: `supporterFieldsSchema` / `supporterFormSchema` (consent tick) / `supporterInputSchema` (UUIDv7, PU code, known consent version matching its language, consent ≤ capture + 60 s, GPS ranges) / `supporterPatchSchema` (editable fields only); strict objects reject unknown keys; `shared/constants/consent.ts` versions; `supporter.errors.*` in ha/en; output type = `SupporterInput` (type-checked) · see commit `feat(supporters)`
+- 2026-09-26 · 3.3 · Capture page `/app/capture` (PU leads; nav): UForm + `supporterFormSchema` with translated errors, chip radio groups, consent notice (HA/EN, tick time = consentAt), silent GPS (`useSilentGps`, fixes ≤ 2 min), sticky Save, clear + refocus + session counter; `POST /api/sync/push` + `pushSupporters` (per-item results, 120/min); consent scripts in `shared/constants/consent.ts` + `NUXT_PUBLIC_ORG_NAME`; E2E keyboard-only save, errors in ha/en, 403 for others, axe clean · see commit `feat(capture)`

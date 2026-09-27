@@ -98,6 +98,9 @@
     team: 'Tawaga',
     // TODO(ha-review)
     admin: 'Gudanarwa',
+
+    // TODO(ha-review)
+    capture: 'Ƙara magoyi',
   },
   lang: {
     // TODO(ha-review)
@@ -254,7 +257,65 @@
     },
   },
   supporter: {
+    fields: {
+      // TODO(ha-review)
+      fullName: 'Cikakken suna',
+      // TODO(ha-review)
+      phone: 'Lambar waya',
+      // TODO(ha-review)
+      sharedPhone: 'Waya ta tarayya',
+      // TODO(ha-review)
+      address: 'Adireshi ko alama',
+      // TODO(ha-review)
+      gender: 'Jinsi',
+      // TODO(ha-review)
+      ageBand: 'Shekaru',
+      // TODO(ha-review)
+      supportLevel: 'Goyon baya',
+      // TODO(ha-review)
+      hasPvc: 'Yana da PVC',
+      // TODO(ha-review)
+      volunteer: 'Zai iya zama ɗan agaji',
+    },
+    gender: {
+      // TODO(ha-review)
+      male: 'Namiji',
+      // TODO(ha-review)
+      female: 'Mace',
+    },
+    ageBand: {
+      // TODO(ha-review)
+      '18_24': '18–24',
+      // TODO(ha-review)
+      '25_34': '25–34',
+      // TODO(ha-review)
+      '35_44': '35–44',
+      // TODO(ha-review)
+      '45_54': '45–54',
+      // TODO(ha-review)
+      '55_64': '55–64',
+      // TODO(ha-review)
+      '65_plus': '65+',
+    },
+    supportLevel: {
+      // TODO(ha-review)
+      strong: 'Sosai',
+      // TODO(ha-review)
+      leaning: 'Kaɗan',
+      // TODO(ha-review)
+      undecided: 'Ba tabbas',
+    },
+    hasPvc: {
+      // TODO(ha-review)
+      yes: 'E',
+      // TODO(ha-review)
+      no: 'A\'a',
+      // TODO(ha-review)
+      unsure: 'Ban sani ba',
+    },
     errors: {
+      // TODO(ha-review)
+      tooManyItems: 'Bayanai sun yi yawa a aika ɗaya. Sake gwadawa.',
       // TODO(ha-review)
       invalid: 'Akwai abin da ba daidai ba a wannan bayani. Duba ka sake gwadawa.',
       // TODO(ha-review)
@@ -277,6 +338,68 @@
       puInvalid: 'Wannan rumfar zaɓe ba daidai ba ce.',
       // TODO(ha-review)
       nothingToSave: 'Babu abin da aka canza.',
+    },
+  },
+  capture: {
+    // TODO(ha-review)
+    title: 'Ƙara magoyi baya',
+    // TODO(ha-review)
+    pu: 'Rumfa {code} · {name}',
+    // TODO(ha-review)
+    requiredNote: 'Wuraren da ke da * dole ne a cika su.',
+    // TODO(ha-review)
+    sharedPhoneHelp: 'Yi alama idan wannan lambar ta iyali ce (har mutum 3).',
+    // TODO(ha-review)
+    addressHelp: 'Gida, titi ko alama kusa da inda yake zaune.',
+    // TODO(ha-review)
+    consentRead: 'Karanta masa sanarwar izini',
+    // TODO(ha-review)
+    consentLanguage: 'Harshen sanarwa',
+    consentLanguageName: {
+      // TODO(ha-review)
+      ha: 'Hausa',
+      // TODO(ha-review)
+      en: 'English',
+    },
+    // TODO(ha-review)
+    consentAgree: 'Ya amince',
+    // TODO(ha-review)
+    save: 'Ajiye',
+    // TODO(ha-review)
+    saved: 'An ajiye',
+    // TODO(ha-review)
+    sessionCount: 'An ajiye {count} a wannan zama',
+    // TODO(ha-review)
+    notAllowed: 'Shugabannin rumfa ne kaɗai ke ƙara magoya baya.',
+    gps: {
+      // TODO(ha-review)
+      waiting: 'Ana neman wuri…',
+      // TODO(ha-review)
+      ok: 'Wuri ±{metres} m',
+      // TODO(ha-review)
+      denied: 'Babu wuri (an hana izini)',
+      // TODO(ha-review)
+      unavailable: 'Babu wuri',
+    },
+    errors: {
+      // TODO(ha-review)
+      invalid: 'Akwai abin da ba daidai ba. Duba wuraren ka sake ajiyewa.',
+      // TODO(ha-review)
+      no_consent: 'Babu izini. Karanta masa sanarwar ka yi alama cewa ya amince.',
+      // TODO(ha-review)
+      out_of_scope: 'Za ka iya ƙara magoya baya na rumfarka kaɗai.',
+      // TODO(ha-review)
+      pu_inactive: 'Wannan rumfa ba ta aiki yanzu. Tuntuɓi shugaban mazaɓarka.',
+      // TODO(ha-review)
+      conflict: 'Ba a iya ajiye wannan bayani ba. Sake ajiyewa.',
+      // TODO(ha-review)
+      network: 'Ba a iya kaiwa sabar ba. Duba haɗin intanet ka sake ajiyewa.',
+      // TODO(ha-review)
+      not_allowed: 'Shugabannin rumfa ne kaɗai ke ƙara magoya baya.',
+      // TODO(ha-review)
+      rate_limited: 'Ajiya ta yi yawa cikin ɗan lokaci. Jira minti ɗaya ka sake.',
+      // TODO(ha-review)
+      unknown: 'Wani abu ya faru. Sake ajiyewa.',
     },
   },
 }

@@ -14,6 +14,7 @@ export const TEAM_ROLES: readonly Role[] = ['DG', 'STATE_LEAD', 'LGA_LEAD', 'WAR
 
 export const APP_NAV: readonly NavItem[] = [
   { to: '/app', labelKey: 'nav.home', icon: 'i-lucide-house' },
+  { to: '/app/capture', labelKey: 'nav.capture', icon: 'i-lucide-user-plus', roles: ['PU_LEAD'] },
   { to: '/app/team', labelKey: 'nav.team', icon: 'i-lucide-users', roles: TEAM_ROLES },
   { to: '/app/admin', labelKey: 'nav.admin', icon: 'i-lucide-shield', roles: ['ADMIN'] },
   { to: '/app/settings', labelKey: 'nav.settings', icon: 'i-lucide-settings' },

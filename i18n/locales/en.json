@@ -52,7 +52,8 @@
     "home": "Home",
     "settings": "Settings",
     "team": "Team",
-    "admin": "Admin"
+    "admin": "Admin",
+    "capture": "Add supporter"
   },
   "lang": {
     "label": "Language",
@@ -152,7 +153,76 @@
       "consentAfterCapture": "The consent time is after the save time. Check the phone's clock.",
       "gpsInvalid": "The location reading is not valid.",
       "puInvalid": "This polling unit is not valid.",
-      "nothingToSave": "Nothing was changed."
+      "nothingToSave": "Nothing was changed.",
+      "tooManyItems": "Too many records in one send. Try again."
+    },
+    "fields": {
+      "fullName": "Full name",
+      "phone": "Phone number",
+      "sharedPhone": "Shared phone",
+      "address": "Address or landmark",
+      "gender": "Gender",
+      "ageBand": "Age",
+      "supportLevel": "Support",
+      "hasPvc": "Has a PVC",
+      "volunteer": "Can volunteer"
+    },
+    "gender": {
+      "male": "Male",
+      "female": "Female"
+    },
+    "ageBand": {
+      "18_24": "18–24",
+      "25_34": "25–34",
+      "35_44": "35–44",
+      "45_54": "45–54",
+      "55_64": "55–64",
+      "65_plus": "65+"
+    },
+    "supportLevel": {
+      "strong": "Strong",
+      "leaning": "Leaning",
+      "undecided": "Undecided"
+    },
+    "hasPvc": {
+      "yes": "Yes",
+      "no": "No",
+      "unsure": "Not sure"
+    }
+  },
+  "capture": {
+    "title": "Add supporter",
+    "pu": "Polling unit {code} · {name}",
+    "requiredNote": "Fields marked * are required.",
+    "sharedPhoneHelp": "Tick if this number is shared with family members (up to 3 people).",
+    "addressHelp": "A house, street or landmark near where they live.",
+    "consentRead": "Read the consent notice to them",
+    "consentLanguage": "Language of the notice",
+    "consentLanguageName": {
+      "ha": "Hausa",
+      "en": "English"
+    },
+    "consentAgree": "They agree",
+    "save": "Save",
+    "saved": "Saved",
+    "sessionCount": "{count} saved this session",
+    "notAllowed": "Only polling unit leads add supporters.",
+    "gps": {
+      "waiting": "Finding location…",
+      "ok": "Location ±{metres} m",
+      "denied": "No location (permission off)",
+      "unavailable": "No location"
+    },
+    "errors": {
+      "invalid": "Something in this record is not valid. Check the fields and save again.",
+      "no_consent": "Consent is missing. Read the notice and tick that they agree.",
+      "out_of_scope": "You can only add supporters for your own polling unit.",
+      "pu_inactive": "This polling unit is no longer active. Contact your ward lead.",
+      "conflict": "This record could not be saved. Save it again.",
+      "network": "Could not reach the server. Check your connection and save again.",
+      "not_allowed": "Only polling unit leads add supporters.",
+      "rate_limited": "Too many saves in a short time. Wait a minute and save again.",
+      "unknown": "Something went wrong. Save again."
     }
   }
 }

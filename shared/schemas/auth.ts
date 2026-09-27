@@ -1,7 +1,7 @@
 // Auth request schemas, shared by the client forms and the server routes (CLAUDE.md: Zod in shared/schemas).
 // Error messages are i18n keys; the client translates them.
 import { z } from 'zod'
-import { normalizePhone } from '../utils/phone'
+import { normalizePhone } from '../utils/phone.ts'
 
 /** Nigerian mobile, any common format in → E.164 out. */
 export const phoneSchema = z.string().trim().transform((value, ctx) => {

@@ -6,9 +6,11 @@ import type { Db, DbLike } from '../db/client.ts'
 import { puStats, supporters, units, type Supporter } from '../db/schema/index.ts'
 import type { Role } from '../../shared/constants/roles.ts'
 import type { SessionUser } from '../../shared/types/auth.ts'
+import { supporterInputSchema } from '../../shared/schemas/supporter.ts'
 import {
   SUPPORTER_EDITABLE_FIELDS,
   type MaskedSupporterDto,
+  type SyncItemResult,
   type SupporterDto,
   type SupporterEditableField,
   type SupporterInput,
@@ -320,4 +322,42 @@ export async function updateSupporter(db: Db, caller: Caller, id: string, patch:
     })
   }
   return result
+}
+
+// ── Sync push ───────────────────────────────────────────────────────────────
+
+/** Consent problems get their own reason so the Sync screen can say "ask for consent again". */
+const CONSENT_PATHS = new Set(['consentAt', 'consentVersion', 'consentLanguage'])
+
+/**
+ * Process a push batch (≤ 50 items, checked by the route): each item is validated and created on its own, in order,
+ * so one bad record never blocks the rest. Issues carry i18n keys and field paths only, never input values.
+ */
+export async function pushSupporters(db: Db, caller: Caller, items: readonly unknown[]): Promise<SyncItemResult[]> {
+  const results: SyncItemResult[] = []
+  for (const item of items) {
+    const rawId = (item as { id?: unknown } | null)?.id
+    const id = typeof rawId === 'string' && isUuidV7(rawId) ? rawId : null
+    const parsed = supporterInputSchema.safeParse(item)
+    if (!parsed.success) {
+      const issues = parsed.error.issues.map(i => ({ path: i.path.join('.'), message: i.message }))
+      // Only consent at fault → no_consent (the Sync screen says "ask for consent again"); anything else → invalid.
+      const reason = issues.every(i => CONSENT_PATHS.has(i.path)) ? 'no_consent' : 'invalid'
+      results.push({ id, result: 'rejected', reason, issues })
+      continue
+    }
+    const r = await createSupporter(db, caller, parsed.data)
+    switch (r.kind) {
+      case 'accepted':
+      case 'duplicate':
+        results.push({ id: r.supporter.id, result: r.kind, serverUpdatedAt: r.supporter.updatedAt.toISOString() })
+        break
+      case 'conflict':
+        results.push({ id: parsed.data.id, result: 'conflict' })
+        break
+      case 'rejected':
+        results.push({ id: parsed.data.id, result: 'rejected', reason: r.reason })
+    }
+  }
+  return results
 }

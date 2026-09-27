@@ -56,7 +56,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
 
 - [x] **3.1 Schema:** supporters, flags, pu_stats; the service `server/services/supporters.ts` with create/update/serialize and incremental pu_stats updates. Also: extend the dev seed with 5,000 fake supporters (some flag-worthy).
 - [x] **3.2 Shared Zod schema** `shared/schemas/supporter.ts` (consent required, enums, max lengths).
-- [ ] **3.3 Capture page** per UX §4.1 using Nuxt UI `UForm` + chip groups; consent script from `shared/constants/consent.ts`; silent GPS.
+- [x] **3.3 Capture page** per UX §4.1 using Nuxt UI `UForm` + chip groups; consent script from `shared/constants/consent.ts`; silent GPS.
   **AC:** keyboard-only and TalkBack usable; required-field errors in the active language.
 - [ ] **3.4 Supporter list + detail + edit** (PU & ward), search by name/phone, cursor pagination.
 - [ ] **3.5 Phone duplicate check** (`/supporters/check-phone`) + the shared-phone rule (max 3).

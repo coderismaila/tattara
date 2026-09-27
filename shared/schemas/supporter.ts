@@ -2,11 +2,11 @@
 // shared/schemas). Error messages are i18n keys. Objects are strict: an unknown key (say `pvcNumber` or `nin`) is
 // rejected, not silently dropped, so no new sensitive field can sneak in through the API (CLAUDE.md rule 3).
 import { z } from 'zod'
-import { AGE_BANDS, CONSENT_LANGUAGES, GENDERS, HAS_PVC, SUPPORT_LEVELS } from '../constants/enums'
-import { CONSENT_VERSIONS, consentLanguageOf } from '../constants/consent'
-import { isValidPuCode, unitLevel } from '../utils/pu-code'
-import { isUuidV7 } from '../utils/uuid'
-import { phoneSchema } from './auth'
+import { AGE_BANDS, CONSENT_LANGUAGES, GENDERS, HAS_PVC, SUPPORT_LEVELS } from '../constants/enums.ts'
+import { CONSENT_VERSIONS, consentLanguageOf } from '../constants/consent.ts'
+import { isValidPuCode, unitLevel } from '../utils/pu-code.ts'
+import { isUuidV7 } from '../utils/uuid.ts'
+import { phoneSchema } from './auth.ts'
 
 /** Consent may be recorded at most this long after the capture time (both come from the same phone clock). */
 export const CONSENT_AFTER_CAPTURE_TOLERANCE_MS = 60_000
@@ -96,3 +96,15 @@ export const supporterPatchSchema = z.strictObject({
 
 export type SupporterFields = z.infer<typeof supporterFieldsSchema>
 export type SupporterForm = z.input<typeof supporterFormSchema>
+
+// ── Sync push (API.md) ──────────────────────────────────────────────────────
+
+export const SYNC_PUSH_MAX_ITEMS = 50
+
+/** The batch envelope only: each item is validated on its own, so one bad record doesn't reject the others. */
+export const syncPushSchema = z.strictObject({
+  items: z.array(z.unknown(), 'supporter.errors.invalid')
+    .min(1, 'supporter.errors.invalid')
+    .max(SYNC_PUSH_MAX_ITEMS, 'supporter.errors.tooManyItems'),
+})
+export type SupporterFormOutput = z.output<typeof supporterFormSchema>

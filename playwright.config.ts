@@ -27,7 +27,8 @@ export default defineConfig({
     url: `http://localhost:${E2E_PORT}`,
     // Always a fresh server: a reused one could point at another database or send real SMS.
     reuseExistingServer: false,
-    timeout: 300_000,
+    // The production build takes 3–6 min on a dev laptop.
+    timeout: 600_000,
     env: {
       PORT: String(E2E_PORT),
       NUXT_DATABASE_URL: E2E_DB_URL,

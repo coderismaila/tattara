@@ -15,9 +15,28 @@ export function useAuthConfig(): AuthConfig {
   return cached
 }
 
-/** Send queued SMS now rather than on the next minute tick (OTPs must arrive in seconds). Fire-and-forget. */
+let running: Promise<unknown> | null = null
+let rerun = false
+
+/**
+ * Send queued SMS now rather than on the next minute tick (OTPs must arrive in seconds). Fire-and-forget.
+ * Nitro's runTask joins a run already in progress, which would miss a message queued during that run (two leads
+ * signing in at once): so if a run is in flight, run once more when it ends.
+ */
 export function sendQueuedSmsNow(): void {
-  runTask('sms:process').catch((error: unknown) => {
-    console.error('[sms] immediate send failed; the scheduled task will retry:', error instanceof Error ? error.message : error)
-  })
+  if (running) {
+    rerun = true
+    return
+  }
+  running = runTask('sms:process')
+    .catch((error: unknown) => {
+      console.error('[sms] immediate send failed; the scheduled task will retry:', error instanceof Error ? error.message : error)
+    })
+    .finally(() => {
+      running = null
+      if (rerun) {
+        rerun = false
+        sendQueuedSmsNow()
+      }
+    })
 }

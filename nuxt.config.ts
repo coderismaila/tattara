@@ -42,7 +42,7 @@ export default defineNuxtConfig({
     // HMAC key for OTP codes at rest (NUXT_OTP_SECRET, ≥ 32 chars).
     otpSecret: '',
     // siteUrl: base for links sent by SMS (invites), NUXT_PUBLIC_SITE_URL.
-    public: { appVersion: '', gpsFlagMeters: 3000, siteUrl: 'http://localhost:3000' },
+    public: { appVersion: '', gpsFlagMeters: 3000, siteUrl: 'http://localhost:3000', orgName: '' },
   },
 
   alias: {

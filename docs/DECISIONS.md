@@ -174,3 +174,14 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - **Consent:** the version must be a known one (`shared/constants/consent.ts`) and its language must equal `consentLanguage`. Consent may not be recorded more than 60 s after the capture time. Both times come from the phone's clock, so no check against server time (offline captures sync days later).
 - `SupporterInput.consentVersion` narrows to the known versions; stored records keep any past version string.
 **Consequences:** A new consent wording means adding a version (old records keep theirs). 3.3 adds the script text to `consent.ts`.
+
+### ADR-029 · 2026-09-26 · Accepted · Capture page and the early sync push route
+**Decision:**
+- **The server side of `POST /api/sync/push` lands with the capture page (3.3), not 4.3.** Phase 3 is online-only, and the page needed a save route; a separate `POST /supporters` would be thrown away when capture goes local-first. The page sends one item per save now; 4.2/4.3 put Dexie + the outbox in front of the same route.
+- **Per-item processing:** each item is validated with `supporterInputSchema` and created on its own, in order. `no_consent` only when every issue is a consent field (a malformed record is `invalid`). Issues carry field paths and i18n keys, never values.
+- **Consent scripts are versioned constants** (`shared/constants/consent.ts`), not i18n strings: the stored `consentVersion` must identify the exact words read. The lead can read the notice in Hausa or English whatever the app language; the version follows the notice's language, and the tick time becomes `consentAt`. The organisation's name comes from `NUXT_PUBLIC_ORG_NAME` so the code names no party.
+- **Chip groups are `URadioGroup` (table variant, hidden indicator)**, so they're real radio groups with a legend: arrow keys and Space work, and TalkBack announces "radio button, 1 of 3".
+- **Silent GPS:** `watchPosition` while the page is open, high accuracy; a capture gets the latest fix only if it's under 2 minutes old; denied or no signal never blocks saving (PRD R-4).
+- Form controls stay disabled until hydrated (as login/setup, ADR-024); after a failed save, focus moves to the first field with an error. UForm disables its controls while validating, so focus is retried until the field is enabled again.
+- **SMS sent-now fix (found by E2E):** Nitro's `runTask` joins a run already in progress, so an OTP queued during that run waited for the next minute tick (two leads signing in together). `sendQueuedSmsNow` now runs the task once more after an in-flight run.
+**Consequences:** 3.5 adds the inline duplicate-phone warning. 4.2 replaces the online save with a local write; the result handling (accepted/duplicate/rejected reasons) moves to the Sync screen (4.4).

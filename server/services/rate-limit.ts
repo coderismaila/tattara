@@ -23,6 +23,8 @@ export const RATE_LIMITS = {
   otpSend: { limit: 3, windowSec: 60 * 60 },
   // Per inviter: each invite is an SMS.
   invite: { limit: 100, windowSec: 60 * 60 },
+  // Per user (ARCHITECTURE §6): the sync engine pushes ≤ 50 items per request.
+  syncPush: { limit: 120, windowSec: 60 },
 } as const satisfies Record<string, RateLimitRule>
 
 /** Keys are hashed so phone numbers are never stored in the clear. */

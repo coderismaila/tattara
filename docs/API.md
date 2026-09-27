@@ -33,7 +33,7 @@ WARD+ here means WARD_LEAD, LGA_LEAD, STATE_LEAD and DG (DG manages the state le
 | GET | `/supporters/check-phone` | PU | `?phone=` | `{ countInSystem, samePu: bool }` — no names returned |
 
 ## Sync
-| POST | `/sync/push` | PU | `{ items: SupporterInput[≤50] }` | per-item `{ id, result, reason?, serverUpdatedAt }` |
+| POST | `/sync/push` | PU | `{ items: SupporterInput[≤50] }` | `{ results }` in item order: `{ id, result: accepted\|duplicate, serverUpdatedAt }`, `{ id \| null, result: rejected, reason, issues? }` (issues = `{ path, message: i18n key }`, never values) or `{ id, result: conflict }`. Each item validated alone (one bad item never blocks the rest). Other roles 403 `not_allowed`; 400 for > 50 items; 120/min per user. Live since 3.3 (the capture page sends one item) |
 | GET | `/sync/pull` | PU, WARD | `?since=ISO` | `{ supporters[], stats, announcements[], serverTime }` |
 
 ## Stats and map

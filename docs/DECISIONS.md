@@ -256,3 +256,13 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - **The server check** (`/api/auth/me`) runs when the app starts, when the phone comes back online, and when the page becomes visible (at most once a minute).
 **Why:** SECURITY_PRIVACY §7; deactivated leads must lose the data on their next contact; an expired session must not destroy a day's offline captures.
 **Consequences:** E2E sessions are saved with `indexedDB: true`, and E2E runs with a 120-min idle limit (lock.spec fast-forwards the clock). 4.2 adds supporters/outbox to the same wipe. 4.3 should push the outbox before anything that could wipe it where possible (a revoked session can't push; that loss is accepted).
+
+### ADR-037 · 2026-10-07 · Accepted · Local-first capture with an immediate push (4.2)
+**Decision:**
+- **Every save goes to Dexie first** (`saveCapture`: supporter `pending` + outbox row, one transaction, idempotent by id), then, if the phone is online, one `pushOutbox()` sends the oldest ≤ 50 queued items to `/api/sync/push` and applies the per-item answers. Unanswered rows (offline, 5xx, 429, 401) stay queued with `attempts` counted; nothing leaves the outbox without an answer.
+- **A refusal of the supporter just saved** (rejected or conflict in that same push) discards the local copy and keeps the form filled with the reason inline: the lead is still with the supporter and fixes it on the spot. **Refusals of earlier offline captures** stay on the phone as `rejected` (reason + issue keys) and get a warning toast until the Sync screen (4.4) lists them.
+- **Toast wording tells where the record is:** "Saved" only when the server accepted it, otherwise "Saved on this phone, sent when there is a connection".
+- **Offline the capture page uses the local session** (4.5) for the lead's PU, and the duplicate-phone notice counts this PU's non-rejected supporters on the phone; online (or if the check fails) it asks the server as before. The 3-per-number limit stays the server's call.
+- Dexie version 2 adds `supporters`, `outbox`, `units` (DATA_MODEL §6); `units` stays empty until the pull (4.3).
+**Why:** ARCHITECTURE §5 (client is the source until synced); keeps 3.3's on-the-spot error handling where it still applies.
+**Consequences:** 4.3 replaces the immediate push with the sync engine (timer, backoff on `attempts`/`nextAttemptAt`, Background Sync, pull) and keeps `pushOutbox` as its unit of work. 4.4 shows pending/sent/rejected from the local tables.

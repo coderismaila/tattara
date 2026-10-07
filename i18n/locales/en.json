@@ -236,6 +236,8 @@
     "consentAgree": "They agree",
     "save": "Save",
     "saved": "Saved",
+    "savedLocal": "Saved on this phone. It will be sent when there is a connection.",
+    "rejectedLater": "1 supporter saved earlier was not accepted. Check it on the Sync screen. | {count} supporters saved earlier were not accepted. Check them on the Sync screen.",
     "sessionCount": "{count} saved this session",
     "notAllowed": "Only polling unit leads add supporters.",
     "gps": {
@@ -245,6 +247,7 @@
       "unavailable": "No location"
     },
     "errors": {
+      "deviceStorage": "This phone could not save the record. Free some storage and save again.",
       "invalid": "Something in this record is not valid. Check the fields and save again.",
       "no_consent": "Consent is missing. Read the notice and tick that they agree.",
       "out_of_scope": "You can only add supporters for your own polling unit.",

@@ -423,6 +423,10 @@
     // TODO(ha-review)
     saved: 'An ajiye',
     // TODO(ha-review)
+    savedLocal: 'An ajiye a wannan wayar. Za a aika idan an sami intanet.',
+    // TODO(ha-review)
+    rejectedLater: 'Ba a karɓi magoyi baya 1 da aka ajiye a baya ba. Duba shi a shafin Aikawa. | Ba a karɓi magoya baya {count} da aka ajiye a baya ba. Duba su a shafin Aikawa.',
+    // TODO(ha-review)
     sessionCount: 'An ajiye {count} a wannan zama',
     // TODO(ha-review)
     notAllowed: 'Shugabannin rumfa ne kaɗai ke ƙara magoya baya.',
@@ -443,6 +447,8 @@
       elsewhere: 'Wannan lambar tana da magoya baya {count} a wani wuri a Tattara. Duba lambar.',
     },
     errors: {
+      // TODO(ha-review)
+      deviceStorage: 'Wannan wayar ba ta iya ajiye bayanin ba. Samar da wuri a ma’ajiya ka sake ajiyewa.',
       // TODO(ha-review)
       phone_limit: 'Magoya baya 3 sun riga sun yi amfani da wannan lambar. Duba lambar ko yi amfani da wata.',
       // TODO(ha-review)

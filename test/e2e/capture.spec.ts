@@ -123,6 +123,55 @@ test.describe('capture (PU lead)', () => {
     await expect(page.getByTestId('capture-error')).toContainText('Magoya baya 3 sun riga sun yi amfani da wannan lambar')
   })
 
+  // 4.2: local-first. Offline saves stay on the phone; the next online save sends them along, each exactly once.
+  test('saves on the phone while offline and sends it with the next online save', async ({ page, context }) => {
+    async function addSupporter(name: string, phone: string) {
+      await page.getByTestId('capture-name').fill(name)
+      await page.getByTestId('capture-phone').fill(phone)
+      await page.getByTestId('capture-support').getByText('Sosai', { exact: true }).click()
+      await page.getByTestId('capture-pvc').getByText('E', { exact: true }).click()
+      await page.getByRole('checkbox', { name: /Ya amince/ }).click()
+      await page.getByTestId('capture-submit').click()
+    }
+    const onServer = async (e164: string) => {
+      const res = await page.request.get(`/api/supporters?q=${encodeURIComponent(e164)}`)
+      return ((await res.json()) as { items: unknown[] }).items.length
+    }
+
+    await page.goto('/app/capture')
+    // Let the service worker take control, so an offline reload gets the cached shell (4.1).
+    await page.evaluate(() => navigator.serviceWorker.ready)
+    await page.reload()
+    await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true)
+    await expect(page.getByTestId('capture-name')).toBeEnabled()
+
+    await context.setOffline(true)
+    try {
+      await addSupporter('Zainab Offline', '0803 100 8001')
+      await expect(page.getByText('An ajiye a wannan wayar. Za a aika idan an sami intanet.')).toBeVisible()
+      await expect(page.getByTestId('capture-name')).toHaveValue('')
+
+      // Offline duplicate notice from the phone's own copy (US-7).
+      await page.getByTestId('capture-phone').fill('08031008001')
+      await page.getByTestId('capture-name').focus()
+      await expect(page.getByTestId('capture-phone-notice')).toContainText('Wannan lambar tana da magoya baya 1 a rumfarka')
+      await page.getByTestId('capture-phone').fill('')
+
+      // Reloading offline keeps it (the cached shell opens, the PU comes from the local session).
+      await page.reload()
+      await expect(page.getByTestId('capture-pu')).toContainText('19/01/01/001')
+    }
+    finally {
+      await context.setOffline(false)
+    }
+    expect(await onServer('+2348031008001')).toBe(0)
+
+    await addSupporter('Zainab Online', '0803 100 8002')
+    await expect(page.getByText('An ajiye', { exact: true })).toBeVisible()
+    expect(await onServer('+2348031008001')).toBe(1)
+    expect(await onServer('+2348031008002')).toBe(1)
+  })
+
   test('no axe violations on /app/capture', async ({ page }) => {
     await page.goto('/app/capture')
     await expect(page.getByTestId('capture-name')).toBeEnabled()

@@ -3,12 +3,15 @@ import type { FormErrorEvent, FormSubmitEvent } from '@nuxt/ui'
 import type { AgeBand, ConsentLanguage, Gender, HasPvc, SupportLevel } from '~~/shared/constants/enums'
 import { CURRENT_CONSENT_VERSION, consentScript } from '~~/shared/constants/consent'
 import { supporterFormSchema, type SupporterForm, type SupporterFormOutput } from '~~/shared/schemas/supporter'
-import type { SupporterInput, SyncItemResult } from '~~/shared/types/supporter'
+import type { SupporterInput } from '~~/shared/types/supporter'
 import { newId } from '~~/shared/utils/uuid'
 import { normalizePhone } from '~~/shared/utils/phone'
+import { getLocalSession, type LocalSession } from '~/offline/local-session'
+import { countLocalPhone, discardCapture, saveCapture } from '~/offline/outbox'
+import { pushOutbox } from '~/offline/push'
 
 // Add supporter (UX §4.1, PRD US-4…US-7). One scroll, a big Save, only name/phone/support/PVC/consent required.
-// Phase 3 saves online through /api/sync/push; 4.2 moves this to local-first (Dexie + outbox).
+// Local-first (4.2, ADR-037): saved on the phone and queued, then sent at once when online.
 definePageMeta({ layout: 'app', titleKey: 'nav.capture' })
 
 const { t, locale } = useI18n()
@@ -17,8 +20,14 @@ const config = useRuntimeConfig()
 const gps = useSilentGps()
 
 const { data: me } = await useFetch('/api/auth/me', { key: 'me' })
-const unit = computed(() => me.value?.unit ?? null)
-const isPuLead = computed(() => me.value?.user.role === 'PU_LEAD')
+// Offline, /api/auth/me fails: the phone's own copy of the session (4.5) names the lead's PU.
+const local = ref<LocalSession | null>(null)
+onMounted(async () => {
+  local.value = (await getLocalSession().catch(() => undefined)) ?? null
+})
+const role = computed(() => me.value?.user.role ?? local.value?.role ?? null)
+const unit = computed(() => me.value?.unit ?? local.value?.unit ?? null)
+const isPuLead = computed(() => role.value === 'PU_LEAD')
 
 // Controls stay disabled until hydrated: typing before hydration would be lost on slow phones (ADR-024).
 const mounted = ref(false)
@@ -96,9 +105,16 @@ function onError(event: FormErrorEvent) {
   nextTick(() => focusWhenEnabled(target))
 }
 
-// ── Duplicate phone notice (US-7): checked online when the phone field is left; silent if offline. ──
+// ── Duplicate phone notice (US-7): checked when the phone field is left; online against the whole system, offline
+// (or if the server can't answer) against the supporters on this phone for this PU. ──
 interface PhoneCheck { countInSystem: number, samePu: boolean, limitReached: boolean }
 const phoneCheck = ref<{ phone: string, result: PhoneCheck } | null>(null)
+
+async function localPhoneCheck(phone: string): Promise<PhoneCheck | null> {
+  if (!unit.value) return null
+  const n = await countLocalPhone(unit.value.code, phone).catch(() => 0)
+  return { countInSystem: n, samePu: n > 0, limitReached: false } // the limit is the server's to judge
+}
 
 async function checkPhoneNumber() {
   const phone = normalizePhone(state.phone)
@@ -107,14 +123,13 @@ async function checkPhoneNumber() {
     return
   }
   if (phoneCheck.value?.phone === phone) return
-  try {
-    const result = await $fetch<PhoneCheck>('/api/supporters/check-phone', { query: { phone } })
-    // Ignore a late answer for a number the lead has since changed.
-    if (normalizePhone(state.phone) === phone) phoneCheck.value = { phone, result }
+  let result: PhoneCheck | null = null
+  if (navigator.onLine) {
+    result = await $fetch<PhoneCheck>('/api/supporters/check-phone', { query: { phone } }).catch(() => null)
   }
-  catch {
-    // Offline or rate-limited: no notice. The server still enforces the limit on save.
-  }
+  result ??= await localPhoneCheck(phone)
+  // Ignore a late answer for a number the lead has since changed.
+  if (result && normalizePhone(state.phone) === phone) phoneCheck.value = { phone, result }
 }
 watch(() => state.phone, (value) => {
   if (phoneCheck.value && normalizePhone(value) !== phoneCheck.value.phone) phoneCheck.value = null
@@ -130,6 +145,15 @@ const phoneNotice = computed(() => {
 })
 
 const REJECT_KEYS = new Set(['invalid', 'no_consent', 'out_of_scope', 'pu_inactive', 'phone_limit'])
+
+function clearForm() {
+  savedThisSession.value++
+  Object.assign(state, blank())
+  consentAt.value = null
+  phoneCheck.value = null
+  form.value?.clear()
+  focusName()
+}
 
 async function onSubmit(event: FormSubmitEvent<SupporterFormOutput>) {
   if (!unit.value) return
@@ -149,27 +173,31 @@ async function onSubmit(event: FormSubmitEvent<SupporterFormOutput>) {
     deviceId: getDeviceId(),
   }
   try {
-    const { results } = await $fetch<{ results: SyncItemResult[] }>('/api/sync/push', { method: 'POST', body: { items: [item] } })
-    const result = results[0]
-    if (result?.result === 'accepted' || result?.result === 'duplicate') {
-      savedThisSession.value++
-      toast.add({ title: t('capture.saved'), color: 'success', icon: 'i-lucide-check' })
-      Object.assign(state, blank())
-      consentAt.value = null
-      phoneCheck.value = null
-      form.value?.clear()
-      focusName()
+    try {
+      await saveCapture(item)
     }
-    else if (result?.result === 'rejected' && REJECT_KEYS.has(result.reason)) {
-      saveError.value = `capture.errors.${result.reason}`
+    catch {
+      saveError.value = 'capture.errors.deviceStorage'
+      return
     }
-    else {
-      saveError.value = 'capture.errors.conflict'
+    const outcome = navigator.onLine ? await pushOutbox() : null
+    const mine = outcome?.sent ? outcome.results.find(r => r.id === item.id) : undefined
+    if (mine?.result === 'rejected' || mine?.result === 'conflict') {
+      // Refused while the lead is still with the supporter: keep the form so they can fix it and save again.
+      await discardCapture(item.id)
+      saveError.value = mine.result === 'rejected' && REJECT_KEYS.has(mine.reason) ? `capture.errors.${mine.reason}` : 'capture.errors.conflict'
+      return
     }
-  }
-  catch (error) {
-    const status = (error as { statusCode?: number }).statusCode
-    saveError.value = !status ? 'capture.errors.network' : status === 429 ? 'capture.errors.rate_limited' : status === 403 ? 'capture.errors.not_allowed' : 'capture.errors.unknown'
+    const onServer = mine?.result === 'accepted' || mine?.result === 'duplicate'
+    toast.add({
+      title: t(onServer ? 'capture.saved' : 'capture.savedLocal'),
+      color: 'success',
+      icon: onServer ? 'i-lucide-check' : 'i-lucide-smartphone',
+    })
+    // Captures saved earlier (offline) that this push got refused: the Sync screen (4.4) lists them.
+    const earlier = outcome?.sent ? outcome.results.filter(r => r.id !== item.id && (r.result === 'rejected' || r.result === 'conflict')).length : 0
+    if (earlier) toast.add({ title: t('capture.rejectedLater', { count: earlier }, earlier), color: 'warning', icon: 'i-lucide-triangle-alert' })
+    clearForm()
   }
   finally {
     saving.value = false
@@ -180,7 +208,7 @@ async function onSubmit(event: FormSubmitEvent<SupporterFormOutput>) {
 <template>
   <div class="flex flex-col gap-4">
     <UAlert
-      v-if="me && !isPuLead"
+      v-if="role && !isPuLead"
       color="warning"
       variant="subtle"
       :title="t('capture.notAllowed')"

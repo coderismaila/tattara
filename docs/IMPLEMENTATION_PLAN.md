@@ -74,7 +74,7 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
 - [x] **4.1 PWA setup** (`@vite-pwa/nuxt`, injectManifest, custom `sw.ts`): precache the app shell, runtime-cache `/geo/*` (CacheFirst), never cache `/api/supporters*`. Install prompt UX, update prompt ("New version — reload").
   **AC:** installable on Android Chrome; app shell loads in airplane mode after the first visit.
 _4.5 was done before 4.2 (ADR-036): the lock must protect the phone before supporter data is stored on it._
-- [ ] **4.2 Dexie layer** `app/offline/db.ts`, `outbox.ts`; capture writes locally first.
+- [x] **4.2 Dexie layer** `app/offline/db.ts`, `outbox.ts`; capture writes locally first.
 - [ ] **4.3 Sync engine** `app/offline/sync.ts` + `/api/sync/push` + `/api/sync/pull`; backoff; Background Sync trigger from the SW; `navigator.storage.persist()`.
   **AC:** e2e (Playwright offline mode): capture 20 supporters offline → go online → all 20 accepted exactly once; killing the app mid-sync causes no duplicates.
 - [ ] **4.4 Sync screen + status pill** per UX §4.5.

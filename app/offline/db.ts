@@ -1,7 +1,9 @@
-// The on-device database (ARCHITECTURE §5, DATA_MODEL §6). 4.5 needs only `meta` (the local session and the PIN
-// verifier); 4.2 adds supporters, outbox and units as version 2. Everything here is wiped on sign-out, after too
-// many wrong PINs, and when the server says the session was revoked (SECURITY_PRIVACY §7).
+// The on-device database (ARCHITECTURE §5, DATA_MODEL §6). Version 1 (4.5): `meta` (the local session and the PIN
+// verifier). Version 2 (4.2): supporters captured on this phone, the outbox of writes to send, and the lead's units.
+// Everything here is wiped on sign-out, after too many wrong PINs, and when the server says the session was revoked
+// (SECURITY_PRIVACY §7).
 import Dexie, { type EntityTable } from 'dexie'
+import type { SupporterInput, SyncItemResult } from '~~/shared/types/supporter'
 import { LAST_ACTIVE_STORAGE_KEY } from './idle'
 
 export const DB_NAME = 'tattara'
@@ -11,12 +13,52 @@ export interface MetaRow {
   value: unknown
 }
 
+export type LocalSyncStatus = 'pending' | 'synced' | 'rejected'
+export type LocalRejectReason = Extract<SyncItemResult, { result: 'rejected' }>['reason'] | 'conflict'
+
+/** A supporter as this phone holds it: what was captured plus where it stands with the server. */
+export interface LocalSupporter extends SupporterInput {
+  syncStatus: LocalSyncStatus
+  rejectReason?: LocalRejectReason
+  /** Field paths and i18n keys only, never values (as the server sends them). */
+  issues?: { path: string, message: string }[]
+  serverUpdatedAt?: string
+}
+
+/** One write waiting for the server. 4.2 only creates; edits join as another kind. */
+export interface OutboxRow {
+  seq?: number
+  id: string
+  kind: 'create'
+  payload: SupporterInput
+  createdAt: string
+  attempts: number
+  /** ISO time before which the sync engine (4.3) does not retry. */
+  nextAttemptAt: string
+}
+
+/** The lead's own subtree (PU and ward leads), for offline names. Filled by the pull (4.3). */
+export interface LocalUnit {
+  code: string
+  parentCode: string | null
+  name: string
+  level: string
+}
+
 export class TattaraDb extends Dexie {
   meta!: EntityTable<MetaRow, 'key'>
+  supporters!: EntityTable<LocalSupporter, 'id'>
+  outbox!: EntityTable<OutboxRow, 'seq'>
+  units!: EntityTable<LocalUnit, 'code'>
 
   constructor(name = DB_NAME) {
     super(name)
     this.version(1).stores({ meta: 'key' })
+    this.version(2).stores({
+      supporters: 'id, puCode, phone, syncStatus, capturedAt',
+      outbox: '++seq, id, kind, createdAt, attempts, nextAttemptAt',
+      units: 'code, parentCode',
+    })
   }
 }
 

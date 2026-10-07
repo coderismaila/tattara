@@ -31,6 +31,8 @@ Draft consent script (for legal review; the Hausa version needs a native transla
 | Data / action | PU | WARD | LGA | STATE | DG | ADMIN |
 |---|---|---|---|---|---|---|
 | Add supporter | own PU | — | — | — | — | — |
+| Create/revoke sign-up links (§12) | own PU | PUs in own ward | — | — | — | — |
+| Confirm/reject self sign-ups | own PU | — | — | — | — | — |
 | View supporter full details | own PU | own ward | — | — | — | — |
 | View supporter masked (name initials, `+234 80* *** 1234`) | — | — | flag review only | — | — | — |
 | Aggregates / map | own PU | own ward | own LGA | own state | all | all |
@@ -95,3 +97,18 @@ ADMIN has no default read access to supporter PII; break-glass access requires a
 - Record or facilitate any payment or inducement to supporters (Electoral Act offences).
 - Present itself as INEC or as voter registration.
 - Share supporter lists with unverified third parties.
+
+## 12. Supporter sign-up links (PRD §6.2a, ADR-035)
+- **No open public link.** Every link is a token issued by a lead for one PU in their scope: 128-bit random, hashed
+  at rest, expiring (default 30 days), revocable. The token is the only scope a sign-up write has; the server
+  derives the PU from it and never accepts a PU from the form.
+- **Phone proven by OTP** before anything is stored. OTP rules as §5, plus per-IP, per-token and per-phone limits
+  and a daily SMS cap per token (SMS-pumping defence). Nigerian numbers only.
+- **No enumeration.** The flow never reveals whether a number is known: same response, same timing, same thank-you.
+  A number already on file is not stored again and the existing record is left untouched (a sign-up never edits
+  a lead's record); the 3-per-number check does not run on this path (one self sign-up per number).
+- **Consent is ticked by the supporter**, with its own versions (`s1-ha`, `s1-en`). Needs legal sign-off (7.4).
+- Records arrive as `source = self`, pending until the PU lead confirms; pending records are excluded from coverage,
+  targets and SMS broadcasts, and are deleted (not just anonymised) if rejected or left unconfirmed for 30 days.
+- The sign-up page is a separate, public, server-rendered route with none of the app shell, no offline cache, no
+  third-party scripts. Never ask for PVC/VIN/NIN there; the page tells people the party never asks for them.

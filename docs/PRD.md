@@ -87,6 +87,15 @@ Each lead creates the accounts one level below them (cascading onboarding). The 
 - **R-4** GPS location and accuracy are captured when available; saving is never blocked by lack of GPS.
 - **R-5** Phone numbers are normalised to E.164 (+234). Shared household phones are allowed with a "shared phone" tick, max 3 supporters per number system-wide.
 
+### 6.2a Supporter sign-up links (v1.0)
+There is **no open public sign-up link**. Self sign-up happens only through a link issued by a lead for one PU (ADR-035).
+- **US-25** As a PU or ward lead, I can create a sign-up link for a PU in my scope and share it (e.g. on WhatsApp); I can see how many people used it and revoke it.
+- **US-26** As a supporter who received a link, I confirm my phone with an SMS code, fill in my details, read the consent notice and tick it myself.
+- **US-27** As a PU lead, I see sign-ups from my links in a "To confirm" list and confirm or reject each one. Only confirmed sign-ups count toward coverage and targets.
+- **R-10** The sign-up form never reveals whether a phone number is already known; it always ends with the same thank-you.
+- **R-11** One self sign-up per phone number (proven by OTP). Shared household phones are added only by a lead.
+- **R-12** Links expire (default 30 days), are rate-limited, and have a daily SMS cap.
+
 ### 6.3 Verification and data quality
 - **US-9** After sync, the supporter receives an SMS: a thank-you plus an opt-out ("Reply STOP"). Replies update the record.
 - **US-10** As a ward lead, I get a daily random sample (default 5%) of new supporters in my ward to call back and mark verified / wrong number / denies / unreachable.
@@ -145,7 +154,7 @@ Each lead creates the accounts one level below them (cascading onboarding). The 
 | Release | Contents |
 |---|---|
 | **MVP (pilot)** | Accounts and cascade onboarding, capture (offline), sync, SMS thank-you/opt-out, flags, lead dashboards, map to ward level, Hausa/English. Pilot: 2 LGAs. |
-| **v1.0 (NW rollout)** | Call-back workflow, quality scores, targets, PU-level map, exports with approval, admin tooling, load-tested. |
+| **v1.0 (NW rollout)** | Call-back workflow, quality scores, targets, PU-level map, exports with approval, admin tooling, supporter sign-up links (§6.2a), load-tested. |
 | **v1.1** | SMS broadcasts, announcements, inactive-lead nudges. |
 | **v2 (election)** | Turnout marking, EC8A capture and IReV comparison, incident reporting, agent management. |
 
@@ -156,3 +165,5 @@ Each lead creates the accounts one level below them (cascading onboarding). The 
 3. SMS sender ID and budget (at 8M supporters, one SMS each is a large cost; confirm the per-SMS rate).
 4. Who is the Data Protection Officer?
 5. Should PU leads be able to register supporters who live elsewhere but vote at their PU? (Assumed yes: registration follows the voting PU.)
+6. Should states get rally sign-up links not tied to one PU? They would need their own review queue, since no PU lead owns those records. (Not in v1.0.)
+7. Does legal accept consent ticked by the supporter on their own phone (self sign-up) for political-opinion data? Required before §6.2a ships (task 7.4).

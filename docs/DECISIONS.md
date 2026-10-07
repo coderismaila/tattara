@@ -233,3 +233,14 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - **Offline, the auth middleware lets `/app` open without a confirmed session** (it can't reach the server). Safe today because every screen loads data from the API; 4.5's local PIN lock must gate on-device data before 4.2 stores supporters.
 - **Icons are generated** from a shape-only SVG by `scripts/make-icons.ts` (Playwright's Chromium), so no image tooling dependency.
 **Consequences:** the service worker only exists in production builds (E2E covers it). 4.2 adds Dexie; 4.3 the sync trigger; 4.5 the offline session and lock.
+
+### ADR-035 · 2026-10-07 · Accepted · Self sign-up only through lead-issued links, never an open public link
+**Decision:**
+- **No open public sign-up link.** Supporters can sign themselves up only through a link a PU or ward lead creates for one PU. The link token is the write's scope; the PU comes from the token, never from the form.
+- **OTP-verified phone, one self sign-up per number.** Shared household phones stay lead-only.
+- **No enumeration:** the flow answers identically for new and known numbers, and never edits an existing record.
+- **Supporter-ticked consent** with its own versions (`s1-ha`, `s1-en`), subject to legal review.
+- **Pending until the PU lead confirms** (`source = self`); pending records don't count toward coverage, targets or broadcasts.
+- **Scheduled for v1.0** as task 5.6, after the thank-you SMS (5.2). The pilot runs on lead capture only.
+**Why:** An open link would (1) let anyone learn whether a number belongs to a party supporter (the duplicate check becomes an oracle), a safety risk in the region; (2) let people sign up others without their consent (NDPA: political opinion is sensitive data); (3) bypass the lead attribution, GPS, rate and call-back checks that make the numbers trustworthy (PRD goal 3); (4) expose the SMS budget to OTP-pumping bots. Lead-issued links keep the reach of self sign-up while keeping scope, attribution and review.
+**Consequences:** SECURITY_PRIVACY §3 and §12; PRD §6.2a and open questions 6 (state rally links) and 7 (legal on self-consent). The sign-up path is the first write not made by a logged-in user; it must not reuse `requireScope` loosely. It gets its own token-scope check and access-matrix entries.

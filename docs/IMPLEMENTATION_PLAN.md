@@ -87,6 +87,16 @@ acceptance criteria (AC) pass, then log it in PROGRESS.md. Tasks marked 👤 nee
 - [ ] **5.3 Call-back workflow:** daily sample task, ward review page, outcomes update verification.
 - [ ] **5.4 Flags review page** (ward full, LGA+ masked) + resolve actions, audited.
 - [ ] **5.5 Lead quality score** computed nightly; shown in Team lists.
+- [ ] **5.6 Supporter sign-up links** (PRD §6.2a, SECURITY_PRIVACY §12, ADR-035). Blocked on 👤 legal sign-off of
+  self-ticked consent (PRD Q7). Schema: `signup_links` (token hash, pu_code, created_by, expires_at, revoked_at,
+  daily SMS cap); supporters gain `source enum lead|self` and status `pending` (migration). Lead routes to
+  create/list/revoke links and confirm/reject pending sign-ups (`requireScope`); public routes for OTP + submit,
+  scoped by token only. Separate public SSR page, Hausa first, no app shell. Pending records are left out of
+  `pu_stats`, targets and broadcasts; a nightly job deletes rejected and 30-day-old pending ones. Consent versions
+  `s1-ha`/`s1-en`. Thank-you SMS on confirm (5.2).
+  **AC:** the response and timing are the same for a new and a known number (tested); one sign-up per phone; a
+  revoked/expired token gets 410; rate limits and the per-token SMS cap hold (tested); a sign-up never changes an
+  existing record; access matrix covers every new route; e2e: link → OTP → submit → PU lead confirms → counted.
 
 ## Phase 6 — Dashboards & map
 

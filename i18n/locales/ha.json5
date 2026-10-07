@@ -106,6 +106,8 @@
 
     // TODO(ha-review)
     supporters: 'Magoya baya',
+    // TODO(ha-review)
+    sync: 'Aikawa',
   },
   lang: {
     // TODO(ha-review)
@@ -584,5 +586,85 @@
     install: 'Saka a waya',
     // TODO(ha-review)
     notNow: 'Ba yanzu ba',
+  },
+  sync: {
+    pill: {
+      // TODO(ha-review)
+      rejected: "1 ba a karɓa ba | {count} ba a karɓa ba",
+      // TODO(ha-review)
+      offline: "An adana a waya | An adana a waya · 1 na jiran aika | An adana a waya · {count} na jiran aika",
+      // TODO(ha-review)
+      sending: "Ana aika 1… | Ana aika {count}…",
+      // TODO(ha-review)
+      waiting: "1 na jiran aika | {count} na jiran aika",
+      // TODO(ha-review)
+      allSent: "An aika duka",
+    },
+    // TODO(ha-review)
+    notAllowed: "Shugabannin rumfa ne kaɗai ke ƙara magoya baya, don haka babu abin aikawa daga wannan wayar.",
+    // TODO(ha-review)
+    statusHeading: "Halin aikawa",
+    // TODO(ha-review)
+    online: "Wannan wayar tana da intanet. Ana aika magoya baya kai tsaye.",
+    // TODO(ha-review)
+    offline: "Wannan wayar ba ta da intanet. Magoya baya suna nan a adane a wayar, za a aika su idan an sami intanet.",
+    // TODO(ha-review)
+    lastSent: "Aikawa ta ƙarshe: {time}",
+    // TODO(ha-review)
+    neverSent: "Ba a aika komai daga wannan wayar ba tukuna.",
+    // TODO(ha-review)
+    sendNow: "Gwada aikawa yanzu",
+    // TODO(ha-review)
+    sendNowOffline: "Haɗa da intanet don aikawa.",
+    // TODO(ha-review)
+    sendFailed: "Ba a sami sabar ba. Magoya bayanku suna nan a adane a wannan wayar.",
+    // TODO(ha-review)
+    sentAll: "An aika komai.",
+    // TODO(ha-review)
+    sentSomeRefused: "An aika, amma ba a karɓi magoyi 1 ba. Duba ƙasa. | An aika, amma ba a karɓi magoya baya {count} ba. Duba ƙasa.",
+    // TODO(ha-review)
+    rejectedHeading: "1 ba a karɓa ba | {count} ba a karɓa ba",
+    // TODO(ha-review)
+    pendingHeading: "Na jiran aika | Na jiran aika (1) | Na jiran aika ({count})",
+    // TODO(ha-review)
+    pendingNone: "Babu abin da ke jiran aika.",
+    // TODO(ha-review)
+    sentHeading: "An aika | An aika (1) | An aika ({count})",
+    // TODO(ha-review)
+    sentLatest: "Ana nuna {count} na baya-bayan nan.",
+    // TODO(ha-review)
+    capturedAt: "An ƙara {time}",
+    // TODO(ha-review)
+    attempts: "an gwada sau ɗaya | an gwada sau {count}",
+    reasons: {
+      // TODO(ha-review)
+      invalid: "Akwai wani abu da bai dace ba a wannan bayani. Danna Gyara, ka gyara shi, sannan ka sake ajiyewa.",
+      // TODO(ha-review)
+      no_consent: "Ba a rubuta amincewa yadda ya kamata ba. Danna Gyara, sake karanta sanarwar amincewa ga magoyin, sannan ka duba akwatin.",
+      // TODO(ha-review)
+      phone_limit: "Magoya baya 3 sun riga sun yi amfani da wannan lambar waya. Danna Gyara ka duba lambar, ko ka cire wannan bayani.",
+      // TODO(ha-review)
+      conflict: "Wannan bayani ya ci karo da wani a sabar. Danna Gyara ka sake ajiyewa.",
+      // TODO(ha-review)
+      out_of_scope: "Wannan bayani na rumfar da ba kai ne shugabanta yanzu ba. Cire shi, ka sanar da shugaban mazaɓarka.",
+      // TODO(ha-review)
+      pu_inactive: "An rufe wannan rumfa. Cire bayanin, ka sanar da shugaban mazaɓarka.",
+    },
+    // TODO(ha-review)
+    fix: "Gyara",
+    // TODO(ha-review)
+    remove: "Cire",
+    // TODO(ha-review)
+    removeTitle: "A cire wannan magoyin?",
+    // TODO(ha-review)
+    removeConfirm: "Sabar ba ta karɓi {name} ba. Cirewa zai goge bayanin daga wannan wayar.",
+    // TODO(ha-review)
+    removed: "An cire daga wannan wayar.",
+    // TODO(ha-review)
+    cancel: "Soke",
+    // TODO(ha-review)
+    fixing: "Kana gyara bayanin da ba a karɓa ba. Duba bayanan, sake karanta sanarwar amincewa, sannan ka ajiye.",
+    // TODO(ha-review)
+    fixGone: "Wannan bayani ba ya jiran gyara kuma.",
   },
 }

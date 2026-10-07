@@ -60,7 +60,10 @@ useHead({ title })
             </ul>
           </nav>
 
-          <CommonLanguageSwitch class="ms-auto" />
+          <div class="ms-auto flex items-center gap-2">
+            <CommonSyncPill />
+            <CommonLanguageSwitch />
+          </div>
         </div>
       </header>
 

@@ -75,7 +75,7 @@ test.describe('app shell', () => {
 })
 
 test.describe('accessibility (axe, WCAG 2.2 AA)', () => {
-  for (const path of ['/', '/app', '/app/settings', '/app/team']) {
+  for (const path of ['/', '/app', '/app/settings', '/app/team', '/app/sync']) {
     test(`no violations on ${path}`, async ({ page }) => {
       await page.goto(path)
       await expect(page.locator('main')).toBeVisible()

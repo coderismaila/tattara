@@ -77,7 +77,7 @@ _4.5 was done before 4.2 (ADR-036): the lock must protect the phone before suppo
 - [x] **4.2 Dexie layer** `app/offline/db.ts`, `outbox.ts`; capture writes locally first.
 - [x] **4.3 Sync engine** `app/offline/sync.ts` + `/api/sync/push` + `/api/sync/pull`; backoff; Background Sync trigger from the SW; `navigator.storage.persist()`.
   **AC:** e2e (Playwright offline mode): capture 20 supporters offline → go online → all 20 accepted exactly once; killing the app mid-sync causes no duplicates.
-- [ ] **4.4 Sync screen + status pill** per UX §4.5.
+- [x] **4.4 Sync screen + status pill** per UX §4.5.
 - [x] **4.5 Offline session & idle lock** local PIN verifier, 5-min idle lock, device wipe on logout/deactivation.
 
 ## Phase 5 — Data quality

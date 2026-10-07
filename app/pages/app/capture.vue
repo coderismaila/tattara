@@ -7,7 +7,7 @@ import type { SupporterInput } from '~~/shared/types/supporter'
 import { newId } from '~~/shared/utils/uuid'
 import { normalizePhone } from '~~/shared/utils/phone'
 import { getLocalSession, type LocalSession } from '~/offline/local-session'
-import { countLocalPhone, discardCapture, saveCapture } from '~/offline/outbox'
+import { countLocalPhone, discardCapture, getRejected, removeRejected, saveCapture } from '~/offline/outbox'
 import { requestBackgroundSync } from '~/offline/background'
 
 // Add supporter (UX §4.1, PRD US-4…US-7). One scroll, a big Save, only name/phone/support/PVC/consent required.
@@ -70,6 +70,43 @@ const consentAt = ref<string | null>(null)
 watch(() => state.consentGiven, ticked => (consentAt.value = ticked ? new Date().toISOString() : null))
 
 const { genderItems, ageItems, supportItems, pvcItems } = useSupporterOptions()
+
+// Fix (Sync screen, 4.4): `?fix=<id>` fills the form from a capture the server refused. Saving makes a new capture
+// (new id, consent ticked again now) and then drops the refused copy.
+const route = useRoute()
+const router = useRouter()
+const fixId = ref<string | null>(null)
+const fixGone = ref(false)
+onMounted(async () => {
+  const id = typeof route.query.fix === 'string' ? route.query.fix : null
+  if (!id) return
+  const refused = await getRejected(id).catch(() => undefined)
+  if (!refused) {
+    fixGone.value = true
+    return
+  }
+  fixId.value = id
+  Object.assign(state, {
+    ...blank(),
+    fullName: refused.fullName,
+    phone: refused.phone,
+    address: refused.address ?? '',
+    gender: refused.gender ?? undefined,
+    ageBand: refused.ageBand ?? undefined,
+    supportLevel: refused.supportLevel,
+    hasPvc: refused.hasPvc,
+    volunteer: refused.volunteer,
+    sharedPhone: refused.sharedPhone,
+  })
+  consentLanguage.value = refused.consentLanguage
+})
+
+async function finishFix() {
+  if (!fixId.value) return
+  await removeRejected(fixId.value).catch(() => false)
+  fixId.value = null
+  await router.replace({ query: {} })
+}
 
 const form = useTemplateRef('form')
 const nameInput = useTemplateRef('nameInput')
@@ -192,6 +229,7 @@ async function onSubmit(event: FormSubmitEvent<SupporterFormOutput>) {
       saveError.value = mine.result === 'rejected' && REJECT_KEYS.has(mine.reason) ? `capture.errors.${mine.reason}` : 'capture.errors.conflict'
       return
     }
+    await finishFix()
     const onServer = mine?.result === 'accepted' || mine?.result === 'duplicate'
     toast.add({
       title: t(onServer ? 'capture.saved' : 'capture.savedLocal'),
@@ -230,6 +268,15 @@ async function onSubmit(event: FormSubmitEvent<SupporterFormOutput>) {
           {{ t('capture.pu', { code: unit.code, name: unit.name }) }}
         </p>
       </div>
+
+      <UAlert
+        v-if="fixId || fixGone"
+        :color="fixId ? 'warning' : 'neutral'"
+        variant="subtle"
+        icon="i-lucide-pencil"
+        :title="t(fixId ? 'sync.fixing' : 'sync.fixGone')"
+        data-testid="capture-fixing"
+      />
 
       <UForm
         ref="form"

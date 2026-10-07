@@ -55,7 +55,8 @@
     "team": "Team",
     "admin": "Admin",
     "capture": "Add supporter",
-    "supporters": "Supporters"
+    "supporters": "Supporters",
+    "sync": "Sync"
   },
   "lang": {
     "label": "Language",
@@ -326,5 +327,48 @@
     "installBody": "Open it from your home screen like any app, even without network.",
     "install": "Add to phone",
     "notNow": "Not now"
+  },
+  "sync": {
+    "pill": {
+      "rejected": "1 not accepted | {count} not accepted",
+      "offline": "Saved on phone | Saved on phone · 1 waiting to send | Saved on phone · {count} waiting to send",
+      "sending": "Sending 1… | Sending {count}…",
+      "waiting": "1 waiting to send | {count} waiting to send",
+      "allSent": "All sent"
+    },
+    "notAllowed": "Only PU leads add supporters, so there is nothing to send from this phone.",
+    "statusHeading": "Status",
+    "online": "This phone is online. Supporters are sent automatically.",
+    "offline": "This phone is offline. Supporters stay saved here and are sent when there is a connection.",
+    "lastSent": "Last sent: {time}",
+    "neverSent": "Nothing sent from this phone yet.",
+    "sendNow": "Try sending now",
+    "sendNowOffline": "Connect to the internet to send.",
+    "sendFailed": "Could not reach the server. Your supporters are still saved on this phone.",
+    "sentAll": "Everything was sent.",
+    "sentSomeRefused": "Sent, but 1 supporter was not accepted. See below. | Sent, but {count} supporters were not accepted. See below.",
+    "rejectedHeading": "1 not accepted | {count} not accepted",
+    "pendingHeading": "Waiting to send | Waiting to send (1) | Waiting to send ({count})",
+    "pendingNone": "Nothing is waiting to be sent.",
+    "sentHeading": "Sent | Sent (1) | Sent ({count})",
+    "sentLatest": "Showing the latest {count}.",
+    "capturedAt": "Added {time}",
+    "attempts": "tried once | tried {count} times",
+    "reasons": {
+      "invalid": "Something in this record is not valid. Tap Fix, correct it and save again.",
+      "no_consent": "The consent was not recorded properly. Tap Fix, read the consent notice to the supporter again and tick the box.",
+      "phone_limit": "This phone number is already used by 3 supporters. Tap Fix and check the number, or remove this record.",
+      "conflict": "This record clashed with another one on the server. Tap Fix and save it again.",
+      "out_of_scope": "This record is for a polling unit you no longer lead. Remove it, and tell your ward lead.",
+      "pu_inactive": "This polling unit is closed. Remove the record, and tell your ward lead."
+    },
+    "fix": "Fix",
+    "remove": "Remove",
+    "removeTitle": "Remove this supporter?",
+    "removeConfirm": "{name} was not accepted by the server. Removing deletes the record from this phone.",
+    "removed": "Removed from this phone.",
+    "cancel": "Cancel",
+    "fixing": "Fixing a record that was not accepted. Check the details, read the consent notice again and save.",
+    "fixGone": "That record is no longer waiting to be fixed."
   }
 }

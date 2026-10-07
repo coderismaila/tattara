@@ -4,6 +4,7 @@
 // short (app killed after the server saved but before the answer arrived) only leads to a `duplicate` answer later.
 import { SYNC_LOCK } from '~~/shared/constants/sync'
 import type { SyncItemResult } from '~~/shared/types/supporter'
+import { db, getMeta, setMeta } from './db'
 import { getLocalSession } from './local-session'
 import { PullSessionGone, pullAll, type PullGet } from './pull'
 import { pushOutbox, type PushPost } from './push'
@@ -60,6 +61,8 @@ export async function runSync(options: SyncOptions = {}): Promise<SyncReport> {
       afterSeq = outcome.lastSeq
     }
 
+    if (report.pushError === undefined) await markSynced(session.userId)
+
     const stop = report.pushError != null && STOP_STATUSES.has(report.pushError)
     const pulls = session.role === 'PU_LEAD' || session.role === 'WARD_LEAD'
     if (options.pull !== false && !stop && pulls && session.unitCode) {
@@ -74,6 +77,19 @@ export async function runSync(options: SyncOptions = {}): Promise<SyncReport> {
     }
     return report
   })
+}
+
+const LAST_SYNC_KEY = 'lastSyncAt'
+
+/** When the server last answered a push (or there was nothing to send): "Last sent" on the Sync screen. */
+export const getLastSyncAt = () => getMeta<string>(LAST_SYNC_KEY)
+
+/** Only while the same lead is signed in: a phone wiped during the run stays empty. */
+async function markSynced(userId: string) {
+  await db.transaction('rw', db.meta, async () => {
+    const session = (await db.meta.get('session'))?.value as { userId?: string } | undefined
+    if (session?.userId === userId) await setMeta(LAST_SYNC_KEY, new Date().toISOString())
+  }).catch(() => {})
 }
 
 let running: Promise<SyncReport> | null = null

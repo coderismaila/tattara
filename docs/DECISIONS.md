@@ -279,3 +279,13 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - **Persistent storage** is requested after sign-in and at app start; a refusal is remembered and shown as a warning in Settings.
 **Why:** ARCHITECTURE §5; AC 4.3 (20 offline captures accepted exactly once, no duplicates after a kill mid-sync).
 **Consequences:** 4.4 builds the Sync screen and status pill on `useSync().state` and the local tables (`rejected` rows with reasons). Background Sync can't be triggered from Playwright; it is covered by unit tests of the shared code and must be checked once on a real Android phone (PROGRESS).
+
+### ADR-039 · 2026-10-07 · Accepted · Sync screen: live local state, Fix makes a new capture (4.4)
+**Decision:**
+- **The Sync screen and the status pill read only the phone's database**, through Dexie live queries (`useLiveQuery`), so they work offline and update after captures, engine runs and service-worker pushes alike. They list captures made on this phone (`deviceId` set); records brought by the pull are not "sent" by this phone and stay out.
+- **Pill (PU leads only), calm in every state:** refused first (amber: the lead has something to do), then offline ("Saved on phone · N waiting to send"), sending, waiting, all sent (neem). Never red. On narrow phones it shows the icon and count; the sentence stays in the accessible name.
+- **Fix = a new capture prefilled from the refused copy** (`/app/capture?fix=<id>`): new id, new capture time, and consent ticked again. The refused copy is removed only after the new one is saved and not refused on the spot. Re-sending the old id isn't possible: consent must be within 60 s of capture, and a conflict means the id itself clashed.
+- **Refusals the lead can't fix on the phone** (`out_of_scope`, `pu_inactive`) offer Remove only and point to the ward lead. Remove asks first and deletes only refused records.
+- **"Last sent"** is kept on the phone (`meta.lastSyncAt`) whenever the server answers a push, written only while the same lead is signed in.
+**Why:** UX §2.3 and §4.5; PRD US-6 ("I can see what's pending").
+**Consequences:** the capture page's "refused earlier" toast stays, pointing to the Sync screen.

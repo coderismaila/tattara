@@ -92,3 +92,55 @@ export async function countLocalPhone(puCode: string, phone: string): Promise<nu
     .filter((s: LocalSupporter) => s.puCode === puCode && s.syncStatus !== 'rejected')
     .count()
 }
+
+/** Captures made on this phone, by where they stand (the Sync screen, 4.4). Records brought by the pull are left out. */
+export interface LocalCaptures {
+  /** Refused by the server, newest first. */
+  rejected: LocalSupporter[]
+  /** Waiting for the server, oldest first (the order they'll be sent), with the outbox's retry count. */
+  pending: (LocalSupporter & { attempts: number })[]
+  /** Accepted by the server, newest first, at most `sentLimit`. */
+  sent: LocalSupporter[]
+  /** All accepted on this phone (the list shows only `sentLimit`). */
+  sentTotal: number
+}
+
+export async function listLocalCaptures(sentLimit = 50): Promise<LocalCaptures> {
+  return db.transaction('r', db.supporters, db.outbox, async () => {
+    const mine = (await db.supporters.orderBy('capturedAt').reverse().toArray()).filter(s => !!s.deviceId)
+    const attempts = new Map((await db.outbox.toArray()).map(r => [r.id, r.attempts]))
+    const sent = mine.filter(s => s.syncStatus === 'synced')
+    return {
+      rejected: mine.filter(s => s.syncStatus === 'rejected'),
+      pending: mine.filter(s => s.syncStatus === 'pending').reverse().map(s => ({ ...s, attempts: attempts.get(s.id) ?? 0 })),
+      sent: sent.slice(0, sentLimit),
+      sentTotal: sent.length,
+    }
+  })
+}
+
+/** Counts for the status pill. */
+export async function captureCounts(): Promise<{ pending: number, rejected: number }> {
+  const [pending, rejected] = await Promise.all([
+    db.outbox.count(),
+    db.supporters.where('syncStatus').equals('rejected').count(),
+  ])
+  return { pending, rejected }
+}
+
+/** A refused capture, for Fix (prefill the form). Undefined unless it is still refused. */
+export async function getRejected(id: string): Promise<LocalSupporter | undefined> {
+  const row = await db.supporters.get(id)
+  return row?.syncStatus === 'rejected' ? row : undefined
+}
+
+/** Drop a refused capture (the lead removed it, or saved a corrected copy). Never touches anything else. */
+export async function removeRejected(id: string): Promise<boolean> {
+  return db.transaction('rw', db.supporters, db.outbox, async () => {
+    const row = await db.supporters.get(id)
+    if (row?.syncStatus !== 'rejected') return false
+    await db.supporters.delete(id)
+    await db.outbox.where('id').equals(id).delete()
+    return true
+  })
+}

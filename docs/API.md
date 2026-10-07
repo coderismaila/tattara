@@ -33,8 +33,8 @@ WARD+ here means WARD_LEAD, LGA_LEAD, STATE_LEAD and DG (DG manages the state le
 | GET | `/supporters/check-phone` | PU | `?phone=` | `{ countInSystem, samePu, limitReached }`: counts only (no names, PUs or ids); 60/min per user; other roles 403 |
 
 ## Sync
-| POST | `/sync/push` | PU | `{ items: SupporterInput[≤50] }` | `{ results }` in item order: `{ id, result: accepted\|duplicate, serverUpdatedAt }`, `{ id \| null, result: rejected, reason, issues? }` (issues = `{ path, message: i18n key }`, never values) or `{ id, result: conflict }`. Each item validated alone (one bad item never blocks the rest). Other roles 403 `not_allowed`; 400 for > 50 items; 120/min per user. Live since 3.3 (the capture page sends one item) |
-| GET | `/sync/pull` | PU, WARD | `?since=ISO` | `{ supporters[], stats, announcements[], serverTime }` |
+| POST | `/sync/push` | PU | `{ items: SupporterInput[≤50] }` | `{ results }` in item order: `{ id, result: accepted\|duplicate, serverUpdatedAt }`, `{ id \| null, result: rejected, reason, issues? }` (issues = `{ path, message: i18n key }`, never values) or `{ id, result: conflict }`. Each item validated alone (one bad item never blocks the rest). Other roles 403 `not_allowed`; 400 for > 50 items; 120/min per user. Sent by the sync engine (4.3) and by the service worker on Background Sync |
+| GET | `/sync/pull` | PU, WARD | `?since=ISO&cursor=` | `{ supporters[], units[], stats, announcements[], serverTime, nextCursor }`. The caller's own unit only (PU lead: their PU; ward lead: their ward), full records; anonymised ones as `{ id, deleted: true }`. Oldest change first, 500 per page; follow `nextCursor` (`<ms>_<uuid>`) with the same `since`, and use the first page's `serverTime` as the next `since` (it is 2 min before the server clock, so pulls overlap). `units` (the subtree) on the first page only; `stats` = summed `pu_stats` (`total`, `verified`, `flaggedOpen`, `lastCaptureAt`); `announcements` always `[]` until v1.1. Others 403 `not_allowed`; 60/min per user (task 4.3) |
 
 ## Stats and map
 | GET | `/stats/unit/:code` | scope | | totals, coverage, target, breakdowns, last 30 days |

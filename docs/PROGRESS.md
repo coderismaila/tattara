@@ -27,14 +27,18 @@ Also note blockers and anything the next session must know.
     mode, and check the icon on the home screen. Playwright can't click Chrome's own install UI.
 - **Offline lock (4.5, ADR-036), for 4.2 onwards:** the Dexie db is `app/offline/db.ts` (v1 `meta`, v2 supporters/
   outbox/units since 4.2; a new table means **version 3**). `wipeDevice()` deletes the whole database.
-- **Local-first capture (4.2, ADR-037), for 4.3/4.4:** `app/offline/outbox.ts` (`saveCapture`, `applyResults`,
-  `listOutbox`, `markAttempted`, `countLocalPhone`) and `push.ts` (`pushOutbox`, one ≤ 50 batch). Capture calls
-  `pushOutbox()` once after each online save; 4.3 adds the timer/backoff/Background Sync/pull around it and should
-  drop the immediate call only if the engine pushes as fast. Rejected earlier captures are only toasted until 4.4.
+- **Sync engine (4.3, ADR-038), for 4.4:** `syncNow`/`runSync` in `app/offline/sync.ts`; UI state from `useSync()`
+  (`state`: running, pending, lastSyncedAt, lastError; `run(options)`, `refresh()`); the plugin `sync.client.ts` decides
+  when. Rejected captures are local `supporters` rows with `syncStatus: 'rejected'` + `rejectReason`/`issues`: 4.4 lists
+  them (capture still toasts them for now). "Try sending now" = `useSync().run({ force: true })`. Pull results: local
+  `supporters` (pulled rows have no `deviceId`), `units`, `getPullStats()`, `getLastPullAt()`.
   Use `getLocalSession()` (unit, role, name) for offline screens instead of `/api/auth/me`. E2E: shared sessions are
   saved with `indexedDB: true`; a spec that waits on idle uses `page.clock` (E2E idle limit is 120 min).
   Pages under `/app` render behind the lock (still mounted): don't autofocus or fetch-and-announce on mount
   assuming the lead can see the page.
+  - Docker Desktop on this machine hung on first start today (engine API 500); quitting and restarting it fixed it.
+  - **👤 Before the pilot (Background Sync):** on a real Android phone, capture offline, close the app, turn data on,
+    and check the capture reaches the server without reopening the app (Playwright can't fire `sync`).
 - DB: `pnpm db:up && pnpm db:migrate`. Integration tests (`pnpm test:integration`) need the DB; they skip locally
   without it and fail in CI. `pg_trgm` is enabled by migration 0007 (3.4).
 - **1.3 data (see `data/SOURCES.md`):** fetched by `pnpm data:fetch:inec` / `data:fetch:grid3`.
@@ -139,3 +143,4 @@ Also note blockers and anything the next session must know.
 - 2026-09-27 · 4.1 · PWA: injectManifest service worker (precache app, `/app` network-first with cached shell fallback, `/geo` cache-first, `/api` never cached), manifest with 192/512/maskable PNG icons (`pnpm icons`), install and update prompts (`CommonPwaPrompts`), offline `/app` opens without the login redirect; E2E: manifest + icon sizes, shell opens offline after a first visit, no `/api` entries in any cache · see commit `feat(pwa)`
 - 2026-10-07 · 4.5 · Offline session & idle lock (done before 4.2, ADR-036): Dexie db (`meta` only) + `wipeDevice`; PBKDF2 PIN verifier (600k) and `/auth/me` snapshot saved at login/OTP/setup (another lead → wipe first); `useAppLock` + `CommonAppLock` cover `/app` (inert, still mounted) after `NUXT_PUBLIC_LOCK_IDLE_MINUTES` idle, also on cold start; 5 wrong PINs → wipe + sign-out; "sign in again" without a local session; 401 `data.reason` `revoked`/`expired` with a sticky revoked marker in the session, so revoked phones wipe on next contact and expired ones keep data; sign-out always wipes; unit + integration tests, E2E lock/unlock offline, 5-wrong wipe, sign-out wipe, deactivated lead wiped · see commit `feat(offline)`
 - 2026-10-07 · 4.2 · Dexie layer (ADR-037): db v2 adds `supporters`/`outbox`/`units`; `outbox.ts` (atomic idempotent `saveCapture`, `applyResults`, `discardCapture`, `countLocalPhone`) + `push.ts` (`pushOutbox`, oldest ≤ 50, unanswered rows stay queued); capture saves locally then pushes once when online ("Saved" vs "Saved on this phone"), keeps the form on an immediate refusal, toasts refusals of earlier captures; PU from the local session offline; offline duplicate notice from the phone copy; unit tests (fake-indexeddb) + E2E offline capture → reload offline → online save sends both exactly once · see commit `feat(offline)`
+- 2026-10-07 · 4.3 · Sync engine (ADR-038): `GET /api/sync/pull` (own PU / ward only, full records, tombstones for anonymised, `(updated_at ms, id)` cursor pages of 500, 2-min overlapping `serverTime`, unit subtree + summed stats; 60/min; access matrix 21 routes); `runSync`/`syncNow` (all due batches each once per run, then pull; Web Lock shared with the SW; coalescing), backoff 30 s→30 min with jitter, pull never overwrites queued/refused captures, unit change starts over; plugin triggers (start, sign-in, online, 60 s, visible, SW message); capture uses the engine + registers Background Sync; SW `sync` pushes the outbox itself; persistent storage requested + Settings warning; unit (fake-indexeddb), integration and E2E (20 offline → online → 20 exactly once; push answer lost + app killed → no duplicates) · see commit `feat(offline)`

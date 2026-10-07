@@ -1,26 +1,29 @@
-// Send queued captures to POST /api/sync/push (task 4.2). One batch per call, oldest first. 4.3 wraps this in the sync
-// engine (timer, backoff, Background Sync, pull); capture calls it right after a save while online.
-import type { SyncItemResult } from '~~/shared/types/supporter'
-import { applyResults, listOutbox, markAttempted } from './outbox'
+// Send queued captures to POST /api/sync/push (tasks 4.2–4.3). One batch per call, oldest first. The sync engine
+// (sync.ts) loops over it; the service worker calls the same code with its own `post` (no Nuxt there).
+import type { SupporterInput, SyncItemResult } from '~~/shared/types/supporter'
+import { applyResults, listOutbox, markAttempted, type ListOutboxOptions } from './outbox'
 
 /** Server batch limit (API.md: ≤ 50 items per push). */
 export const PUSH_BATCH_SIZE = 50
 
+/** Sends a batch. Throws on no answer, with `statusCode` when the server answered with an error. */
+export type PushPost = (items: SupporterInput[]) => Promise<{ results: SyncItemResult[] }>
+
 export type PushOutcome
-  = | { sent: true, results: SyncItemResult[] }
+  = | { sent: true, results: SyncItemResult[], lastSeq: number | null }
   /** Nothing was answered: offline, server error, rate limit or signed out. The rows stay queued. */
     | { sent: false, statusCode: number | null }
 
-export async function pushOutbox(): Promise<PushOutcome> {
-  const rows = await listOutbox(PUSH_BATCH_SIZE)
-  if (!rows.length) return { sent: true, results: [] }
+/** The app's sender ($fetch, with Nuxt's error shape). */
+export const nuxtPost: PushPost = items => $fetch<{ results: SyncItemResult[] }>('/api/sync/push', { method: 'POST', body: { items } })
+
+export async function pushOutbox(options: ListOutboxOptions & { post?: PushPost } = {}): Promise<PushOutcome> {
+  const rows = await listOutbox(PUSH_BATCH_SIZE, options)
+  if (!rows.length) return { sent: true, results: [], lastSeq: null }
   try {
-    const { results } = await $fetch<{ results: SyncItemResult[] }>('/api/sync/push', {
-      method: 'POST',
-      body: { items: rows.map(r => r.payload) },
-    })
+    const { results } = await (options.post ?? nuxtPost)(rows.map(r => r.payload))
     await applyResults(results)
-    return { sent: true, results }
+    return { sent: true, results, lastSeq: rows[rows.length - 1]!.seq! }
   }
   catch (error) {
     await markAttempted(rows.map(r => r.seq!)).catch(() => {})

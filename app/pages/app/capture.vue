@@ -8,7 +8,7 @@ import { newId } from '~~/shared/utils/uuid'
 import { normalizePhone } from '~~/shared/utils/phone'
 import { getLocalSession, type LocalSession } from '~/offline/local-session'
 import { countLocalPhone, discardCapture, saveCapture } from '~/offline/outbox'
-import { pushOutbox } from '~/offline/push'
+import { requestBackgroundSync } from '~/offline/background'
 
 // Add supporter (UX §4.1, PRD US-4…US-7). One scroll, a big Save, only name/phone/support/PVC/consent required.
 // Local-first (4.2, ADR-037): saved on the phone and queued, then sent at once when online.
@@ -144,6 +144,7 @@ const phoneNotice = computed(() => {
   return { color: 'warning' as const, text: t('capture.phoneCheck.elsewhere', { count: n }, n) }
 })
 
+const sync = useSync()
 const REJECT_KEYS = new Set(['invalid', 'no_consent', 'out_of_scope', 'pu_inactive', 'phone_limit'])
 
 function clearForm() {
@@ -180,8 +181,11 @@ async function onSubmit(event: FormSubmitEvent<SupporterFormOutput>) {
       saveError.value = 'capture.errors.deviceStorage'
       return
     }
-    const outcome = navigator.onLine ? await pushOutbox() : null
-    const mine = outcome?.sent ? outcome.results.find(r => r.id === item.id) : undefined
+    // Online: send now (the backoff is ignored, the pull waits for the next run). Offline, or if this push gets no
+    // answer: the service worker sends it once the connection is back (Background Sync), or the next engine run does.
+    const report = await sync.run({ force: true, pull: false })
+    if (!report || report.pushError !== undefined) void requestBackgroundSync()
+    const mine = report?.results.find(r => r.id === item.id)
     if (mine?.result === 'rejected' || mine?.result === 'conflict') {
       // Refused while the lead is still with the supporter: keep the form so they can fix it and save again.
       await discardCapture(item.id)
@@ -195,7 +199,7 @@ async function onSubmit(event: FormSubmitEvent<SupporterFormOutput>) {
       icon: onServer ? 'i-lucide-check' : 'i-lucide-smartphone',
     })
     // Captures saved earlier (offline) that this push got refused: the Sync screen (4.4) lists them.
-    const earlier = outcome?.sent ? outcome.results.filter(r => r.id !== item.id && (r.result === 'rejected' || r.result === 'conflict')).length : 0
+    const earlier = report?.results.filter(r => r.id !== item.id && (r.result === 'rejected' || r.result === 'conflict')).length ?? 0
     if (earlier) toast.add({ title: t('capture.rejectedLater', { count: earlier }, earlier), color: 'warning', icon: 'i-lucide-triangle-alert' })
     clearForm()
   }

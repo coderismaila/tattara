@@ -202,6 +202,22 @@ export const ACCESS_MATRIX = {
       else ensure(r.result === 'rejected' && r.reason === 'out_of_scope', 'another PU is out_of_scope')
     },
   },
+  // Each lead pulls only their own unit; nobody above ward holds supporter records offline.
+  'GET /api/sync/pull': {
+    request: () => ({ method: 'GET', path: '/api/sync/pull' }),
+    expect: only({ kanoWard: 200, kanoPu: 200, katsinaWard: 200, katsinaPu: 200 }),
+    check: (caller, body) => {
+      const unit = { kanoWard: '19/01/01', kanoPu: '19/01/01/001', katsinaWard: '20/01/01', katsinaPu: '20/01/01/001' }[caller as 'kanoPu']
+      ensure(unit, 'a PU or ward lead')
+      const inUnit = (code: string) => code === unit || code.startsWith(`${unit}/`)
+      const records = body.supporters.filter((s: any) => !s.deleted)
+      ensure(records.length > 0, 'the unit has supporters')
+      ensure(records.every((s: any) => inUnit(s.puCode)), 'only the caller\'s own unit')
+      ensure(records.every((s: any) => s.masked === false && E164.test(s.phone)), 'PU and ward leads see full phones')
+      ensure(body.units.length > 0 && body.units.every((u: any) => inUnit(u.code)), 'units of the caller\'s subtree only')
+      ensure(typeof body.serverTime === 'string' && typeof body.stats.total === 'number', 'serverTime and stats')
+    },
+  },
 } satisfies Record<string, AccessEntry>
 
 export type AccessRoute = keyof typeof ACCESS_MATRIX

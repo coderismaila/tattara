@@ -157,10 +157,10 @@ with `[redacted]` once sent or finally failed. `last_error` holds provider error
 
 ```ts
 // app/offline/db.ts. Version 1 (4.5): meta only. Version 2 (4.2): the rest.
-db.version(1).stores({ meta: 'key' })   // session snapshot, pinVerifier, unlockFailures (later lastPullAt)
+db.version(1).stores({ meta: 'key' })   // session, pinVerifier, unlockFailures; 4.3: lastPullAt, pullUnit, pullStats, storagePersisted
 db.version(2).stores({
-  supporters: 'id, puCode, phone, syncStatus, capturedAt', // syncStatus pending | synced | rejected (+ rejectReason, issues)
-  outbox: '++seq, id, kind, createdAt, attempts, nextAttemptAt', // kind 'create' with the SupporterInput payload
+  supporters: 'id, puCode, phone, syncStatus, capturedAt', // syncStatus pending | synced | rejected (+ rejectReason, issues); pulled rows have no deviceId
+  outbox: '++seq, id, kind, createdAt, attempts, nextAttemptAt', // kind 'create' with the SupporterInput payload; nextAttemptAt = backoff
   units: 'code, parentCode', // user's own subtree (PU/Ward leads only), filled by the pull (4.3)
 })
 ```

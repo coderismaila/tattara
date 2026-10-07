@@ -3,6 +3,7 @@
 // Everything here is wiped on sign-out, after too many wrong PINs, and when the server says the session was revoked
 // (SECURITY_PRIVACY §7).
 import Dexie, { type EntityTable } from 'dexie'
+import type { SupporterStatus, UnitLevel, VerificationStatus } from '~~/shared/constants/enums'
 import type { SupporterInput, SyncItemResult } from '~~/shared/types/supporter'
 import { LAST_ACTIVE_STORAGE_KEY } from './idle'
 
@@ -16,8 +17,14 @@ export interface MetaRow {
 export type LocalSyncStatus = 'pending' | 'synced' | 'rejected'
 export type LocalRejectReason = Extract<SyncItemResult, { result: 'rejected' }>['reason'] | 'conflict'
 
-/** A supporter as this phone holds it: what was captured plus where it stands with the server. */
-export interface LocalSupporter extends SupporterInput {
+/**
+ * A supporter as this phone holds it: captured here (`deviceId` set) or brought by the pull (4.3: the lead's PU, or a
+ * ward lead's ward, with the server's status), plus where it stands with the server.
+ */
+export interface LocalSupporter extends Omit<SupporterInput, 'deviceId'> {
+  deviceId?: string
+  status?: SupporterStatus
+  verification?: VerificationStatus
   syncStatus: LocalSyncStatus
   rejectReason?: LocalRejectReason
   /** Field paths and i18n keys only, never values (as the server sends them). */
@@ -33,16 +40,17 @@ export interface OutboxRow {
   payload: SupporterInput
   createdAt: string
   attempts: number
-  /** ISO time before which the sync engine (4.3) does not retry. */
+  /** ISO time before which the sync engine does not retry (backoff after unanswered pushes; `force` ignores it). */
   nextAttemptAt: string
 }
 
-/** The lead's own subtree (PU and ward leads), for offline names. Filled by the pull (4.3). */
+/** The lead's own subtree (PU and ward leads), for offline names. Replaced by each full pull (4.3). */
 export interface LocalUnit {
   code: string
   parentCode: string | null
   name: string
-  level: string
+  level: UnitLevel
+  active?: boolean
 }
 
 export class TattaraDb extends Dexie {

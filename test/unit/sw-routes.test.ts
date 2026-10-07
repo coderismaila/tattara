@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
-import { describe, expect, it } from 'vitest'
-import { APP_SHELL_URL, PRECACHE_IGNORES, isApiRequest, isAppNavigation, isGeoRequest } from '../../service-worker/routes'
+import { describe, expect, it, vi } from 'vitest'
+import { APP_SHELL_URL, PRECACHE_IGNORES, isApiRequest, isAppNavigation, isGeoRequest, swPost } from '../../service-worker/routes'
 
 const url = (path: string) => new URL(path, 'https://tattara.test')
 
@@ -39,5 +39,18 @@ describe('service worker routes', () => {
     const sw = readFileSync(new URL('../../service-worker/sw.ts', import.meta.url), 'utf8')
     expect(sw).toMatch(/registerRoute\(\(\{ url \}\) => isApiRequest\(url\), new NetworkOnly\(\)\)/)
     expect(sw).not.toMatch(/isApiRequest\(url\)[^\n]*(?:CacheFirst|StaleWhileRevalidate|NetworkFirst)/)
+  })
+})
+
+describe('swPost (Background Sync, 4.3)', () => {
+  it('posts the batch with the session cookie and returns the results', async () => {
+    const fetcher = vi.fn(async () => new Response(JSON.stringify({ results: [{ id: 'a', result: 'accepted' }] }), { status: 200 }))
+    expect(await swPost([{ id: 'a' }], fetcher as unknown as typeof fetch)).toEqual({ results: [{ id: 'a', result: 'accepted' }] })
+    expect(fetcher).toHaveBeenCalledWith('/api/sync/push', expect.objectContaining({ method: 'POST', credentials: 'same-origin', body: '{"items":[{"id":"a"}]}' }))
+  })
+
+  it('throws with the status like $fetch, so the engine keeps the rows and backs off', async () => {
+    const fetcher = vi.fn(async () => new Response('', { status: 429 }))
+    await expect(swPost([], fetcher as unknown as typeof fetch)).rejects.toMatchObject({ statusCode: 429 })
   })
 })

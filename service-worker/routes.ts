@@ -1,5 +1,7 @@
 // What the service worker caches (task 4.1, ARCHITECTURE §5, SECURITY_PRIVACY §7). Pure and unit-tested; sw.ts wires
 // these into Workbox. The one hard rule: nothing under /api is ever cached (no supporter data in the SW cache).
+// Also the request the service worker sends for Background Sync (4.3).
+import type { SyncItemResult } from '../shared/types/supporter'
 
 /** Cache for the /app HTML shell (every /app page is the same SPA shell: SSR is off there). */
 export const SHELL_CACHE = 'tattara-shell'
@@ -24,3 +26,18 @@ export function isAppNavigation(url: URL, mode: RequestMode): boolean {
 /** Files the build precaches: the app's own assets. Boundary files are cached on use instead (they're large). */
 export const PRECACHE_GLOBS = ['**/*.{js,css,html,woff2,ico,png,svg,webmanifest}']
 export const PRECACHE_IGNORES = ['geo/**', '**/*.map']
+
+/**
+ * The service worker's push sender (Background Sync, task 4.3): same request as the app's, with the session cookie.
+ * Throws like $fetch: `statusCode` set when the server answered with an error, unset with no answer.
+ */
+export async function swPost(items: unknown[], fetcher: typeof fetch = fetch): Promise<{ results: SyncItemResult[] }> {
+  const res = await fetcher('/api/sync/push', {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ items }),
+  })
+  if (!res.ok) throw Object.assign(new Error(`sync push ${res.status}`), { statusCode: res.status })
+  return res.json() as Promise<{ results: SyncItemResult[] }>
+}

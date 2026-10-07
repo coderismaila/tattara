@@ -68,7 +68,9 @@
   "settings": {
     "languageHelp": "The app opens in this language on this phone.",
     "account": "Account",
-    "signOutHelp": "Signing out deletes Tattara's data from this phone. You will need a connection, your phone number and your PIN to sign in again."
+    "signOutHelp": "Signing out deletes Tattara's data from this phone. You will need a connection, your phone number and your PIN to sign in again.",
+    "storageTitle": "This phone may delete unsent supporters",
+    "storageHelp": "The browser did not agree to keep Tattara's data when the phone runs low on space. Add Tattara to the home screen and send your supporters whenever you have a connection."
   },
   "lock": {
     "checking": "Opening Tattara",

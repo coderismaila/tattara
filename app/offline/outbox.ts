@@ -1,6 +1,7 @@
 // Local-first capture (task 4.2, ARCHITECTURE §5): a supporter is written to the phone and queued for the server in
 // one transaction; server results then mark it synced or rejected. Outbox rows leave only when the server has
 // answered for them (accepted, duplicate, rejected or conflict), never on a network error.
+import { PUSH_BACKOFF_BASE_MS, PUSH_BACKOFF_MAX_MS } from '~~/shared/constants/sync'
 import type { SupporterInput, SyncItemResult } from '~~/shared/types/supporter'
 import { db, type LocalSupporter, type OutboxRow } from './db'
 
@@ -22,9 +23,27 @@ export async function discardCapture(id: string): Promise<void> {
   })
 }
 
+export interface ListOutboxOptions {
+  /** Only rows whose backoff has run out by this ISO time. */
+  dueBy?: string
+  /** Only rows queued after this one (the engine never sends a row twice in one run). */
+  afterSeq?: number
+}
+
 /** Oldest first: the order they were captured in. */
-export function listOutbox(limit = Infinity): Promise<OutboxRow[]> {
-  return db.outbox.orderBy('seq').limit(limit).toArray()
+export function listOutbox(limit = Infinity, options: ListOutboxOptions = {}): Promise<OutboxRow[]> {
+  const { dueBy, afterSeq } = options
+  const rows = afterSeq === undefined ? db.outbox.orderBy('seq') : db.outbox.where('seq').above(afterSeq)
+  return (dueBy === undefined ? rows : rows.filter(r => r.nextAttemptAt <= dueBy)).limit(limit).toArray()
+}
+
+/**
+ * Wait before retrying a row after `attempts` unanswered pushes: doubling from 30 s, at most 30 min (ARCHITECTURE §5),
+ * spread over the upper half so phones that lost the network together don't all retry at the same moment.
+ */
+export function backoffMs(attempts: number, random = Math.random): number {
+  const cap = Math.min(PUSH_BACKOFF_MAX_MS, PUSH_BACKOFF_BASE_MS * 2 ** Math.max(0, attempts - 1))
+  return Math.round(cap * (0.5 + random() * 0.5))
 }
 
 export function pendingCount(): Promise<number> {
@@ -50,11 +69,17 @@ export async function applyResults(results: SyncItemResult[]): Promise<void> {
   })
 }
 
-/** Count failed attempts (network or server errors) on rows that were sent but not answered. */
-export async function markAttempted(seqs: number[]): Promise<void> {
+/** Count failed attempts (network or server errors) on rows that were sent but not answered, and back them off. */
+export async function markAttempted(seqs: number[], now = Date.now()): Promise<void> {
   await db.outbox.where('seq').anyOf(seqs).modify((row) => {
     row.attempts++
+    row.nextAttemptAt = new Date(now + backoffMs(row.attempts)).toISOString()
   })
+}
+
+/** When the earliest backed-off row may be retried (ISO), or null with nothing queued. */
+export async function nextAttemptAt(): Promise<string | null> {
+  return (await db.outbox.orderBy('nextAttemptAt').first())?.nextAttemptAt ?? null
 }
 
 /**

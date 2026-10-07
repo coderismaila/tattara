@@ -126,6 +126,10 @@
     account: 'Asusu',
     // TODO(ha-review)
     signOutHelp: 'Fita zai goge bayanan Tattara daga wannan wayar. Za ku buƙaci intanet, lambar wayarku da PIN ɗinku don sake shiga.',
+    // TODO(ha-review)
+    storageTitle: 'Wannan wayar na iya goge magoya bayan da ba a tura ba',
+    // TODO(ha-review)
+    storageHelp: 'Burauzar ba ta amince ta adana bayanan Tattara ba idan wurin ajiya ya yi ƙasa. Saka Tattara a allon farko na wayarku, kuma ku tura magoya bayanku a duk lokacin da kuke da intanet.',
   },
   lock: {
     // TODO(ha-review)

@@ -8,6 +8,7 @@ import type { Role } from '../../shared/constants/roles.ts'
 import { MAX_SUPPORTERS_PER_PHONE } from '../../shared/constants/supporters.ts'
 import type { SessionUser } from '../../shared/types/auth.ts'
 import { supporterInputSchema, type SupporterListQuery } from '../../shared/schemas/supporter.ts'
+import type { PullCursor } from '../../shared/schemas/sync.ts'
 import {
   SUPPORTER_EDITABLE_FIELDS,
   type MaskedSupporterDto,
@@ -498,4 +499,41 @@ export async function checkPhone(db: DbLike, caller: Caller, phone: string): Pro
   }).from(supporters).where(eq(supporters.phone, phone))
   const countInSystem = row?.n ?? 0
   return { countInSystem, samePu: !!row?.samePu, limitReached: countInSystem >= MAX_SUPPORTERS_PER_PHONE }
+}
+
+// ── Sync pull (4.3) ─────────────────────────────────────────────────────────
+
+export type PullSupportersResult
+  = | { kind: 'ok', items: Supporter[], nextCursor: PullCursor | null }
+    | { kind: 'forbidden' }
+
+/** `updated_at` to the millisecond: the cursor's precision (JS dates have no microseconds). */
+const updatedAtMs = sql<number>`floor(extract(epoch from ${supporters.updatedAt}) * 1000)::bigint`
+
+/**
+ * Supporters changed since `since` in the caller's unit (PU lead: own PU; ward lead: own ward), oldest change first,
+ * paged by (updated_at ms, id). Anonymised records are included so the phone can delete its copy (the caller turns
+ * them into tombstones). Other roles: forbidden (they never hold supporter records offline, SECURITY_PRIVACY §7).
+ */
+export async function pullSupporters(
+  db: DbLike,
+  caller: Caller,
+  query: { since?: string, cursor?: PullCursor, limit: number },
+): Promise<PullSupportersResult> {
+  if (!FULL_VIEW_ROLES.includes(caller.role) || !caller.unitCode) return { kind: 'forbidden' }
+  const conditions: SQL[] = [underUnit(supporters.puCode, caller.unitCode)]
+  if (query.since) conditions.push(sql`${updatedAtMs} >= ${new Date(query.since).getTime()}`)
+  if (query.cursor) conditions.push(sql`(${updatedAtMs}, ${supporters.id}) > (${query.cursor.at}, ${query.cursor.id}::uuid)`)
+
+  const rows = await db.select({ row: supporters, at: updatedAtMs }).from(supporters)
+    .where(and(...conditions))
+    .orderBy(updatedAtMs, supporters.id)
+    .limit(query.limit + 1)
+  const page = rows.slice(0, query.limit)
+  const last = page[page.length - 1]
+  return {
+    kind: 'ok',
+    items: page.map(r => r.row),
+    nextCursor: rows.length > query.limit && last ? { at: Number(last.at), id: last.row.id } : null,
+  }
 }

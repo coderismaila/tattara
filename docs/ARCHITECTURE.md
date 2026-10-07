@@ -162,8 +162,10 @@ Codes are stored zero-padded exactly as INEC publishes them. `shared/utils/pu-co
 
 1. Capture form validates with the shared Zod schema, generates a **UUIDv7** `id`, and writes to
    Dexie `supporters` (status `pending`) **and** `outbox` in one Dexie transaction.
-2. `useSync()` runs: on app start, on the `online` event, every 60 s while online, and when the SW
-   receives a `sync` event (Background Sync where supported; Android Chrome supports it).
+2. `useSync()` (`app/offline/sync.ts`, ADR-038) runs: on app start, after sign-in, on the `online` event, every 60 s
+   while the page is shown, and after each capture. When a capture can't be sent, it registers Background Sync; the SW's
+   `sync` event then pushes the outbox itself (even with the app closed) and tells open pages. One run at a time per
+   phone (Web Lock `tattara-sync`, shared by tabs and the SW).
 3. The push sends batches of ≤ 50 items to `POST /api/sync/push`. The server upserts by `id` inside
    a transaction, runs validation, dedupe and flag checks, and returns a per-item result:
    `accepted | duplicate | rejected(reason) | conflict`.
@@ -171,7 +173,8 @@ Codes are stored zero-padded exactly as INEC publishes them. `shared/utils/pu-co
 5. Retries use exponential backoff (max 30 min). Items never auto-delete from the outbox until
    acknowledged.
 6. Pull: `GET /api/sync/pull?since=` returns changes to supporters in the lead's scope (PU/Ward only)
-   plus my-unit stats, so the offline list stays current.
+   plus my-unit stats, so the offline list stays current. Paged (500), overlapping by 2 min; never overwrites a capture
+   still in the outbox or one the server refused; a lead moved to another unit starts over.
 7. Edits are last-write-wins using `updatedAt` from the server clock. The conflict rate is expected to be tiny
    (only one lead per PU writes).
 

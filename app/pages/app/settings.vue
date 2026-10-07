@@ -1,9 +1,17 @@
 <script setup lang="ts">
+import { getStoragePersisted } from '~/offline/background'
+
 definePageMeta({ layout: 'app', titleKey: 'nav.settings' })
 
 const { t } = useI18n()
 const signOutOfPhone = useSignOut()
 const signingOut = ref(false)
+
+// ARCHITECTURE §5: warn when the browser refused persistent storage (unsent captures could be evicted).
+const storageRefused = ref(false)
+onMounted(async () => {
+  storageRefused.value = (await getStoragePersisted().catch(() => undefined)) === false
+})
 
 // Ends the server session when reachable and always wipes this phone's Tattara data (4.5).
 async function signOut() {
@@ -22,6 +30,16 @@ async function signOut() {
     <h1 class="text-2xl font-bold">
       {{ t('nav.settings') }}
     </h1>
+
+    <UAlert
+      v-if="storageRefused"
+      color="warning"
+      variant="subtle"
+      icon="i-lucide-hard-drive"
+      :title="t('settings.storageTitle')"
+      :description="t('settings.storageHelp')"
+      data-testid="settings-storage-warning"
+    />
 
     <section
       aria-labelledby="settings-language"

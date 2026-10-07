@@ -124,7 +124,7 @@ describe('pushOutbox', () => {
   it('does not call the server with an empty queue', async () => {
     const fetch = vi.fn()
     vi.stubGlobal('$fetch', fetch)
-    expect(await pushOutbox()).toEqual({ sent: true, results: [] })
+    expect(await pushOutbox()).toEqual({ sent: true, results: [], lastSeq: null })
     expect(fetch).not.toHaveBeenCalled()
   })
 })

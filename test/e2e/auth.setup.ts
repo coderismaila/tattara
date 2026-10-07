@@ -16,7 +16,8 @@ async function signIn(page: Page, phone: string, stateFile: string) {
   await page.getByTestId('code-submit').click()
 
   await expect(page).toHaveURL(/\/app$/)
-  await page.context().storageState({ path: stateFile })
+  // indexedDB: the local session and PIN verifier (4.5); without them /app shows "sign in again".
+  await page.context().storageState({ path: stateFile, indexedDB: true })
 }
 
 setup('sign in the app-shell user (Kano ward lead)', async ({ page }) => {

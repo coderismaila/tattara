@@ -4,6 +4,7 @@ import { loginSchema, otpCodeSchema, phoneSchema } from '~~/shared/schemas/auth'
 const { t } = useI18n()
 const route = useRoute()
 const { fetch: refreshSession } = useUserSession()
+const rememberSignIn = useLocalSignIn()
 
 useHead({ title: () => t('auth.signIn') })
 
@@ -30,6 +31,15 @@ const nextPath = computed(() => {
 
 async function finish() {
   await refreshSession()
+  try {
+    // Saves the PIN verifier for the offline lock (4.5); the PIN is still in memory from the first step.
+    await rememberSignIn(pin.value)
+  }
+  catch {
+    error.value = { key: 'auth.errors.deviceStorage' }
+    return
+  }
+  pin.value = ''
   await navigateTo(nextPath.value, { replace: true })
 }
 

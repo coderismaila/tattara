@@ -193,6 +193,11 @@ in `service-worker/routes.ts` (unit-tested).
 - **Session length:** 30 days sliding, so offline users aren't logged out mid-drive. Incrementing `sessionVersion` in the DB
   invalidates sessions on the next online request (used on deactivate/PIN reset).
 - **Invite setup:** an invite token (random 128-bit, hashed in DB, 72 h expiry) is delivered by SMS as a short code + link.
+- **Offline session and idle lock (4.5, ADR-036):** each online sign-in saves a snapshot of `/auth/me` and a PBKDF2
+  PIN verifier in Dexie `meta`. `/app` sits behind the lock screen (`useAppLock`, `CommonAppLock`): 5 min idle →
+  PIN, checked on the phone; 5 wrong → wipe. `app/plugins/offline-session.client.ts` feeds activity to the lock and
+  asks `/auth/me` on start, on reconnect and on resume: a 401 `revoked` wipes the phone, `expired` keeps the data
+  and sends the lead to `/login`. Sign-out always wipes (`useSignOut`).
 - **Rate limits:** login 10/15 min per phone (above the 5-wrong-PIN lockout, ADR-024), OTP sends 3/hour per phone, sync push 120/min per user.
 
 ## 7. Aggregation for dashboards

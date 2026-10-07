@@ -18,7 +18,15 @@ export interface AuthContext {
   deviceId: string
 }
 
-const unauthorized = () => createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+/**
+ * `revoked`: the account or device was shut off (deactivated, PIN reset, device revoked), so the client wipes its
+ * local data (SECURITY_PRIVACY §7). `expired`: no session or 30 days idle; the client keeps its data for the same
+ * lead's next sign-in. Only someone who held a valid session ever sees `revoked`.
+ */
+export type UnauthorizedReason = 'revoked' | 'expired'
+
+const unauthorized = (reason: UnauthorizedReason = 'expired') =>
+  createError({ statusCode: 401, statusMessage: 'Unauthorized', data: { reason } })
 
 /** Start a session after a successful login, OTP or setup. Replaces any previous session data. */
 export async function startSession(event: H3Event, user: SessionUser, deviceId: string): Promise<void> {
@@ -41,6 +49,7 @@ export async function requireAuth(event: H3Event): Promise<AuthContext> {
 
   const session = await getUserSession(event)
   const secure = session.secure
+  if (secure?.revoked) throw unauthorized('revoked')
   if (!session.user || !secure?.deviceId || !secure.refreshedAt) throw unauthorized()
 
   const now = Date.now()
@@ -62,10 +71,11 @@ export async function requireAuth(event: H3Event): Promise<AuthContext> {
     )})`,
   }).from(users).where(eq(users.id, session.user.id))
 
-  // Deactivated, PIN reset (session_version bump), or device revoked ("wipe this device").
+  // Deactivated, PIN reset (session_version bump), or device revoked ("wipe this device"). The user is dropped from
+  // the session and a revoked marker stays, so every later request also says `revoked` (the phone must wipe).
   if (!row || row.status !== 'active' || row.sessionVersion !== session.user.sessionVersion || !row.deviceOk) {
-    await clearUserSession(event)
-    throw unauthorized()
+    await replaceUserSession(event, { secure: { revoked: true } })
+    throw unauthorized('revoked')
   }
 
   const user: SessionUser = { id: row.id, role: row.role, unitCode: row.unitCode, sessionVersion: row.sessionVersion }

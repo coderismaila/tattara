@@ -39,7 +39,6 @@ const { getScope } = await import('../../server/utils/scope')
 
 const PU_LEAD = '+2348000000104'
 const newEvent = () => ({ context: {} }) as unknown as H3Event
-const statusOf = (p: Promise<unknown>) => p.then(() => 200, (e: { statusCode?: number }) => e.statusCode)
 
 describe.skipIf(!dbAvailable)('requireAuth', () => {
   let temp: Awaited<ReturnType<typeof createTempDatabase>>
@@ -82,19 +81,23 @@ describe.skipIf(!dbAvailable)('requireAuth', () => {
 
   it('401 without a session', async () => {
     state.session = {}
-    expect(await statusOf(requireAuth(newEvent()))).toBe(401)
+    await expect(requireAuth(newEvent())).rejects.toMatchObject({ statusCode: 401, data: { reason: 'expired' } })
   })
 
   it.each([
     ['the user was deactivated', async () => db.update(users).set({ status: 'deactivated' }).where(eq(users.id, lead.id))],
     ['the session version was bumped (PIN reset)', async () => db.update(users).set({ sessionVersion: sql`${users.sessionVersion} + 1` }).where(eq(users.id, lead.id))],
     ['the device was revoked (wipe)', async () => db.update(userDevices).set({ revokedAt: sql`now()` })],
-    ['30 days passed without activity', async () => {
-      state.session.secure!.refreshedAt = Date.now() - SESSION_IDLE_MS - 1000
-    }],
-  ])('401 and clears the session when %s', async (_label, change) => {
+  ])('401 revoked when %s; the session keeps only a revoked marker, so later requests say revoked too', async (_label, change) => {
     await change()
-    expect(await statusOf(requireAuth(newEvent()))).toBe(401)
+    await expect(requireAuth(newEvent())).rejects.toMatchObject({ statusCode: 401, data: { reason: 'revoked' } })
+    expect(state.session).toEqual({ secure: { revoked: true } })
+    await expect(requireAuth(newEvent())).rejects.toMatchObject({ statusCode: 401, data: { reason: 'revoked' } })
+  })
+
+  it('401 expired and clears the session after 30 days without activity', async () => {
+    state.session.secure!.refreshedAt = Date.now() - SESSION_IDLE_MS - 1000
+    await expect(requireAuth(newEvent())).rejects.toMatchObject({ statusCode: 401, data: { reason: 'expired' } })
     expect(state.cleared).toBe(1)
     expect(state.session).toEqual({})
   })

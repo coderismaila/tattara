@@ -20,6 +20,9 @@ importers:
       '@vite-pwa/nuxt':
         specifier: 1.1.1
         version: 1.1.1(magicast@0.5.5)(vite@8.3.1(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))(workbox-build@7.4.1)(workbox-window@7.4.1)
+      dexie:
+        specifier: ^4.4.6
+        version: 4.4.6
       drizzle-orm:
         specifier: ^0.45.3
         version: 0.45.3(better-sqlite3@13.0.3)(postgres@3.4.9)
@@ -90,6 +93,9 @@ importers:
       eslint:
         specifier: ^10.11.0
         version: 10.11.0(jiti@2.7.0)
+      fake-indexeddb:
+        specifier: ^6.2.5
+        version: 6.2.5
       happy-dom:
         specifier: ^20.14.5
         version: 20.14.5
@@ -4542,6 +4548,9 @@ packages:
         optional: true
       cac:
         optional: true
+
+  dexie@4.4.6:
+    resolution: {integrity: sha512-hJP/BO6mjB+tX6hToIO1kmxYLNmun90wYbfcoAoLpKEyDYal/k33dg0TAfoUe2TDsbbLoVIzljJ3BN2UbR5EOg==}
 
   dfa@1.2.0:
     resolution: {integrity: sha512-ED3jP8saaweFTjeGX8HQPjeC1YYyZs98jGNZx6IiBvxW7JG5v492kamAQB3m2wop07CvU/RQmzcKr6bgcC5D/Q==}
@@ -13122,6 +13131,8 @@ snapshots:
     transitivePeerDependencies:
       - ocache
       - srvx
+
+  dexie@4.4.6: {}
 
   dfa@1.2.0: {}
 

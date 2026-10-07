@@ -12,7 +12,7 @@ All routes are under `/api`, return JSON, and use cookie sessions. Every input i
 | POST | `/auth/otp/resend` | public | `{ phone }` | always 202 (reveals nothing) unless 429; only resends for a pending PIN-verified login |
 | POST | `/auth/setup` | public | `{ token, pin, deviceId }` | from invite; activates user, trusts the device, bumps session_version. 400 `invite_invalid`, 410 `invite_expired`, 409 `unit_taken`; weak PINs rejected (400) |
 | POST | `/auth/logout` | any | — | clears the session |
-| GET | `/auth/me` | any | — | `{ user: { id, fullName, role, unitCode }, unit, scope }`; 401 once the session is revoked |
+| GET | `/auth/me` | any | — | `{ user: { id, fullName, role, unitCode }, unit, scope }`; 401 once the session is revoked or expired (below) |
 
 Errors carry `data.reason` (and `data.issues` with i18n keys for 400 `invalid`). Every authenticated route calls
 `requireAuth` (active user, same `session_version`, device not revoked, active within 30 days).
@@ -84,3 +84,6 @@ Unit codes in URL paths use dashes: `19/05/03` → `19-05-03` (`toUrlCode` / `fr
 - Pagination: cursor-based (`cursor` = last id), default 50, max 200.
 - `/sync/push` item result reasons: `invalid`, `no_consent`, `out_of_scope`, `phone_limit` (a 4th supporter on one number, PRD R-5), `pu_inactive`.
 - All mutating routes are CSRF-safe via SameSite=Lax cookies + an `Origin` header check.
+- Every authenticated route answers 401 with `data.reason`: `revoked` (deactivated, PIN reset, device revoked → the
+  client wipes its local data) or `expired` (no session, or 30 days idle → the client keeps its data for the same
+  lead's next sign-in).

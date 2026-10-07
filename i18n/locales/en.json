@@ -41,6 +41,7 @@
       "invite_expired": "This invite link has expired. Ask your lead to send a new one.",
       "unit_taken": "Your unit already has an active lead. Ask your lead to check.",
       "network": "No connection. Check your network and try again.",
+      "deviceStorage": "This phone's browser would not save Tattara's data. Leave private browsing, or free some storage, and sign in again.",
       "unknown": "Something went wrong. Try again."
     }
   },
@@ -67,7 +68,21 @@
   "settings": {
     "languageHelp": "The app opens in this language on this phone.",
     "account": "Account",
-    "signOutHelp": "Signing out on this phone means you will need your PIN to sign in again."
+    "signOutHelp": "Signing out deletes Tattara's data from this phone. You will need a connection, your phone number and your PIN to sign in again."
+  },
+  "lock": {
+    "checking": "Opening Tattara",
+    "title": "Tattara is locked",
+    "intro": "Enter your PIN to continue.",
+    "introNamed": "{name}, enter your PIN to continue.",
+    "unlock": "Unlock",
+    "wrongPin": "Wrong PIN. 1 try left before Tattara's data is deleted from this phone. | Wrong PIN. {count} tries left before Tattara's data is deleted from this phone.",
+    "forgotHelp": "Forgot your PIN? Sign out, then sign in again with a connection. Signing out deletes Tattara's data from this phone.",
+    "needsSignIn": {
+      "title": "Sign in again",
+      "online": "To use Tattara on this phone, sign in with your phone number and PIN.",
+      "offline": "To use Tattara on this phone, connect to the internet and sign in with your phone number and PIN."
+    }
   },
   "team": {
     "title": "Team",

@@ -4,6 +4,7 @@ import { inviteTokenSchema, setupSchema } from '~~/shared/schemas/auth'
 const { t } = useI18n()
 const route = useRoute()
 const { fetch: refreshSession } = useUserSession()
+const rememberSignIn = useLocalSignIn()
 
 useHead({ title: () => t('auth.setupTitle') })
 
@@ -36,6 +37,13 @@ async function submit() {
   try {
     await $fetch('/api/auth/setup', { method: 'POST', body: parsed.data })
     await refreshSession()
+    try {
+      await rememberSignIn(pin.value) // offline lock verifier (4.5)
+    }
+    catch {
+      error.value = { key: 'auth.errors.deviceStorage' }
+      return
+    }
     await navigateTo('/app', { replace: true })
   }
   catch (e) {

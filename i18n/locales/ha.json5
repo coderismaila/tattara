@@ -80,6 +80,8 @@
       // TODO(ha-review)
       network: 'Babu hanyar sadarwa. Ku duba network ɗinku ku sake gwadawa.',
       // TODO(ha-review)
+      deviceStorage: 'Burauzar wannan wayar ta ƙi adana bayanan Tattara. Ku fita daga yanayin sirri, ko ku samar da wuri a ma’ajiya, sannan ku sake shiga.',
+      // TODO(ha-review)
       unknown: 'An sami matsala. Ku sake gwadawa.',
     },
   },
@@ -123,7 +125,31 @@
     // TODO(ha-review)
     account: 'Asusu',
     // TODO(ha-review)
-    signOutHelp: 'Idan kun fita a wannan wayar, sai kun yi amfani da PIN ɗinku kafin ku sake shiga.',
+    signOutHelp: 'Fita zai goge bayanan Tattara daga wannan wayar. Za ku buƙaci intanet, lambar wayarku da PIN ɗinku don sake shiga.',
+  },
+  lock: {
+    // TODO(ha-review)
+    checking: 'Ana buɗe Tattara',
+    // TODO(ha-review)
+    title: 'An kulle Tattara',
+    // TODO(ha-review)
+    intro: 'Ku shigar da PIN ɗinku don ci gaba.',
+    // TODO(ha-review)
+    introNamed: '{name}, ku shigar da PIN ɗinku don ci gaba.',
+    // TODO(ha-review)
+    unlock: 'Buɗe',
+    // TODO(ha-review)
+    wrongPin: 'PIN ba daidai ba. Saura gwaji 1 kafin a goge bayanan Tattara daga wannan wayar. | PIN ba daidai ba. Saura gwaji {count} kafin a goge bayanan Tattara daga wannan wayar.',
+    // TODO(ha-review)
+    forgotHelp: 'Kun manta PIN ɗinku? Ku fita, sannan ku sake shiga da intanet. Fita zai goge bayanan Tattara daga wannan wayar.',
+    needsSignIn: {
+      // TODO(ha-review)
+      title: 'Ku sake shiga',
+      // TODO(ha-review)
+      online: 'Don amfani da Tattara a wannan wayar, ku shiga da lambar wayarku da PIN ɗinku.',
+      // TODO(ha-review)
+      offline: 'Don amfani da Tattara a wannan wayar, ku haɗa da intanet sannan ku shiga da lambar wayarku da PIN ɗinku.',
+    },
   },
   team: {
     // TODO(ha-review)

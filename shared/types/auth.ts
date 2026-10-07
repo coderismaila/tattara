@@ -20,4 +20,9 @@ export interface SecureSession {
   /** Epoch ms of the last activity refresh; sessions end after 30 days without one. */
   refreshedAt: number
   loggedInAt: number
+  /**
+   * Set (alone) once the server found this session revoked: later requests keep answering 401 `revoked` until the
+   * phone signs out or in, so the client still learns to wipe its data after the first 401 (task 4.5).
+   */
+  revoked?: true
 }

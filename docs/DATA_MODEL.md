@@ -156,6 +156,7 @@ with `[redacted]` once sent or finally failed. `last_error` holds provider error
 ## 6. Client (Dexie) schema
 
 ```ts
+// 4.5 shipped version(1) with `meta` only (keys: session, pinVerifier, unlockFailures); 4.2 adds the rest as version(2).
 db.version(1).stores({
   supporters: 'id, puCode, phone, syncStatus, capturedAt',
   outbox: '++seq, id, kind, createdAt, attempts, nextAttemptAt',

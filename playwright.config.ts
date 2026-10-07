@@ -43,6 +43,8 @@ export default defineConfig({
       NUXT_APP_ENV: 'test',
       NUXT_SMS_FAKE_OUTBOX: OUTBOX_FILE,
       NUXT_PUBLIC_SITE_URL: `http://localhost:${E2E_PORT}`,
+      // Long enough that shared sessions don't lock mid-run; lock.spec.ts fast-forwards the clock past it.
+      NUXT_PUBLIC_LOCK_IDLE_MINUTES: '120',
       // Test-only values; real secrets come from the deploy environment.
       NUXT_SESSION_PASSWORD: 'e2e-only-session-password-at-least-32-chars',
       NUXT_OTP_SECRET: 'e2e-only-otp-secret-at-least-32-characters',

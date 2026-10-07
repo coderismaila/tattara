@@ -75,8 +75,8 @@ ADMIN has no default read access to supporter PII; break-glass access requires a
 ## 7. On the device
 - Data in IndexedDB is readable by anyone who unlocks the phone. Mitigations:
   - PU leads only ever hold their own PU's supporters; ward leads hold only their ward's.
-  - Auto-lock the app after 5 min idle → PIN re-entry (offline-verifiable via a locally stored PIN verifier: PBKDF2 with a high iteration count).
-  - "Wipe this device" on logout and remotely on deactivate (next online contact clears Dexie).
+  - Auto-lock the app after 5 min idle → PIN re-entry (offline-verifiable via a locally stored PIN verifier: PBKDF2 with a high iteration count). 5 wrong PINs on the lock screen wipe the phone (ADR-036).
+  - "Wipe this device" on logout and remotely on deactivate, PIN reset or device revocation (next online contact clears Dexie: the server answers 401 `revoked`).
   - No supporter data in the SW cache, URLs, or `localStorage`.
 
 ## 8. Logging

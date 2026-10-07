@@ -2,19 +2,17 @@
 definePageMeta({ layout: 'app', titleKey: 'nav.settings' })
 
 const { t } = useI18n()
-const { clear } = useUserSession()
+const signOutOfPhone = useSignOut()
 const signingOut = ref(false)
 
+// Ends the server session when reachable and always wipes this phone's Tattara data (4.5).
 async function signOut() {
   signingOut.value = true
   try {
-    await $fetch('/api/auth/logout', { method: 'POST' })
+    await signOutOfPhone()
   }
   finally {
-    // Local state is cleared even offline; the server session is cleared when reachable.
-    await clear().catch(() => {})
     signingOut.value = false
-    await navigateTo('/login', { replace: true })
   }
 }
 </script>

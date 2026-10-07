@@ -19,13 +19,18 @@ Also note blockers and anything the next session must know.
   (60 s stats cache) actually cache in a production build.
 - **PWA (4.1):** `service-worker/sw.ts` (injectManifest). Icons come from `pnpm icons` (renders `public/icons/*.png`
   with Playwright's Chromium). The service worker only runs in a production build (`pnpm build && pnpm preview`).
-  - **Obligation for 4.2:** offline, `/app` pages now open without a confirmed session (auth middleware skips the
-    login redirect when `navigator.onLine` is false). Before 4.2 keeps supporters in Dexie, 4.5's local PIN lock
-    must gate that data (or 4.2 ships with it).
+  - Offline, `/app` opens without a confirmed session; since 4.5 it stays behind the lock screen (local session +
+    PIN). The 4.1 obligation is met (ADR-036).
   - **Size budget:** the precache is ~1.6 MB raw / ~775 KB over the wire (one-time download; ~430 KB are the Noto Sans
     fonts for Hausa letters). Review in 7.x before adding more to the app shell.
   - **👤 Before the pilot:** install from Chrome on a real Android Go phone (Add to home screen), open it in airplane
     mode, and check the icon on the home screen. Playwright can't click Chrome's own install UI.
+- **Offline lock (4.5, ADR-036), for 4.2 onwards:** the Dexie db is `app/offline/db.ts` (version 1 = `meta` only; add
+  supporters/outbox/units as **version 2**). `wipeDevice()` deletes the whole database, so new tables are wiped too.
+  Use `getLocalSession()` (unit, role, name) for offline screens instead of `/api/auth/me`. E2E: shared sessions are
+  saved with `indexedDB: true`; a spec that waits on idle uses `page.clock` (E2E idle limit is 120 min).
+  Pages under `/app` render behind the lock (still mounted): don't autofocus or fetch-and-announce on mount
+  assuming the lead can see the page.
 - DB: `pnpm db:up && pnpm db:migrate`. Integration tests (`pnpm test:integration`) need the DB; they skip locally
   without it and fail in CI. `pg_trgm` is enabled by migration 0007 (3.4).
 - **1.3 data (see `data/SOURCES.md`):** fetched by `pnpm data:fetch:inec` / `data:fetch:grid3`.
@@ -128,3 +133,4 @@ Also note blockers and anything the next session must know.
 - 2026-09-27 · 3.6 · Access-control suite: `test/e2e/access/` matrix of all 18 routes × 11 callers (status + field checks: full vs masked phones, counts-only check-phone, no token/PIN/device keys in any response), real HTTP on the production build, runs first in E2E; unit meta-test keeps the matrix in step with `server/api/`; verified it catches a wrong status and unmasked phones · see commit `test(access)`
 - 2026-09-27 · 3.7 · Registered voters from the field: migration 0008 (`registered_voters_reported_by/_at`, CHECK); `setRegisteredVoters` (own PU lead or ward lead, 0–10,000, audited from/to) + `registeredVotersSummary` (PU figure, or sum + reported X of Y); `GET/PUT /api/units/:code/registered-voters` (dashed codes, `all`); importer never overwrites a reported figure; Home card + once-per-device prompt (PU) / totals (ward+), Team page correct button; access matrix 20 routes · see commit `feat(units)`
 - 2026-09-27 · 4.1 · PWA: injectManifest service worker (precache app, `/app` network-first with cached shell fallback, `/geo` cache-first, `/api` never cached), manifest with 192/512/maskable PNG icons (`pnpm icons`), install and update prompts (`CommonPwaPrompts`), offline `/app` opens without the login redirect; E2E: manifest + icon sizes, shell opens offline after a first visit, no `/api` entries in any cache · see commit `feat(pwa)`
+- 2026-10-07 · 4.5 · Offline session & idle lock (done before 4.2, ADR-036): Dexie db (`meta` only) + `wipeDevice`; PBKDF2 PIN verifier (600k) and `/auth/me` snapshot saved at login/OTP/setup (another lead → wipe first); `useAppLock` + `CommonAppLock` cover `/app` (inert, still mounted) after `NUXT_PUBLIC_LOCK_IDLE_MINUTES` idle, also on cold start; 5 wrong PINs → wipe + sign-out; "sign in again" without a local session; 401 `data.reason` `revoked`/`expired` with a sticky revoked marker in the session, so revoked phones wipe on next contact and expired ones keep data; sign-out always wipes; unit + integration tests, E2E lock/unlock offline, 5-wrong wipe, sign-out wipe, deactivated lead wiped · see commit `feat(offline)`

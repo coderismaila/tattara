@@ -94,6 +94,10 @@ export const flags = pgTable('flags', {
   index('flags_supporter_idx').on(t.supporterId),
   // The flag engine (5.1) re-runs: at most one open flag of a type per supporter.
   uniqueIndex('flags_one_open_per_supporter_type_idx').on(t.supporterId, t.type).where(sql`${t.status} = 'open' and ${t.supporterId} is not null`),
+  // PU-level flags (pu_over_capacity): one open per PU and type. Lead-level flags (rate_anomaly): one open per lead.
+  uniqueIndex('flags_one_open_per_pu_type_idx').on(t.puCode, t.type).where(sql`${t.status} = 'open' and ${t.supporterId} is null and ${t.userId} is null`),
+  uniqueIndex('flags_one_open_per_user_type_idx').on(t.userId, t.type).where(sql`${t.status} = 'open' and ${t.supporterId} is null and ${t.userId} is not null`),
+  index('flags_user_idx').on(t.userId),
   check('flags_review', sql`(${t.status} = 'open') = (${t.reviewedAt} is null)`),
 ])
 

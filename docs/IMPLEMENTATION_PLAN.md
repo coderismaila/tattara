@@ -82,7 +82,7 @@ _4.5 was done before 4.2 (ADR-036): the lock must protect the phone before suppo
 
 ## Phase 5 — Data quality
 
-- [ ] **5.1 Flag engine** `server/services/flags.ts`: gps_far, duplicate_phone, pu_over_capacity, rate_anomaly, gps_cluster, run at sync + nightly.
+- [x] **5.1 Flag engine** `server/services/flags.ts`: gps_far, duplicate_phone, pu_over_capacity, rate_anomaly, gps_cluster, run at sync + nightly.
   **AC:** unit tests per flag type with fixtures.
 - [ ] **5.2 Thank-you SMS + STOP webhook** → verification/opt-out state; anonymise job (72 h).
 - [ ] **5.3 Call-back workflow:** daily sample task, ward review page, outcomes update verification.

@@ -110,8 +110,10 @@ unless anonymised, and an anonymised row has no phone, address or GPS; name 1–
 ### `flags`
 | id | supporter_id FK null | user_id FK null | pu_code | type enum | details jsonb | status enum `open\|dismissed\|confirmed` | reviewed_by | reviewed_at | created_at |
 
-Indexes: `pu_code text_pattern_ops`, `(status, created_at)`, `(supporter_id)`; partial unique `(supporter_id, type)` where
-open, so the flag engine can re-run. CHECK: `reviewed_at` is set exactly when the status is not `open`. `details`
+Indexes: `pu_code text_pattern_ops`, `(status, created_at)`, `(supporter_id)`, `(user_id)`; partial unique
+`(supporter_id, type)` where open, `(pu_code, type)` where open for PU flags (no supporter, no user) and `(user_id, type)`
+where open for lead flags (no supporter), so the flag engine can re-run (ADR-040). Flag ids from SQL are
+`gen_random_uuid()`. CHECK: `reviewed_at` is set exactly when the status is not `open`. `details`
 holds evidence only (distances, counts), never names or phones.
 
 Flag types: `gps_far`, `duplicate_phone`, `pu_over_capacity`, `rate_anomaly`, `gps_cluster`, `callback_failed`, `opt_out_spike`.

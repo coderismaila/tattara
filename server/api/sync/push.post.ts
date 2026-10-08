@@ -1,6 +1,9 @@
 // POST /api/sync/push { items: SupporterInput[≤50] } → { results } (API.md, ARCHITECTURE §5). PU leads only.
-// Each item is validated and upserted on its own; results come back in the same order.
+// Each item is validated and upserted on its own; results come back in the same order. New records then go through
+// the flag checks (5.1).
 import { createError, defineEventHandler } from 'h3'
+import { useRuntimeConfig } from 'nitropack/runtime'
+import { flagAfterWrite } from '~~/server/services/flags'
 import { pushSupporters } from '~~/server/services/supporters'
 import { syncPushSchema } from '~~/shared/schemas/supporter'
 import { requireAuth } from '~~/server/utils/auth'
@@ -14,5 +17,9 @@ export default defineEventHandler(async (event) => {
   if (user.role !== 'PU_LEAD') throw createError({ statusCode: 403, statusMessage: 'Forbidden', data: { reason: 'not_allowed' } })
   await enforceRateLimit(event, `sync-push:${user.id}`, RATE_LIMITS.syncPush)
   const { items } = await readValidated(event, syncPushSchema)
-  return { results: await pushSupporters(useDb(), user, items) }
+  const results = await pushSupporters(useDb(), user, items)
+  // Flag checks (5.1) on what was newly accepted; they never fail the push.
+  const accepted = results.flatMap(r => (r.result === 'accepted' ? [r.id] : []))
+  await flagAfterWrite(useDb(), accepted, Number(useRuntimeConfig().public.gpsFlagMeters))
+  return { results }
 })

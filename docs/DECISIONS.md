@@ -289,3 +289,19 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - **"Last sent"** is kept on the phone (`meta.lastSyncAt`) whenever the server answers a push, written only while the same lead is signed in.
 **Why:** UX §2.3 and §4.5; PRD US-6 ("I can see what's pending").
 **Consequences:** the capture page's "refused earlier" toast stays, pointing to the Sync screen.
+**Amended 2026-10-08:** the pull keeps a refreshed record's local `deviceId` (otherwise this phone's sent captures dropped out of the Sent list once pulled back), and the capture page reads its record's status from the phone after the run, because a sync run already in progress can send the new capture and receive its answer.
+
+### ADR-040 · 2026-10-08 · Accepted · Flag engine: set-based SQL checks at sync and nightly (5.1)
+**Decision:**
+- **One engine, `runFlagChecks`** (`server/services/flags.ts`): each check is a single `INSERT … SELECT`. After a sync it runs for the newly accepted supporters (and their PUs and leads); after a phone edit for that record; nightly (`flags:scan`, 01:00 UTC) for everything. The dev seed runs it once so dev data has flags. Failures after a write are logged and never fail the save (flags, not blocks).
+- **Rules (PRD R-6), thresholds in `shared/constants/flags.ts`:**
+  - `gps_far`: distance from the PU minus the fix's reported accuracy > `gpsFlagMeters` (3 km). **PUs with an estimated location** (ward centroid / polygon point) use 10 km, and the flag says so; otherwise most captures in Kebbi, Sokoto and Zamfara would be flagged.
+  - `duplicate_phone`: every use of a number after the earliest record; evidence is the use count, whether an earlier use is on the same PU, and the shared-phone tick, never where the others are.
+  - `pu_over_capacity`: supporters (all statuses, as `pu_stats.total`) > 90% of the PU's registered voters; PUs without a figure are skipped (ADR-033). One flag per PU.
+  - `rate_anomaly`: > 60 captures by one lead in any rolling hour of the **device** capture time (the server receive time would turn each offline sync into a burst). One flag per lead, for the busiest hour.
+  - `gps_cluster`: ≥ 10 supporters from one lead with the same fix to 6 decimals.
+- **Reviewed is final:** a supporter's flag that was dismissed or confirmed is not raised again for that type. A PU's capacity flag comes back only when its registered-voter figure changes; a lead's rate flag only for an hour that starts after the reviewed burst ended.
+- **Uniqueness:** besides the existing one-open-per-(supporter, type), migration 0009 adds one open per (PU, type) for PU flags and per (lead, type) for lead flags, so concurrent runs can't double up (`on conflict do nothing`).
+- **Evidence only** in `details` (distances, counts, ratios, the hour): no names, phone numbers or coordinates. `pu_stats.flagged_open` is refreshed for every PU that got a new flag (`refreshFlaggedOpen`, also for 5.4's resolve).
+- **Tests run against Postgres** (the checks are SQL): the dev seed's planted patterns must be found exactly, plus edge cases; pure helpers have unit tests.
+**Consequences:** 5.4 lists and resolves flags and must call `refreshFlaggedOpen`. `callback_failed` (5.3) and `opt_out_spike` (5.2) are raised by their own tasks.

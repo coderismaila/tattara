@@ -1,5 +1,7 @@
 // PATCH /api/supporters/:id { editable fields } → the updated supporter (API.md). The PU lead of its PU only.
 import { createError, defineEventHandler, getRouterParam } from 'h3'
+import { useRuntimeConfig } from 'nitropack/runtime'
+import { flagAfterWrite } from '~~/server/services/flags'
 import { serializeSupporter, updateSupporter } from '~~/server/services/supporters'
 import { supporterPatchSchema } from '~~/shared/schemas/supporter'
 import { requireAuth } from '~~/server/utils/auth'
@@ -15,6 +17,8 @@ export default defineEventHandler(async (event) => {
   const result = await updateSupporter(useDb(), user, id, patch)
   switch (result.kind) {
     case 'ok':
+      // A new phone number may now be shared (duplicate_phone, 5.1).
+      if (result.changed.includes('phone')) await flagAfterWrite(useDb(), [id], Number(useRuntimeConfig().public.gpsFlagMeters))
       return { supporter: serializeSupporter(result.supporter, user.role), changed: result.changed }
     case 'invalid':
       throw createError({ statusCode: 400, statusMessage: 'Bad Request', data: { reason: 'invalid' } })

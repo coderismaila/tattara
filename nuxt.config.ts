@@ -65,6 +65,8 @@ export default defineNuxtConfig({
     // Cron runs in UTC; 23:55 WAT tasks (6.1) will be '55 22 * * *'.
     scheduledTasks: {
       '* * * * *': ['sms:process'],
+      // 01:00 UTC = 02:00 in Lagos: the whole-registry flag scan (5.1).
+      '0 1 * * *': ['flags:scan'],
     },
   },
 

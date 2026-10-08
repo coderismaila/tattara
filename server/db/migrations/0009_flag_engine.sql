@@ -1,0 +1,3 @@
+CREATE UNIQUE INDEX "flags_one_open_per_pu_type_idx" ON "flags" USING btree ("pu_code","type") WHERE "flags"."status" = 'open' and "flags"."supporter_id" is null and "flags"."user_id" is null;--> statement-breakpoint
+CREATE UNIQUE INDEX "flags_one_open_per_user_type_idx" ON "flags" USING btree ("user_id","type") WHERE "flags"."status" = 'open' and "flags"."supporter_id" is null and "flags"."user_id" is not null;--> statement-breakpoint
+CREATE INDEX "flags_user_idx" ON "flags" USING btree ("user_id");

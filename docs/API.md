@@ -46,8 +46,8 @@ WARD+ here means WARD_LEAD, LGA_LEAD, STATE_LEAD and DG (DG manages the state le
 Stats never include names or phones. `:code` is `all` for the region (DG).
 
 ## Review
-| GET | `/flags` | WARD+ | `?status=open&type=&unit=` | ward sees supporter names; LGA+ sees masked |
-| POST | `/flags/:id/resolve` | WARD+ | `{ status: dismissed\|confirmed, note }` | |
+| GET | `/flags` | WARD, LGA, STATE (own unit), DG (all) | `?status=open\|reviewed&type=&unit=&cursor=&limit=` (50, max 100) | `{ items, nextCursor, openCounts }`, newest first; cursor `<ms>_<id>`. Each item: `type, status, puCode, createdAt, details` (evidence), `subject` (`supporter`: full for ward leads, masked above; `lead`: name + unit; `pu`), `reviewedAt, reviewedBy { fullName }, reviewNote`. `unit` outside scope 403; PU leads and admin 403 (task 5.4) |
+| POST | `/flags/:id/resolve` | WARD, LGA, STATE, DG in scope | `{ status: dismissed\|confirmed, note? }` (≤ 200, no phone numbers) | `{ flag: { id, status } }`. A reviewed flag can be reviewed again (latest wins: a supervisor overrules). Refreshes `pu_stats.flagged_open`; audited `flag.resolve` with type and from/to, never the note. Out of scope 404, other roles 403 |
 | GET | `/callbacks` | WARD | `?date=YYYY-MM-DD` (default today, Lagos) | `{ date, items, passRate }`: the ward's calls due that day plus any still open from earlier days (oldest first), each with the supporter's name, phone, PU, capture time and verification; anonymised ones left out. `passRate` = verified ÷ (verified + wrong number + denies) over 30 days, unreachable counted apart. Other roles 403 |
 | POST | `/callbacks/:id` | WARD | `{ outcome: verified\|wrong_number\|denies\|unreachable, notes? }` (notes ≤ 200, no phone numbers) | `{ item: { id, outcome, verification } }`. verified → `callback_verified`; wrong number / denies → `callback_failed` + a `callback_failed` flag; unreachable → no change; an opted-out or anonymised supporter keeps its state. Audited (outcome, never notes). Once only: 409 `already_done`. Another ward's lead 404, other roles 403 |
 

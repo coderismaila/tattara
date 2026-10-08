@@ -404,5 +404,70 @@
       "invalid": "Something is not valid. Reload and try again.",
       "unknown": "Could not save the call. Try again."
     }
+  },
+  "flag": {
+    "heading": "Flags",
+    "notAllowed": "Only ward, LGA and state leads and the DG review flags.",
+    "loadFailed": "Could not load the flags. Check your connection and try again.",
+    "statusLegend": "Show",
+    "open": "Open",
+    "reviewed": "Reviewed",
+    "typeLegend": "Type of flag",
+    "allTypes": "All",
+    "noneOpen": "No open flags here.",
+    "noneReviewed": "No reviewed flags here yet.",
+    "meta": "{pu} · {time}",
+    "loadMore": "Show more",
+    "types": {
+      "gps_far": "Far from the polling unit",
+      "duplicate_phone": "Shared phone number",
+      "pu_over_capacity": "Polling unit over capacity",
+      "rate_anomaly": "Too many in an hour",
+      "gps_cluster": "Same location many times",
+      "callback_failed": "Call-back failed",
+      "opt_out_spike": "Many opt-outs"
+    },
+    "evidence": {
+      "gps_far": "Added {km} km from the polling unit (limit {limitKm} km).",
+      "gps_far_estimated": "Added {km} km from the polling unit's approximate location (limit {limitKm} km).",
+      "duplicate_phone": "This number is used by {uses} supporters.",
+      "duplicate_phone_same_pu": "This number is used by {uses} supporters, including one on the same polling unit.",
+      "pu_over_capacity": "{supporters} supporters for {voters} registered voters ({percent}%).",
+      "rate_anomaly": "{count} supporters added within one hour (limit {limit}).",
+      "gps_cluster": "{size} supporters added with exactly the same location.",
+      "callback_wrong_number": "The call-back reached a wrong number.",
+      "callback_denies": "On the call-back the person said they are not a supporter.",
+      "opt_out_spike": "{optOuts} of this lead's {supporters} supporters opted out in {days} days."
+    },
+    "subject": {
+      "supporter": "Supporter: {name}, {phone}",
+      "supporterMasked": "Supporter: {initials}, {phone}",
+      "lead": "Lead: {name} ({unit})",
+      "leadGone": "Lead: no longer active",
+      "pu": "Polling unit {pu}"
+    },
+    "status": {
+      "open": "Open",
+      "dismissed": "Dismissed",
+      "confirmed": "Confirmed"
+    },
+    "dismiss": "Dismiss",
+    "confirm": "Confirm",
+    "dismissTitle": "Dismiss this flag?",
+    "dismissHelp": "The record is fine: the flag closes.",
+    "confirmTitle": "Confirm this flag?",
+    "confirmHelp": "Something is wrong: the flag is recorded as a real problem.",
+    "note": "Note (optional)",
+    "noteHelp": "Why you decided this. Do not write phone numbers.",
+    "cancel": "Cancel",
+    "dismissedToast": "Flag dismissed",
+    "confirmedToast": "Flag confirmed",
+    "errors": {
+      "invalid": "Something is not valid. Reload and try again.",
+      "statusRequired": "Choose dismiss or confirm.",
+      "noteTooLong": "Keep the note under 200 characters.",
+      "notePhone": "Remove the phone number from the note.",
+      "unknown": "Could not save. Try again."
+    }
   }
 }

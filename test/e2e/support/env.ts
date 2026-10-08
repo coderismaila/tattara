@@ -18,6 +18,9 @@ export const FIXTURE_FILE = `${ROOT}test-results/e2e-fixture.json`
 export const AUTH_STATE_FILE = `${ROOT}test-results/auth-state.json`
 /** Session of the seeded Kano PU lead (19/01/01/001), for the capture tests. */
 export const PU_AUTH_STATE_FILE = `${ROOT}test-results/pu-auth-state.json`
+/** Session of the seeded Kano LGA lead (19/01), for the masked flag review (5.4). */
+export const LGA_AUTH_STATE_FILE = `${ROOT}test-results/lga-auth-state.json`
+export const LGA_USER_PHONE = '08000000102'
 
 export const DEV_PIN = '123456'
 /** Seeded Kano ward lead: signed in once by auth.setup.ts for the app-shell tests. */

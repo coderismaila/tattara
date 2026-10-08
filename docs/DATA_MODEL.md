@@ -109,7 +109,7 @@ unless anonymised, and an anonymised row has no phone, address or GPS; name 1–
 **Anonymisation** sets: full_name → `'—'`, phone → `null` (phone becomes nullable only when status = anonymised, enforced by a CHECK), address → null, gps → null. Keeps pu_code, the enums and the dates for aggregate integrity.
 
 ### `flags`
-| id | supporter_id FK null | user_id FK null | pu_code | type enum | details jsonb | status enum `open\|dismissed\|confirmed` | reviewed_by | reviewed_at | created_at |
+| id | supporter_id FK null | user_id FK null | pu_code | type enum | details jsonb | status enum `open\|dismissed\|confirmed` | reviewed_by | reviewed_at | review_note text(200) null | created_at |
 
 Indexes: `pu_code text_pattern_ops`, `(status, created_at)`, `(supporter_id)`, `(user_id)`; partial unique
 `(supporter_id, type)` where open, `(pu_code, type)` where open for PU flags (no supporter, no user) and `(user_id, type)`

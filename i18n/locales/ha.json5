@@ -729,4 +729,122 @@
       unknown: "Ba a iya ajiye kiran ba. Sake gwadawa.",
     },
   },
+  flag: {
+    // TODO(ha-review)
+    heading: "Alamomi",
+    // TODO(ha-review)
+    notAllowed: "Shugabannin mazaɓa, ƙaramar hukuma, jiha da DG ne kaɗai ke duba alamomi.",
+    // TODO(ha-review)
+    loadFailed: "Ba a iya ɗauko alamomin ba. Duba intanet ɗinka ka sake gwadawa.",
+    // TODO(ha-review)
+    statusLegend: "Nuna",
+    // TODO(ha-review)
+    open: "A buɗe",
+    // TODO(ha-review)
+    reviewed: "An duba",
+    // TODO(ha-review)
+    typeLegend: "Irin alama",
+    // TODO(ha-review)
+    allTypes: "Duka",
+    // TODO(ha-review)
+    noneOpen: "Babu alama a buɗe a nan.",
+    // TODO(ha-review)
+    noneReviewed: "Babu alamar da aka duba a nan tukuna.",
+    // TODO(ha-review)
+    meta: "{pu} · {time}",
+    // TODO(ha-review)
+    loadMore: "Nuna ƙari",
+    types: {
+      // TODO(ha-review)
+      gps_far: "Nesa da rumfa",
+      // TODO(ha-review)
+      duplicate_phone: "Lambar waya ɗaya",
+      // TODO(ha-review)
+      pu_over_capacity: "Rumfa ta cika",
+      // TODO(ha-review)
+      rate_anomaly: "Da yawa cikin awa ɗaya",
+      // TODO(ha-review)
+      gps_cluster: "Wuri ɗaya sau da yawa",
+      // TODO(ha-review)
+      callback_failed: "Kiran tabbatarwa bai yi nasara ba",
+      // TODO(ha-review)
+      opt_out_spike: "Da yawa sun fita",
+    },
+    evidence: {
+      // TODO(ha-review)
+      gps_far: "An ƙara shi kilomita {km} daga rumfa (iyaka kilomita {limitKm}).",
+      // TODO(ha-review)
+      gps_far_estimated: "An ƙara shi kilomita {km} daga kusan wurin rumfa (iyaka kilomita {limitKm}).",
+      // TODO(ha-review)
+      duplicate_phone: "Magoya baya {uses} ne ke amfani da wannan lambar.",
+      // TODO(ha-review)
+      duplicate_phone_same_pu: "Magoya baya {uses} ne ke amfani da wannan lambar, har da ɗaya a rumfa ɗaya.",
+      // TODO(ha-review)
+      pu_over_capacity: "Magoya baya {supporters} don masu rajista {voters} ({percent}%).",
+      // TODO(ha-review)
+      rate_anomaly: "An ƙara magoya baya {count} cikin awa ɗaya (iyaka {limit}).",
+      // TODO(ha-review)
+      gps_cluster: "An ƙara magoya baya {size} da wuri ɗaya daidai.",
+      // TODO(ha-review)
+      callback_wrong_number: "Kiran tabbatarwa ya je lambar da ba daidai ba.",
+      // TODO(ha-review)
+      callback_denies: "A kiran tabbatarwa mutumin ya ce shi ba magoyi ba ne.",
+      // TODO(ha-review)
+      opt_out_spike: "Magoya baya {optOuts} cikin {supporters} na wannan shugaba sun fita cikin kwana {days}.",
+    },
+    subject: {
+      // TODO(ha-review)
+      supporter: "Magoyi: {name}, {phone}",
+      // TODO(ha-review)
+      supporterMasked: "Magoyi: {initials}, {phone}",
+      // TODO(ha-review)
+      lead: "Shugaba: {name} ({unit})",
+      // TODO(ha-review)
+      leadGone: "Shugaba: ba ya aiki yanzu",
+      // TODO(ha-review)
+      pu: "Rumfa {pu}",
+    },
+    status: {
+      // TODO(ha-review)
+      open: "A buɗe",
+      // TODO(ha-review)
+      dismissed: "An yi watsi",
+      // TODO(ha-review)
+      confirmed: "An tabbatar",
+    },
+    // TODO(ha-review)
+    dismiss: "Yi watsi",
+    // TODO(ha-review)
+    confirm: "Tabbatar",
+    // TODO(ha-review)
+    dismissTitle: "A yi watsi da wannan alama?",
+    // TODO(ha-review)
+    dismissHelp: "Bayanin daidai ne: alamar za ta rufe.",
+    // TODO(ha-review)
+    confirmTitle: "A tabbatar da wannan alama?",
+    // TODO(ha-review)
+    confirmHelp: "Akwai matsala: za a rubuta alamar a matsayin matsala ta gaske.",
+    // TODO(ha-review)
+    note: "Bayani (ba dole ba)",
+    // TODO(ha-review)
+    noteHelp: "Dalilin da ya sa ka yanke wannan. Kada ka rubuta lambar waya.",
+    // TODO(ha-review)
+    cancel: "Soke",
+    // TODO(ha-review)
+    dismissedToast: "An yi watsi da alama",
+    // TODO(ha-review)
+    confirmedToast: "An tabbatar da alama",
+    errors: {
+      // TODO(ha-review)
+      invalid: "Akwai abin da bai dace ba. Sake lodawa ka gwada.",
+      // TODO(ha-review)
+      statusRequired: "Zaɓi watsi ko tabbatarwa.",
+      // TODO(ha-review)
+      noteTooLong: "Bayanin ya kasance ƙasa da harafi 200.",
+      // TODO(ha-review)
+      notePhone: "Cire lambar waya daga bayanin.",
+      // TODO(ha-review)
+      unknown: "Ba a iya ajiyewa ba. Sake gwadawa.",
+    },
+  },
 }

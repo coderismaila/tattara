@@ -4,7 +4,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { expect, test as setup, type APIRequestContext } from '@playwright/test'
 import { createDb } from '../../../server/db/client'
-import { callbacks } from '../../../server/db/schema'
+import { callbacks, flags } from '../../../server/db/schema'
 import { lagosDate } from '../../../shared/utils/lagos-date'
 import { newId } from '../../../shared/utils/uuid'
 import { DEV_PIN, E2E_DB_URL, E2E_PORT, latestOtp, newOtp } from '../support/env'
@@ -61,6 +61,8 @@ setup('sign in every access-matrix caller and create the fixtures', async ({ pla
   // One call-back due today in the Kano ward (what the daily sample task would draw).
   const { db, client } = createDb(E2E_DB_URL, { max: 1 })
   const [call] = await db.insert(callbacks).values({ supporterId: ids[3]!, wardCode: '19/01/01', dueDate: lagosDate() }).returning()
+  // And one open flag on the viewed supporter (what the flag engine raises).
+  const [flag] = await db.insert(flags).values({ supporterId: ids[0]!, puCode: '19/01/01/001', type: 'gps_far', details: { distanceM: 5200, thresholdM: 3000 } }).returning()
   await client.end()
 
   const fixture: AccessFixture = {
@@ -71,6 +73,7 @@ setup('sign in every access-matrix caller and create the fixtures', async ({ pla
     deactivateTarget: await invite('19/01/01/009', '08031008009'),
     resetTarget: await invite('19/01/01/010', '08031008010'),
     callback: call!.id,
+    flag: flag!.id,
   }
   writeFileSync(ACCESS_FIXTURE_FILE, JSON.stringify(fixture))
   for (const api of Object.values(apis)) await api.dispose()

@@ -328,3 +328,12 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - **Pass rate** = verified ÷ (verified + wrong number + denies) over 30 days (PRD success metric ≥ 85%); unreachable shown apart. 5.5's quality score reuses `passRate`.
 - **Page:** `/app/review` (ward leads; 5.4 adds flags and LGA+): tap-to-call link, outcome chips, then Save (choosing first guards against a mis-tap, since outcomes are final).
 **Why:** PRD US-10, goal 3 (trustworthy numbers).
+
+### ADR-043 · 2026-10-08 · Accepted · Flag review: masked above ward, latest review wins (5.4)
+**Decision:**
+- **Who:** ward, LGA and state leads see the flags in their own unit, the DG all of them (SECURITY_PRIVACY §3). PU leads and the admin don't review flags.
+- **What they see:** supporter flags show the supporter through `serializeSupporter`, so ward leads get name and phone and everyone above gets initials and a masked phone. Lead flags (`rate_anomaly`, `opt_out_spike`) show the lead's name and unit; PU flags the PU. Evidence (`details`) is shown as a plain sentence per type (`app/utils/flag-text.ts`).
+- **Review:** dismiss (the record is fine) or confirm (a real problem), with an optional note (≤ 200, no phone numbers) stored on the flag (`review_note`, migration 0012). **A reviewed flag can be reviewed again by anyone in scope; the latest review wins**, so an LGA lead can overrule a ward decision. Each review is audited (type, from → to), never the note. `pu_stats.flagged_open` is refreshed. Out-of-scope flags answer 404.
+- **Page:** the Review page (`/app/review`) now opens to ward, LGA and state leads and the DG; ward leads see call-backs first, then flags. Open/Reviewed tabs, type chips with open counts, newest first with "Show more".
+- Confirming a flag has no automatic effect on the record yet (no removal, no verification change): it is a recorded judgement that 5.5's quality score counts.
+**Why:** SECURITY_PRIVACY §3 (flags review row), PRD goal 3.

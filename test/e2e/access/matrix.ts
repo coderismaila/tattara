@@ -20,6 +20,8 @@ export interface AccessFixture {
   resetTarget: string
   /** A call-back due today in the Kano ward (on supporterOther), completed by the Kano ward lead. */
   callback: string
+  /** An open gps_far flag on supporterView (19/01/01/001), reviewed by each Kano reviewer in turn. */
+  flag: string
 }
 
 export interface AccessRequest {
@@ -235,6 +237,24 @@ export const ACCESS_MATRIX = {
     request: fx => ({ method: 'POST', path: `/api/callbacks/${fx.callback}`, body: { outcome: 'verified' } }),
     expect: only({ kanoWard: 200, katsinaWard: 404 }),
     check: (_caller, body) => ensure(body.item.verification === 'callback_verified', 'verified'),
+  },
+  // Flag review (5.4): ward leads see supporters in full, LGA and above masked; each only their own unit.
+  'GET /api/flags': {
+    request: () => ({ method: 'GET', path: '/api/flags?limit=100' }),
+    expect: only({ kanoWard: 200, kanoLga: 200, kanoState: 200, dg: 200, katsinaWard: 200, katsinaLga: 200, katsinaState: 200 }),
+    check: (caller, body) => {
+      const unit = { kanoWard: '19/01/01/', kanoLga: '19/01/', kanoState: '19/', katsinaWard: '20/01/01/', katsinaLga: '20/01/', katsinaState: '20/', dg: '' }[caller as 'dg']
+      ensure(body.items.every((f: any) => f.puCode.startsWith(unit)), 'only flags in the caller’s unit')
+      const supporters = body.items.filter((f: any) => f.subject.kind === 'supporter').map((f: any) => f.subject.supporter)
+      if (caller === 'kanoWard') ensure(supporters.some((s: any) => s.masked === false && E164.test(s.phone)), 'the ward lead sees supporters in full')
+      if (caller === 'kanoWard' || caller === 'katsinaWard') ensure(supporters.every((s: any) => s.masked === false), 'ward leads see supporters in full')
+      else ensure(supporters.every((s: any) => s.masked === true && (s.phone === null || MASKED.test(s.phone)) && !('fullName' in s)), 'masked above ward')
+    },
+  },
+  'POST /api/flags/:id/resolve': {
+    request: fx => ({ method: 'POST', path: `/api/flags/${fx.flag}/resolve`, body: { status: 'dismissed' } }),
+    expect: only({ kanoWard: 200, kanoLga: 200, kanoState: 200, dg: 200, katsinaWard: 404, katsinaLga: 404, katsinaState: 404 }),
+    check: (_caller, body) => ensure(body.flag.status === 'dismissed', 'dismissed'),
   },
   // The provider's webhook: a session means nothing here, only the body's signature does (5.2).
   'POST /api/webhooks/sms': {

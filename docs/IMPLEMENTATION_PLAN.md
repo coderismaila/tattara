@@ -86,7 +86,7 @@ _4.5 was done before 4.2 (ADR-036): the lock must protect the phone before suppo
   **AC:** unit tests per flag type with fixtures.
 - [x] **5.2 Thank-you SMS + STOP webhook** → verification/opt-out state; anonymise job (72 h).
 - [x] **5.3 Call-back workflow:** daily sample task, ward review page, outcomes update verification.
-- [ ] **5.4 Flags review page** (ward full, LGA+ masked) + resolve actions, audited.
+- [x] **5.4 Flags review page** (ward full, LGA+ masked) + resolve actions, audited.
 - [ ] **5.5 Lead quality score** computed nightly; shown in Team lists.
 - [ ] **5.6 Supporter sign-up links** (PRD §6.2a, SECURITY_PRIVACY §12, ADR-035). Blocked on 👤 legal sign-off of
   self-ticked consent (PRD Q7). Schema: `signup_links` (token hash, pu_code, created_by, expires_at, revoked_at,

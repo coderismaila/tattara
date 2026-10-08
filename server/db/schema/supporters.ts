@@ -89,6 +89,8 @@ export const flags = pgTable('flags', {
   status: flagStatus().notNull().default('open'),
   reviewedBy: uuid().references(() => users.id),
   reviewedAt: timestamp({ withTimezone: true }),
+  /** The reviewer's note (5.4): ≤ 200 chars, never a phone number (refused on input). */
+  reviewNote: text(),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 }, t => [
   index('flags_pu_code_prefix_idx').on(t.puCode.op('text_pattern_ops')),
@@ -101,6 +103,7 @@ export const flags = pgTable('flags', {
   uniqueIndex('flags_one_open_per_user_type_idx').on(t.userId, t.type).where(sql`${t.status} = 'open' and ${t.supporterId} is null and ${t.userId} is not null`),
   index('flags_user_idx').on(t.userId),
   check('flags_review', sql`(${t.status} = 'open') = (${t.reviewedAt} is null)`),
+  check('flags_review_note_length', sql`${t.reviewNote} is null or length(${t.reviewNote}) <= 200`),
 ])
 
 /** Per-PU counters, updated in the same transaction as supporter writes (ARCHITECTURE §7). */

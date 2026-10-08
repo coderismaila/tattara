@@ -1,0 +1,2 @@
+ALTER TABLE "flags" ADD COLUMN "review_note" text;--> statement-breakpoint
+ALTER TABLE "flags" ADD CONSTRAINT "flags_review_note_length" CHECK ("flags"."review_note" is null or length("flags"."review_note") <= 200);

@@ -15,3 +15,10 @@ export function normaliseName(input: string): string {
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim()
 }
+
+/** Looks like a Nigerian phone number (E.164 or local), spaces and dashes allowed: kept out of free-text notes. */
+const PHONE_LIKE = /(?:\+?234|\b0)[\s-]*[789][\s-]*[01](?:[\s-]*\d){8}/
+
+export function containsPhoneNumber(text: string): boolean {
+  return PHONE_LIKE.test(text)
+}

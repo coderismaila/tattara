@@ -23,6 +23,7 @@
     "db:migrate": "node scripts/db-migrate.ts",
     "db:studio": "drizzle-kit studio",
     "db:seed:dev": "node scripts/seed-dev.ts",
+    "perf:stats": "node scripts/perf-stats.ts",
     "data:fetch:inec": "node scripts/fetch/inec-pus.ts",
     "data:fetch:inec-coords": "node scripts/fetch/inec-pus.ts --coords",
     "data:fetch:grid3": "node scripts/fetch/grid3-boundaries.ts",

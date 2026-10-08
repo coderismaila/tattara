@@ -101,7 +101,7 @@ _4.5 was done before 4.2 (ADR-036): the lock must protect the phone before suppo
 
 ## Phase 6 — Dashboards & map
 
-- [ ] **6.1 Stats service + routes** (`/stats/*`) with 60 s cache; `unit_daily_stats` nightly task; reconcile task.
+- [x] **6.1 Stats service + routes** (`/stats/*`) with 60 s cache; `unit_daily_stats` nightly task; reconcile task.
   **AC:** `/stats/children/all` < 300 ms p95 on 41,671 PUs × 5M supporters (seeded load data).
 - [ ] **6.2 Role-aware home dashboards** per UX §4.2 (Nuxt UI dashboard components; charts with a light lib, lazy-loaded).
 - [ ] **6.3 Map page** MapLibre, choropleth drill-down State→LGA→Ward→PU points, metric switcher, breadcrumb, bottom sheet, legend.

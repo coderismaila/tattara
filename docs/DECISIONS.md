@@ -346,3 +346,14 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - **Shown** as number + word (Good ≥ 75, Fair 50–74, Low < 50), never colour alone, with a "Why this score" breakdown.
 - **Sync push answers first** (found while testing this task under load): flag checks and thank-you queueing run right after the response (`afterResponse`), so a lead's save never waits for them; their errors are logged, never returned.
 **Why:** PRD R-7 (verified rate, flag rate, opt-out rate, shown to supervisors).
+
+### ADR-045 · 2026-10-08 · Accepted · Stats from pu_stats on demand, cached 60 s (6.1)
+**Decision:**
+- **On-demand roll-ups:** `/stats/unit/:code` and `/stats/children/:code` aggregate `pu_stats` joined to the PU units with one `GROUP BY left(code, n)` (ARCHITECTURE §7). No per-level summary tables. Measured with `pnpm perf:stats` (41,671 PUs, counters summing to 5M supporters, uncached): `/stats/children/all` **p50 48 ms, p95 75 ms** (AC: < 300 ms); `/stats/unit/all` p95 56 ms.
+- **Coverage** = supporters on PUs with a reported figure ÷ the sum of those figures; PUs without one count in totals but not in coverage (ADR-033). Totals include deactivated PUs' supporters; "reported X of Y" counts active PUs.
+- **Access:** the same `:code` rule as the registered-voters route (dashes; `all` = region for DG and admin; `requireScope(…, { allowAdmin: true })`), since these are aggregates only.
+- **Cache:** `defineCachedFunction`, 60 s, keyed by unit (+ metric and order); `computedAt` in the payload shows the computation time. An E2E test confirms the cache works in the production build (the build's cache-driver warning is harmless).
+- **Children:** sorted by the chosen metric, units without a value always last; active leads counted per child subtree.
+- **Nightly:** `stats:daily` (23:55 Lagos) upserts each unit's cumulative totals into `unit_daily_stats` (migration 0014; `all` for the region); `stats:reconcile` (02:00 UTC) compares `pu_stats` with a fresh count and rebuilds it if any PU drifted, logging which (drift means a write path skipped `applyStatDelta`).
+- `/stats/leaderboard` and `/stats/inactive` come with 6.5; `/geo/pus` with the map (6.3).
+**Why:** PRD US-11, US-13; ARCHITECTURE §7.

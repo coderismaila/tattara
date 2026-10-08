@@ -141,7 +141,8 @@ Every supporter row counts in `total` (removal-requested and anonymised too); `v
 CHECK: every counter ≥ 0.
 
 ### `unit_daily_stats`
-`unit_code, day date, total, verified` — PK `(unit_code, day)`; written nightly for every unit at every level.
+`unit_code, day date, total, verified` — PK `(unit_code, day)`; written nightly (23:55 Lagos) for every unit with
+supporters at every level, plus `all` for the region (so no FK). A rerun the same day overwrites (task 6.1).
 
 ## 5. Messaging and ops
 

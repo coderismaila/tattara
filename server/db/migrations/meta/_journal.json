@@ -99,6 +99,13 @@
       "when": 1791429511481,
       "tag": "0013_unit_quality",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791471542553,
+      "tag": "0014_unit_daily_stats",
+      "breakpoints": true
     }
   ]
 }

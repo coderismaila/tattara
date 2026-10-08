@@ -256,6 +256,23 @@ export const ACCESS_MATRIX = {
     expect: only({ kanoWard: 200, kanoLga: 200, kanoState: 200, dg: 200, katsinaWard: 404, katsinaLga: 404, katsinaState: 404 }),
     check: (_caller, body) => ensure(body.flag.status === 'dismissed', 'dismissed'),
   },
+  // Stats (6.1): aggregates for anyone whose scope holds the unit, the admin included; never names or phones.
+  'GET /api/stats/unit/:code': {
+    request: () => ({ method: 'GET', path: '/api/stats/unit/19-01-01' }),
+    expect: only({ admin: 200, dg: 200, kanoState: 200, kanoLga: 200, kanoWard: 200 }),
+    check: (_caller, body) => {
+      ensure(body.unit.code === '19/01/01' && typeof body.totals.supporters === 'number', 'ward totals')
+      ensure(!JSON.stringify(body).match(/\+234|fullName/), 'no names or phones')
+    },
+  },
+  'GET /api/stats/children/:code': {
+    request: () => ({ method: 'GET', path: '/api/stats/children/19-01-01' }),
+    expect: only({ admin: 200, dg: 200, kanoState: 200, kanoLga: 200, kanoWard: 200 }),
+    check: (_caller, body) => {
+      ensure(body.children.length > 0 && body.children.every((c: any) => c.code.startsWith('19/01/01/')), 'the ward’s PUs')
+      ensure(!JSON.stringify(body).match(/\+234|fullName/), 'no names or phones')
+    },
+  },
   // The provider's webhook: a session means nothing here, only the body's signature does (5.2).
   'POST /api/webhooks/sms': {
     request: () => ({ method: 'POST', path: '/api/webhooks/sms', body: { type: 'inbound', sender: '2348031234567', message: 'STOP' } }),

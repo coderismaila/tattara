@@ -15,8 +15,8 @@ Also note blockers and anything the next session must know.
   (frozen install, lint, typecheck, test, build, e2e). Push to GitHub to confirm the AC "CI green".
 - `pnpm install` still prints an "Ignored build scripts" notice for unrs-resolver/vue-demi despite
   `pnpm-workspace.yaml`; harmless (neither needs its script).
-- Build warns that Nitro's `runtime/utils/cache-driver.mjs` can't be resolved. **6.1:** verify cached handlers
-  (60 s stats cache) actually cache in a production build.
+- Build warns that Nitro's `runtime/utils/cache-driver.mjs` can't be resolved: harmless, the 60 s stats cache works in
+  the production build (E2E `stats.spec.ts`, 6.1).
 - **PWA (4.1):** `service-worker/sw.ts` (injectManifest). Icons come from `pnpm icons` (renders `public/icons/*.png`
   with Playwright's Chromium). The service worker only runs in a production build (`pnpm build && pnpm preview`).
   - Offline, `/app` opens without a confirmed session; since 4.5 it stays behind the lock screen (local session +
@@ -98,6 +98,12 @@ Also note blockers and anything the next session must know.
     labels and keyboard use, not the screen reader itself), and legal + native review of the consent script (7.4).
 - **Access matrix (3.6):** every new route needs an entry in `test/e2e/access/matrix.ts` (the unit meta-test fails
   otherwise). Run it alone: `E2E_SKIP_BUILD=1 npx playwright test --project=access` (after `pnpm build`).
+- **5.6 sign-up links skipped for now (2026-10-08):** waiting on 👤 legal sign-off of self-ticked consent (PRD Q7) and
+  the `s1-ha`/`s1-en` wording. Phase 6 went ahead first, at the user's request.
+- **Stats (6.1, ADR-045):** `server/services/stats.ts` (`unitStats`, `childrenStats`, `sortChildren`, `writeDailyStats`,
+  `reconcilePuStats`); routes cached 60 s; `pnpm perf:stats` re-measures the AC (p95 75 ms). 6.2 dashboards read
+  `/api/stats/unit/:code` + `/children/:code`; `last30Days` fills only after `stats:daily` runs (dev:
+  `GET /_nitro/tasks/stats:daily`).
 - **Quality (5.5, ADR-044):** `computeQuality(db)` rebuilds `unit_quality` (nightly `quality:compute`, dev:
   `GET /_nitro/tasks/quality:compute`); `qualityFor(db, codes)` reads it; the Team list shows it. The sync push now runs
   its flag checks and thank-you queueing after the response (`server/utils/after-response.ts`).
@@ -172,3 +178,4 @@ Also note blockers and anything the next session must know.
 - 2026-10-08 · 5.3 · Call-backs (ADR-042): migration 0011 `callbacks` (ward-scoped, one per supporter); daily `callbacks:sample` (5% per ward rounded up, previous Lagos day, catch-up within a week, idempotent); `GET /api/callbacks` (today + overdue, 30-day pass rate) and `POST /api/callbacks/:id` (final outcome → callback_verified / callback_failed + flag, audited, notes without phone numbers); `/app/review` page with tap-to-call and outcome chips; nav for ward leads; ha/en strings; `recordAudit` accepts a transaction; integration, unit and E2E tests (+ axe), access matrix 24 routes · see commit `feat(callbacks)`
 - 2026-10-08 · 5.4 · Flag review (ADR-043): migration 0012 `flags.review_note`; `GET /api/flags` (scope per role, full supporter for ward leads and masked above, lead/PU subjects, open counts, cursor paging) and `POST /api/flags/:id/resolve` (dismiss/confirm with a note, latest review wins, audited without the note, flagged_open refreshed); Review page split into call-backs + flags (tabs, type chips, evidence sentences, review dialog) for ward/LGA/state/DG; nav; ha/en strings; `containsPhoneNumber` shared; integration, unit (evidence sentences in both languages) and E2E (ward dismisses with note, LGA sees masked, axe) tests; access matrix 26 routes · see commit `feat(flags)`
 - 2026-10-08 · 5.5 · Lead quality score (ADR-044): `shared/utils/quality.ts` formula (50% verified incl. call-back pass rate, 25% flags, 25% opt-outs; ≥ 10 supporters; 90 days); migration 0013 `unit_quality`; nightly `quality:compute` (per-PU counts rolled up to ward/LGA/state); `/api/team` fills `qualityScore` + `quality` breakdown; Team page badge (number + word) with "Why this score"; dev seed computes it; sync push answers before flag checks and thank-you queueing; unit, integration and E2E tests · see commit `feat(quality)`
+- 2026-10-08 · 6.1 · Stats (ADR-045): `GET /api/stats/unit/:code` (totals, breakdowns, registered voters, coverage over reported PUs, target/progress, last 30 days) and `GET /api/stats/children/:code` (per child: supporters, verified %, flags, coverage, progress, active leads; sorted by metric, missing last), 60 s `defineCachedFunction` cache (confirmed in prod build by E2E); migration 0014 `unit_daily_stats` + `stats:daily` (23:55 Lagos) and `stats:reconcile` (02:00 UTC, logs and fixes drift); `pnpm perf:stats`: children/all p95 75 ms on 41,671 PUs × 5M supporters (AC < 300 ms); unit, integration and E2E tests, access matrix 28 routes · see commit `feat(stats)`

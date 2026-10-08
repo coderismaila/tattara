@@ -66,7 +66,7 @@ export default defineNuxtConfig({
 
   nitro: {
     experimental: { tasks: true },
-    // Cron runs in UTC; 23:55 WAT tasks (6.1) will be '55 22 * * *'.
+    // Cron runs in UTC (Lagos is UTC+1 all year).
     scheduledTasks: {
       '* * * * *': ['sms:process'],
       // 01:00 UTC = 02:00 in Lagos: the whole-registry flag scan (5.1).
@@ -77,6 +77,9 @@ export default defineNuxtConfig({
       '15 * * * *': ['supporters:anonymise'],
       // 04:00 UTC = 05:00 in Lagos: the day's call-back sample (5.3).
       '0 4 * * *': ['callbacks:sample'],
+      // 22:55 UTC = 23:55 in Lagos: the day's snapshot for trend charts (6.1); 02:00 UTC: pu_stats reconcile.
+      '55 22 * * *': ['stats:daily'],
+      '0 2 * * *': ['stats:reconcile'],
     },
   },
 

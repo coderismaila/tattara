@@ -37,8 +37,8 @@ WARD+ here means WARD_LEAD, LGA_LEAD, STATE_LEAD and DG (DG manages the state le
 | GET | `/sync/pull` | PU, WARD | `?since=ISO&cursor=` | `{ supporters[], units[], stats, announcements[], serverTime, nextCursor }`. The caller's own unit only (PU lead: their PU; ward lead: their ward), full records; anonymised ones as `{ id, deleted: true }`. Oldest change first, 500 per page; follow `nextCursor` (`<ms>_<uuid>`) with the same `since`, and use the first page's `serverTime` as the next `since` (it is 2 min before the server clock, so pulls overlap). `units` (the subtree) on the first page only; `stats` = summed `pu_stats` (`total`, `verified`, `flaggedOpen`, `lastCaptureAt`); `announcements` always `[]` until v1.1. Others 403 `not_allowed`; 60/min per user (task 4.3) |
 
 ## Stats and map
-| GET | `/stats/unit/:code` | scope | | totals, coverage, target, breakdowns, last 30 days |
-| GET | `/stats/children/:code` | scope | `?metric=&sort=` | one row per child unit (drives table + choropleth) |
+| GET | `/stats/unit/:code` | scope (admin included: aggregates) | | `{ unit, totals { supporters, verified, flaggedOpen, optedOut, volunteers, hasPvcYes, support, gender, age }, registeredVoters { sum, pusWithFigure, totalPus }, coverage, target, progress, lastCaptureAt, last30Days[], computedAt }`. Coverage = supporters on PUs with a figure ÷ those figures (ADR-033). Cached 60 s per unit (task 6.1) |
+| GET | `/stats/children/:code` | scope (admin included) | `?metric=coverage\|supporters\|verifiedRate\|flaggedOpen\|progress\|activeLeads&sort=asc\|desc` (default coverage asc) | `{ unit, metric, sort, children: [{ code, name, level, supporters, verified, verifiedRate, flaggedOpen, registeredVoters, coverage, target, progress, activeLeads }], computedAt }`; units without a value last; `[]` below a PU. Cached 60 s per unit/metric/order (task 6.1) |
 | GET | `/stats/leaderboard/:code` | scope | `?level=lga\|ward\|pu&limit=` | |
 | GET | `/stats/inactive/:code` | scope | `?days=3` | leads with no captures in N days |
 | GET | `/geo/pus` | scope | `?ward=` | PU points `{ code, name, lat, lng, total, coverage }` |

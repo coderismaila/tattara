@@ -2,6 +2,7 @@
 import { pgEnum } from 'drizzle-orm/pg-core'
 import {
   AGE_BANDS,
+  CALLBACK_OUTCOMES,
   CONSENT_LANGUAGES,
   FLAG_STATUSES,
   FLAG_TYPES,
@@ -33,3 +34,4 @@ export const verificationStatus = pgEnum('verification_status', VERIFICATION_STA
 export const supporterStatus = pgEnum('supporter_status', SUPPORTER_STATUSES)
 export const flagType = pgEnum('flag_type', FLAG_TYPES)
 export const flagStatus = pgEnum('flag_status', FLAG_STATUSES)
+export const callbackOutcome = pgEnum('callback_outcome', CALLBACK_OUTCOMES)

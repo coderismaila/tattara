@@ -613,3 +613,20 @@ export async function anonymiseRequested(db: Db, limit = 500): Promise<{ id: str
     }).where(inArray(supporters.id, before.map(r => r.id))).returning({ id: supporters.id, puCode: supporters.puCode })
   })
 }
+
+// ── Call-back outcome (5.3) ─────────────────────────────────────────────────
+
+/**
+ * A ward lead's call confirmed (`callback_verified`) or contradicted (`callback_failed`) the record; unreachable changes
+ * nothing. An opted-out or anonymised supporter keeps that state. pu_stats follows. Returns the row after the change.
+ */
+export async function applyCallbackVerification(tx: DbLike, supporterId: string, outcome: 'verified' | 'wrong_number' | 'denies' | 'unreachable'): Promise<Supporter | null> {
+  const [before] = await tx.select().from(supporters).where(eq(supporters.id, supporterId))
+  if (!before) return null
+  if (outcome === 'unreachable' || before.status === 'anonymised' || before.verification === 'opted_out') return before
+  const verification = outcome === 'verified' ? 'callback_verified' : 'callback_failed'
+  if (before.verification === verification) return before
+  const [after] = await tx.update(supporters).set({ verification, updatedAt: sql`now()` }).where(eq(supporters.id, supporterId)).returning()
+  await applyStatDelta(tx, after!.puCode, statDelta(before, after!))
+  return after!
+}

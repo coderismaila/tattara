@@ -120,7 +120,10 @@ holds evidence only (distances, counts), never names or phones.
 Flag types: `gps_far`, `duplicate_phone`, `pu_over_capacity`, `rate_anomaly`, `gps_cluster`, `callback_failed`, `opt_out_spike`.
 
 ### `callbacks`
-| id | supporter_id FK | assigned_to FK users | due_date date | outcome enum `verified\|wrong_number\|denies\|unreachable` null | notes text(200) | completed_at |
+| id | supporter_id FK (unique; on delete cascade) | ward_code FK units | assigned_to FK users null (on delete set null) | due_date date (Lagos) | outcome enum `verified\|wrong_number\|denies\|unreachable` null | notes text(200) | completed_at | completed_by FK users | created_at |
+
+Index `(ward_code, due_date)`. CHECKs: ward code shape; outcome, completed_at and completed_by set together; notes ≤ 200.
+The ward code is the scope (a replaced ward lead's open calls go to the new lead). A supporter is sampled at most once (5.3, ADR-042).
 
 ## 4. Stats
 

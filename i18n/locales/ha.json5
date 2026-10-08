@@ -108,6 +108,8 @@
     supporters: 'Magoya baya',
     // TODO(ha-review)
     sync: 'Aikawa',
+    // TODO(ha-review)
+    review: 'Bita',
   },
   lang: {
     // TODO(ha-review)
@@ -666,5 +668,65 @@
     fixing: "Kana gyara bayanin da ba a karɓa ba. Duba bayanan, sake karanta sanarwar amincewa, sannan ka ajiye.",
     // TODO(ha-review)
     fixGone: "Wannan bayani ba ya jiran gyara kuma.",
+  },
+  callback: {
+    // TODO(ha-review)
+    heading: "Kiran tabbatarwa",
+    // TODO(ha-review)
+    progress: "An gama {done} cikin {total}",
+    // TODO(ha-review)
+    passRate: "Yawan nasara (kwana 30): {rate} na kira {answered} da aka amsa · {unreachable} ba a samu ba",
+    // TODO(ha-review)
+    passRateNone: "Yawan nasara (kwana 30): babu kiran da aka amsa tukuna",
+    // TODO(ha-review)
+    none: "Babu kiran da za a yi yau. Ana zaɓar sababbin magoya baya kowace safiya.",
+    // TODO(ha-review)
+    notAllowed: "Shugabannin mazaɓa ne kaɗai ke yin kiran tabbatarwa.",
+    // TODO(ha-review)
+    loadFailed: "Ba a iya ɗauko kiran ba. Duba intanet ɗinka ka sake gwadawa.",
+    // TODO(ha-review)
+    meta: "{pu} · an ƙara {time}",
+    // TODO(ha-review)
+    overdue: "Har yanzu a buɗe tun {date}",
+    // TODO(ha-review)
+    call: "Kira {phone}",
+    // TODO(ha-review)
+    outcomeLegend: "Me ya faru?",
+    outcomes: {
+      // TODO(ha-review)
+      verified: "Ya tabbatar",
+      // TODO(ha-review)
+      wrong_number: "Lambar ba daidai ba",
+      // TODO(ha-review)
+      denies: "Ya ce a'a",
+      // TODO(ha-review)
+      unreachable: "Ba a ɗauka ba",
+    },
+    // TODO(ha-review)
+    notes: "Bayani (ba dole ba)",
+    // TODO(ha-review)
+    notesHelp: "Kalmomi kaɗan game da kiran. Kada ka rubuta lambar waya.",
+    // TODO(ha-review)
+    save: "Ajiye",
+    // TODO(ha-review)
+    saved: "An ajiye kiran",
+    // TODO(ha-review)
+    doneHeading: "An gama yau",
+    // TODO(ha-review)
+    reload: "Sabunta",
+    errors: {
+      // TODO(ha-review)
+      outcomeRequired: "Zaɓi abin da ya faru a kiran.",
+      // TODO(ha-review)
+      notesTooLong: "Bayanin ya kasance ƙasa da harafi 200.",
+      // TODO(ha-review)
+      notesPhone: "Cire lambar waya daga bayanin.",
+      // TODO(ha-review)
+      already_done: "An riga an ajiye wannan kiran.",
+      // TODO(ha-review)
+      invalid: "Akwai abin da bai dace ba. Sake lodawa ka gwada.",
+      // TODO(ha-review)
+      unknown: "Ba a iya ajiye kiran ba. Sake gwadawa.",
+    },
   },
 }

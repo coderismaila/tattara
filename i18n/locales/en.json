@@ -56,7 +56,8 @@
     "admin": "Admin",
     "capture": "Add supporter",
     "supporters": "Supporters",
-    "sync": "Sync"
+    "sync": "Sync",
+    "review": "Review"
   },
   "lang": {
     "label": "Language",
@@ -370,5 +371,38 @@
     "cancel": "Cancel",
     "fixing": "Fixing a record that was not accepted. Check the details, read the consent notice again and save.",
     "fixGone": "That record is no longer waiting to be fixed."
+  },
+  "callback": {
+    "heading": "Call-backs",
+    "progress": "{done} of {total} done",
+    "passRate": "Pass rate (30 days): {rate} of {answered} answered calls · {unreachable} unreachable",
+    "passRateNone": "Pass rate (30 days): no answered calls yet",
+    "none": "No calls to make today. New supporters are sampled every morning.",
+    "notAllowed": "Only ward leads make call-backs.",
+    "loadFailed": "Could not load the calls. Check your connection and try again.",
+    "meta": "{pu} · added {time}",
+    "overdue": "Still open from {date}",
+    "call": "Call {phone}",
+    "outcomeLegend": "What happened?",
+    "outcomes": {
+      "verified": "Confirmed",
+      "wrong_number": "Wrong number",
+      "denies": "Says no",
+      "unreachable": "No answer"
+    },
+    "notes": "Note (optional)",
+    "notesHelp": "A few words about the call. Do not write phone numbers.",
+    "save": "Save",
+    "saved": "Call saved",
+    "doneHeading": "Done today",
+    "reload": "Refresh",
+    "errors": {
+      "outcomeRequired": "Choose what happened on the call.",
+      "notesTooLong": "Keep the note under 200 characters.",
+      "notesPhone": "Remove the phone number from the note.",
+      "already_done": "This call was already saved.",
+      "invalid": "Something is not valid. Reload and try again.",
+      "unknown": "Could not save the call. Try again."
+    }
   }
 }

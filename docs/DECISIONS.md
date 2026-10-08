@@ -318,3 +318,13 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - `sms_queue.supporter_id` is `on delete set null`: supporters are never hard-deleted in the app (anonymised instead); only the dev seed's reset deletes them.
 **Why:** PRD US-9, US-18, R-7; SECURITY_PRIVACY §1 (withdrawal → anonymise within 72 h) and §10 (honour opt-outs globally).
 **Consequences:** 👤 before the pilot: a two-way number from Termii for STOP replies, the webhook URL and secret set in Termii, and one real delivery report + one real inbound message checked against `parseSmsWebhook` (Termii doesn't document the inbound shape). Broadcasts (v1.1) must skip numbers in `sms_opt_outs`.
+
+### ADR-042 · 2026-10-08 · Accepted · Call-backs: daily per-ward sample by Lagos day, final outcomes (5.3)
+**Decision:**
+- **Sample:** `callbacks:sample` runs at 05:00 Lagos. For each ward it takes a random 5% (rounded up: any ward with a new supporter gets a call) of the supporters **received** (server time) the previous Lagos day, due today. Only live supporters with a phone who haven't opted out; a supporter is sampled at most once. Days missed within the last week are drawn late (due the day after their supporters arrived, so they show as overdue); a ward already sampled for a day is never topped up, so reruns add nothing.
+- **Scope is the ward code**, not the lead: calls are listed to whoever leads the ward now. Another ward's call answers 404 (no probing), other roles 403.
+- **Outcomes are final** (409 on a second one): verified → `callback_verified`; wrong number / denies → `callback_failed` and a supporter `callback_failed` flag; unreachable changes nothing. Opt-outs and anonymised records keep their state. pu_stats follows via the supporters service.
+- **Notes** are optional, ≤ 200 chars, and refused if they contain a phone number; they're never audited.
+- **Pass rate** = verified ÷ (verified + wrong number + denies) over 30 days (PRD success metric ≥ 85%); unreachable shown apart. 5.5's quality score reuses `passRate`.
+- **Page:** `/app/review` (ward leads; 5.4 adds flags and LGA+): tap-to-call link, outcome chips, then Save (choosing first guards against a mis-tap, since outcomes are final).
+**Why:** PRD US-10, goal 3 (trustworthy numbers).

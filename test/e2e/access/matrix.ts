@@ -18,6 +18,8 @@ export interface AccessFixture {
   /** Invited PU leads in 19/01/01 that the Kano ward lead deactivates / resets. */
   deactivateTarget: string
   resetTarget: string
+  /** A call-back due today in the Kano ward (on supporterOther), completed by the Kano ward lead. */
+  callback: string
 }
 
 export interface AccessRequest {
@@ -217,6 +219,22 @@ export const ACCESS_MATRIX = {
       ensure(body.units.length > 0 && body.units.every((u: any) => inUnit(u.code)), 'units of the caller\'s subtree only')
       ensure(typeof body.serverTime === 'string' && typeof body.stats.total === 'number', 'serverTime and stats')
     },
+  },
+  // Call-backs (5.3): ward leads only, each their own ward.
+  'GET /api/callbacks': {
+    request: () => ({ method: 'GET', path: '/api/callbacks' }),
+    expect: only({ kanoWard: 200, katsinaWard: 200 }),
+    check: (caller, body) => {
+      const ward = caller === 'kanoWard' ? '19/01/01/' : '20/01/01/'
+      ensure(body.items.every((i: any) => i.supporter.puCode.startsWith(ward)), 'only their own ward')
+      if (caller === 'kanoWard') ensure(body.items.some((i: any) => E164.test(i.supporter.phone)), 'the ward lead sees phones to call')
+      ensure(typeof body.passRate.days === 'number', 'pass rate')
+    },
+  },
+  'POST /api/callbacks/:id': {
+    request: fx => ({ method: 'POST', path: `/api/callbacks/${fx.callback}`, body: { outcome: 'verified' } }),
+    expect: only({ kanoWard: 200, katsinaWard: 404 }),
+    check: (_caller, body) => ensure(body.item.verification === 'callback_verified', 'verified'),
   },
   // The provider's webhook: a session means nothing here, only the body's signature does (5.2).
   'POST /api/webhooks/sms': {

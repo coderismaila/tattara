@@ -85,7 +85,7 @@ _4.5 was done before 4.2 (ADR-036): the lock must protect the phone before suppo
 - [x] **5.1 Flag engine** `server/services/flags.ts`: gps_far, duplicate_phone, pu_over_capacity, rate_anomaly, gps_cluster, run at sync + nightly.
   **AC:** unit tests per flag type with fixtures.
 - [x] **5.2 Thank-you SMS + STOP webhook** → verification/opt-out state; anonymise job (72 h).
-- [ ] **5.3 Call-back workflow:** daily sample task, ward review page, outcomes update verification.
+- [x] **5.3 Call-back workflow:** daily sample task, ward review page, outcomes update verification.
 - [ ] **5.4 Flags review page** (ward full, LGA+ masked) + resolve actions, audited.
 - [ ] **5.5 Lead quality score** computed nightly; shown in Team lists.
 - [ ] **5.6 Supporter sign-up links** (PRD §6.2a, SECURITY_PRIVACY §12, ADR-035). Blocked on 👤 legal sign-off of

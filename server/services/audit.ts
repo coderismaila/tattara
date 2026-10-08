@@ -1,7 +1,7 @@
 // audit_log writes (CLAUDE.md rule 6): exports, role changes, account creation, deletions, bulk SMS, …
 // meta holds IDs, codes and field names only — never PII (SECURITY_PRIVACY §8). The guard below enforces that.
 // Pure (DB injected): usable from services, scripts and tests. The request-aware audit(event) is in server/utils/audit.ts.
-import type { Db } from '../db/client.ts'
+import type { DbLike } from '../db/client.ts'
 import { auditLog, type AuditLogEntry } from '../db/schema/index.ts'
 import type { SessionUser } from '../../shared/types/auth.ts'
 
@@ -49,7 +49,7 @@ export function assertAuditMetaSafe(meta: unknown, path = 'meta'): void {
 }
 
 /** Write an audit entry for an explicit actor (scripts, tasks, CLI). */
-export async function recordAudit(db: Db, actor: AuditActor, input: AuditInput): Promise<AuditLogEntry> {
+export async function recordAudit(db: DbLike, actor: AuditActor, input: AuditInput): Promise<AuditLogEntry> {
   const meta = input.meta ?? {}
   assertAuditMetaSafe(meta)
   const [row] = await db.insert(auditLog).values({

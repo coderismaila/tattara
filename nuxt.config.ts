@@ -73,6 +73,8 @@ export default defineNuxtConfig({
       '0 1 * * *': ['flags:scan'],
       // Removal requests and STOPs are anonymised within the hour (72 h deadline, US-18).
       '15 * * * *': ['supporters:anonymise'],
+      // 04:00 UTC = 05:00 in Lagos: the day's call-back sample (5.3).
+      '0 4 * * *': ['callbacks:sample'],
     },
   },
 

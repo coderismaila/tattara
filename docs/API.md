@@ -48,8 +48,8 @@ Stats never include names or phones. `:code` is `all` for the region (DG).
 ## Review
 | GET | `/flags` | WARD+ | `?status=open&type=&unit=` | ward sees supporter names; LGA+ sees masked |
 | POST | `/flags/:id/resolve` | WARD+ | `{ status: dismissed\|confirmed, note }` | |
-| GET | `/callbacks` | WARD | `?date=` | today's sample |
-| POST | `/callbacks/:id` | WARD | `{ outcome, notes? }` | updates supporter.verification |
+| GET | `/callbacks` | WARD | `?date=YYYY-MM-DD` (default today, Lagos) | `{ date, items, passRate }`: the ward's calls due that day plus any still open from earlier days (oldest first), each with the supporter's name, phone, PU, capture time and verification; anonymised ones left out. `passRate` = verified ÷ (verified + wrong number + denies) over 30 days, unreachable counted apart. Other roles 403 |
+| POST | `/callbacks/:id` | WARD | `{ outcome: verified\|wrong_number\|denies\|unreachable, notes? }` (notes ≤ 200, no phone numbers) | `{ item: { id, outcome, verification } }`. verified → `callback_verified`; wrong number / denies → `callback_failed` + a `callback_failed` flag; unreachable → no change; an opted-out or anonymised supporter keeps its state. Audited (outcome, never notes). Once only: 409 `already_done`. Another ward's lead 404, other roles 403 |
 
 ## Targets
 | PUT | `/targets/:code` | parent-level lead of :code, or DG | `{ target }` | |

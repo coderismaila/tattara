@@ -41,7 +41,7 @@ WARD+ here means WARD_LEAD, LGA_LEAD, STATE_LEAD and DG (DG manages the state le
 | GET | `/stats/children/:code` | scope (admin included) | `?metric=coverage\|supporters\|verifiedRate\|flaggedOpen\|progress\|activeLeads&sort=asc\|desc` (default coverage asc) | `{ unit, metric, sort, children: [{ code, name, level, supporters, verified, verifiedRate, flaggedOpen, registeredVoters, coverage, target, progress, activeLeads }], computedAt }`; units without a value last; `[]` below a PU. Cached 60 s per unit/metric/order (task 6.1) |
 | GET | `/stats/leaderboard/:code` | scope | `?level=lga\|ward\|pu&limit=` | |
 | GET | `/stats/inactive/:code` | scope | `?days=3` | leads with no captures in N days |
-| GET | `/geo/pus` | scope | `?ward=` | PU points `{ code, name, lat, lng, total, coverage }` |
+| GET | `/geo/pus` | scope (admin included) | `?ward=19-05-03` | `{ ward, points: [{ code, name, lat, lng, locationEstimated, total, coverage }] }`: active PUs with a location; 400 for a non-ward code; cached 60 s (task 6.3) |
 
 Stats never include names or phones. `:code` is `all` for the region (DG).
 

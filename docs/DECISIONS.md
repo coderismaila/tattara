@@ -367,3 +367,14 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - **Plain semantic table** for the units below, not `UTable`: lighter, and rows stack on phones.
 - "Inactive leads" joins the home with `/stats/inactive` in 6.5.
 **Why:** UX §4.2; CLAUDE.md rule 9 (2 GB phones, small capture-side JS).
+
+### ADR-047 · 2026-10-08 · Accepted · Map: MapLibre on demand only, drill-down within scope, list as the alternative (6.3)
+**Decision:**
+- **`/app/map`** for ward, LGA and state leads, the DG and the admin. It starts at the caller's own unit (DG/admin: the region) and never goes above it: region → states, state → LGAs, LGA → wards (per-state ward file), ward → PU points (`GET /api/geo/pus?ward=`). Figures come from `/api/stats/children/:code`, joined on the boundary features' `code`.
+- **Tapping a unit opens a bottom sheet** (`UDrawer`) with its numbers and Zoom in / Open dashboard / Team. "Open dashboard" is a new page, `/app/units/[code]`, reusing the 6.2 dashboard for any unit in scope (the stats routes enforce the scope).
+- **Colours:** coverage in the fixed classes 0–10–25–40–60%+, other metrics in quantile classes, the colour-blind-safe ramp, hatched grey for no data, legend always shown; PU points sized by supporters and coloured by coverage. No basemap; GRID3 attribution in the map's attribution control (CC BY-SA 4.0).
+- **The same units as a table** (the 6.2 table in a select mode): the accessible alternative to the canvas, a side panel on desktop with row hover highlighting the unit, behind "Show as list" on phones.
+- **MapLibre (1 MB raw, 285 KB gzip) is downloaded only by the map:** a lazy component imports it dynamically, and the service-worker precache **leaves its chunk out** (`service-worker/precache.ts`, a Workbox `manifestTransforms` that drops chunks containing MapLibre); a cache-first runtime route caches it on first use. Without that, every PU lead's phone would have precached it. E2E checks that capture and the PU home never load it.
+- Pure map maths in `app/utils/map-classes.ts` (classes, legend, feature filtering, breadcrumb), unit-tested.
+- 👤 The AC's "≥ 30 fps pan on a 2 GB Android device" needs a real phone (PROGRESS).
+**Why:** PRD US-12/13, UX §4.3, ARCHITECTURE §8, CLAUDE.md rule 9.

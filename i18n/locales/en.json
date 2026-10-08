@@ -57,7 +57,8 @@
     "capture": "Add supporter",
     "supporters": "Supporters",
     "sync": "Sync",
-    "review": "Review"
+    "review": "Review",
+    "map": "Map"
   },
   "lang": {
     "label": "Language",
@@ -515,5 +516,28 @@
       "progress": "To target",
       "leads": "Active leads"
     }
+  },
+  "map": {
+    "notAllowed": "The map is for ward, LGA and state leads, the DG and the administrator.",
+    "breadcrumb": "Where you are on the map",
+    "metricLegend": "Colour the map by",
+    "metrics": {
+      "coverage": "Coverage",
+      "supporters": "Supporters",
+      "verifiedRate": "Verified",
+      "flaggedOpen": "Open flags",
+      "progress": "To target",
+      "activeLeads": "Active leads"
+    },
+    "legendRange": "{from} – {to}",
+    "legendFrom": "{from} and above",
+    "noData": "No data",
+    "canvasLabel": "Map of {unit}. The same units are listed in the table.",
+    "showList": "Show as list",
+    "hideList": "Hide list",
+    "zoomIn": "Zoom in",
+    "openDashboard": "Open dashboard",
+    "backToMap": "Back to the map",
+    "unitDashboard": "Unit dashboard"
   }
 }

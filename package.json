@@ -42,6 +42,7 @@
     "drizzle-orm": "^0.45.3",
     "h3": "^1.15.11",
     "libphonenumber-js": "^1.13.14",
+    "maplibre-gl": "^6.13.0",
     "nuxt": "^4.5.2",
     "nuxt-auth-utils": "0.5.30",
     "postgres": "^3.4.9",

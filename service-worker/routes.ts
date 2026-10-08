@@ -7,6 +7,14 @@ import type { SyncItemResult } from '../shared/types/supporter'
 export const SHELL_CACHE = 'tattara-shell'
 /** Cache for the simplified boundary files under /geo (map, 6.3). */
 export const GEO_CACHE = 'tattara-geo'
+/** Cache for build assets left out of the precache (the map's MapLibre chunk, ADR-047): cached on first use. */
+export const ON_DEMAND_CACHE = 'tattara-on-demand'
+
+/** A built asset (hashed, immutable): anything under /_nuxt/. */
+export function isBuildAsset(url: URL): boolean {
+  return url.pathname.startsWith('/_nuxt/')
+}
+
 /** The shell URL fetched at install time and served when /app navigations fail offline. */
 export const APP_SHELL_URL = '/app'
 

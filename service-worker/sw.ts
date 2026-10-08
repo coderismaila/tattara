@@ -9,7 +9,7 @@ import { registerRoute } from 'workbox-routing'
 import { CacheFirst, NetworkFirst, NetworkOnly } from 'workbox-strategies'
 import { SYNC_TAG } from '../shared/constants/sync'
 import { runSync } from '../app/offline/sync'
-import { APP_SHELL_URL, GEO_CACHE, SHELL_CACHE, isApiRequest, isAppNavigation, isGeoRequest, swPost } from './routes'
+import { APP_SHELL_URL, GEO_CACHE, ON_DEMAND_CACHE, SHELL_CACHE, isApiRequest, isAppNavigation, isBuildAsset, isGeoRequest, swPost } from './routes'
 
 declare const self: ServiceWorkerGlobalScope & { __WB_MANIFEST: (string | { url: string, revision: string | null })[] }
 
@@ -23,6 +23,13 @@ registerRoute(({ url }) => isApiRequest(url), new NetworkOnly())
 registerRoute(({ url }) => isGeoRequest(url), new CacheFirst({
   cacheName: GEO_CACHE,
   plugins: [new ExpirationPlugin({ maxEntries: 20, maxAgeSeconds: 30 * 24 * 60 * 60 })],
+}))
+
+// Build assets not in the precache (the map's MapLibre chunk): hashed and immutable, so cache-first once used.
+// Precached assets are answered by precacheAndRoute above and never reach this route.
+registerRoute(({ url }) => isBuildAsset(url), new CacheFirst({
+  cacheName: ON_DEMAND_CACHE,
+  plugins: [new ExpirationPlugin({ maxEntries: 20, maxAgeSeconds: 60 * 24 * 60 * 60 })],
 }))
 
 // /app pages: network first (fresh shell after a deploy), the cached shell when offline or on a very slow link.

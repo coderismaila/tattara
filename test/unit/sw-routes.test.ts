@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it, vi } from 'vitest'
-import { APP_SHELL_URL, PRECACHE_IGNORES, isApiRequest, isAppNavigation, isGeoRequest, swPost } from '../../service-worker/routes'
+import { APP_SHELL_URL, PRECACHE_IGNORES, isApiRequest, isAppNavigation, isBuildAsset, isGeoRequest, swPost } from '../../service-worker/routes'
 
 const url = (path: string) => new URL(path, 'https://tattara.test')
 
@@ -52,5 +52,32 @@ describe('swPost (Background Sync, 4.3)', () => {
   it('throws with the status like $fetch, so the engine keeps the rows and backs off', async () => {
     const fetcher = vi.fn(async () => new Response('', { status: 429 }))
     await expect(swPost([], fetcher as unknown as typeof fetch)).rejects.toMatchObject({ statusCode: 429 })
+  })
+})
+
+describe('on-demand chunks (6.3)', () => {
+  it('MapLibre is recognised and left out of the precache; other chunks stay', async () => {
+    const { mkdtempSync, writeFileSync, mkdirSync } = await import('node:fs')
+    const { join } = await import('node:path')
+    const { tmpdir } = await import('node:os')
+    const { dropOnDemandChunks, isOnDemandChunk } = await import('../../service-worker/precache')
+    expect(isOnDemandChunk('x.className="maplibregl-canvas"')).toBe(true)
+    expect(isOnDemandChunk('export const capture = 1')).toBe(false)
+
+    const dir = mkdtempSync(join(tmpdir(), 'precache-'))
+    mkdirSync(join(dir, '_nuxt'))
+    writeFileSync(join(dir, '_nuxt/map.js'), 'const c="maplibregl-canvas"')
+    writeFileSync(join(dir, '_nuxt/app.js'), 'const capture=1')
+    const { manifest } = await dropOnDemandChunks(dir)([
+      { url: '_nuxt/map.js', size: 1, revision: null },
+      { url: '_nuxt/app.js', size: 1, revision: null },
+      { url: 'app/index.html', size: 1, revision: 'x' },
+    ])
+    expect(manifest.map(e => e.url)).toEqual(['_nuxt/app.js', 'app/index.html'])
+  })
+
+  it('build assets are recognised by path', () => {
+    expect(isBuildAsset(url('/_nuxt/QcUPuUjh.js'))).toBe(true)
+    expect(isBuildAsset(url('/api/stats/unit/all'))).toBe(false)
   })
 })

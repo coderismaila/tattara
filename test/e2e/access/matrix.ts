@@ -273,6 +273,15 @@ export const ACCESS_MATRIX = {
       ensure(!JSON.stringify(body).match(/\+234|fullName/), 'no names or phones')
     },
   },
+  // Map PU points (6.3): aggregates and unit locations for anyone whose scope holds the ward.
+  'GET /api/geo/pus': {
+    request: () => ({ method: 'GET', path: '/api/geo/pus?ward=19-01-01' }),
+    expect: only({ admin: 200, dg: 200, kanoState: 200, kanoLga: 200, kanoWard: 200 }),
+    check: (_caller, body) => {
+      ensure(body.ward === '19/01/01' && body.points.length > 0, 'the ward’s PUs')
+      ensure(body.points.every((p: any) => p.code.startsWith('19/01/01/') && typeof p.lat === 'number'), 'points in the ward')
+    },
+  },
   // The provider's webhook: a session means nothing here, only the body's signature does (5.2).
   'POST /api/webhooks/sms': {
     request: () => ({ method: 'POST', path: '/api/webhooks/sms', body: { type: 'inbound', sender: '2348031234567', message: 'STOP' } }),

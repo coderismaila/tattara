@@ -110,6 +110,8 @@
     sync: 'Aikawa',
     // TODO(ha-review)
     review: 'Bita',
+    // TODO(ha-review)
+    map: 'Taswira',
   },
   lang: {
     // TODO(ha-review)
@@ -930,5 +932,47 @@
       // TODO(ha-review)
       leads: "Shugabanni masu aiki",
     },
+  },
+  map: {
+    // TODO(ha-review)
+    notAllowed: "Taswirar ta shugabannin mazaɓa, ƙaramar hukuma, jiha, DG da mai gudanarwa ce.",
+    // TODO(ha-review)
+    breadcrumb: "Inda kake a taswira",
+    // TODO(ha-review)
+    metricLegend: "Launuka bisa",
+    metrics: {
+      // TODO(ha-review)
+      coverage: "Kai wa ga masu rajista",
+      // TODO(ha-review)
+      supporters: "Magoya baya",
+      // TODO(ha-review)
+      verifiedRate: "An tabbatar",
+      // TODO(ha-review)
+      flaggedOpen: "Alamomi a buɗe",
+      // TODO(ha-review)
+      progress: "Zuwa ga buri",
+      // TODO(ha-review)
+      activeLeads: "Shugabanni masu aiki",
+    },
+    // TODO(ha-review)
+    legendRange: "{from} – {to}",
+    // TODO(ha-review)
+    legendFrom: "{from} zuwa sama",
+    // TODO(ha-review)
+    noData: "Babu bayani",
+    // TODO(ha-review)
+    canvasLabel: "Taswirar {unit}. Ana jera yankunan a teburin.",
+    // TODO(ha-review)
+    showList: "Nuna a jeri",
+    // TODO(ha-review)
+    hideList: "Ɓoye jerin",
+    // TODO(ha-review)
+    zoomIn: "Shiga ciki",
+    // TODO(ha-review)
+    openDashboard: "Buɗe allon bayani",
+    // TODO(ha-review)
+    backToMap: "Koma taswira",
+    // TODO(ha-review)
+    unitDashboard: "Allon bayanin yanki",
   },
 }

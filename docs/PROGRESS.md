@@ -22,7 +22,8 @@ Also note blockers and anything the next session must know.
   - Offline, `/app` opens without a confirmed session; since 4.5 it stays behind the lock screen (local session +
     PIN). The 4.1 obligation is met (ADR-036).
   - **Size budget:** the precache is ~1.6 MB raw / ~775 KB over the wire (one-time download; ~430 KB are the Noto Sans
-    fonts for Hausa letters). Review in 7.x before adding more to the app shell.
+    fonts for Hausa letters). Review in 7.x before adding more to the app shell. **6.3:** 1.9 MB raw (86 entries) with
+    the new pages; MapLibre is excluded and cached on use (ADR-047).
   - **👤 Before the pilot:** install from Chrome on a real Android Go phone (Add to home screen), open it in airplane
     mode, and check the icon on the home screen. Playwright can't click Chrome's own install UI.
 - **Offline lock (4.5, ADR-036), for 4.2 onwards:** the Dexie db is `app/offline/db.ts` (v1 `meta`, v2 supporters/
@@ -100,6 +101,12 @@ Also note blockers and anything the next session must know.
   otherwise). Run it alone: `E2E_SKIP_BUILD=1 npx playwright test --project=access` (after `pnpm build`).
 - **5.6 sign-up links skipped for now (2026-10-08):** waiting on 👤 legal sign-off of self-ticked consent (PRD Q7) and
   the `s1-ha`/`s1-en` wording. Phase 6 went ahead first, at the user's request.
+- **Map (6.3, ADR-047):** `/app/map` (lazy `MapUnitMap`, MapLibre only there), `/app/units/[code]` dashboard,
+  `GET /api/geo/pus`. Dev geography codes overlap the real GRID3 codes only in part, so some dev units show as "no data"
+  on the map; with the real INEC import every unit joins.
+  - **👤 Before the pilot:** pan and drill down the map on a real 2 GB Android Go phone (AC: ≥ 30 fps), e.g. with Chrome
+    DevTools remote debugging → Performance → FPS meter, at ward level in Kano (the largest ward file).
+  - `useFetch` with a fixed `key` and a changing URL didn't refetch on drill-down: give such calls no key (or a reactive one).
 - **Home (6.2, ADR-046):** `HomePuHome` (offline-capable; `app/offline/home.ts`) and lazy `HomeUnitDashboard` +
   `HomeChildUnitsTable`; SVG charts in `app/components/charts/`. 6.5 adds an "Inactive leads" card to the dashboard.
   Gotcha found here: never pass a Vue reactive value to Dexie (`DataCloneError`); store a plain object.
@@ -183,3 +190,4 @@ Also note blockers and anything the next session must know.
 - 2026-10-08 · 5.5 · Lead quality score (ADR-044): `shared/utils/quality.ts` formula (50% verified incl. call-back pass rate, 25% flags, 25% opt-outs; ≥ 10 supporters; 90 days); migration 0013 `unit_quality`; nightly `quality:compute` (per-PU counts rolled up to ward/LGA/state); `/api/team` fills `qualityScore` + `quality` breakdown; Team page badge (number + word) with "Why this score"; dev seed computes it; sync push answers before flag checks and thank-you queueing; unit, integration and E2E tests · see commit `feat(quality)`
 - 2026-10-08 · 6.1 · Stats (ADR-045): `GET /api/stats/unit/:code` (totals, breakdowns, registered voters, coverage over reported PUs, target/progress, last 30 days) and `GET /api/stats/children/:code` (per child: supporters, verified %, flags, coverage, progress, active leads; sorted by metric, missing last), 60 s `defineCachedFunction` cache (confirmed in prod build by E2E); migration 0014 `unit_daily_stats` + `stats:daily` (23:55 Lagos) and `stats:reconcile` (02:00 UTC, logs and fixes drift); `pnpm perf:stats`: children/all p95 75 ms on 41,671 PUs × 5M supporters (AC < 300 ms); unit, integration and E2E tests, access matrix 28 routes · see commit `feat(stats)`
 - 2026-10-08 · 6.2 · Role-aware home (ADR-046): PU lead home (Add supporter, added today, waiting, total vs target ring; works offline from the phone + last online numbers) and lazy ward-and-above dashboard (summary with coverage, verified %, target ring, 30-day trend; open flags → Review; units below lowest coverage first, linking to Team `?unit=`); SVG trend line + progress ring without a chart library; ha/en strings; unit (chart maths, Lagos-day count) and E2E (PU home online/offline, no dashboard chunk for PU leads, ward table order, LGA drill-down, axe) tests · see commit `feat(home)`
+- 2026-10-08 · 6.3 · Map (ADR-047): `/app/map` with MapLibre 6.13 (lazy, dynamic import, left out of the SW precache and cached on use): children shaded by coverage/supporters/verified/flags/progress/active leads, fixed coverage classes + quantiles, hatched no-data, legend, breadcrumb within scope, bottom sheet (zoom in, open dashboard, team), PU points at ward level; table as accessible alternative with hover highlight; `GET /api/geo/pus`; `/app/units/[code]` dashboard; nav; ha/en strings; unit (map maths, precache filter), integration (PU points) and E2E (ward map + sheet + dashboard, LGA drill-down, no MapLibre on capture/PU home, axe) tests; access matrix 30 routes · see commit `feat(map)`

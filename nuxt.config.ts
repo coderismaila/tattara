@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import { fileURLToPath } from 'node:url'
+import { dropOnDemandChunks } from './service-worker/precache'
 import { PRECACHE_GLOBS, PRECACHE_IGNORES } from './service-worker/routes'
 
 // nuxt-auth-utils exposes its session helpers only via Nitro auto-imports (disabled under compat 5) and its package
@@ -143,6 +144,8 @@ export default defineNuxtConfig({
     injectManifest: {
       globPatterns: PRECACHE_GLOBS,
       globIgnores: PRECACHE_IGNORES,
+      // The map's MapLibre chunk is cached on use, not precached on every phone (ADR-047).
+      manifestTransforms: [dropOnDemandChunks(fileURLToPath(new URL('./.output/public', import.meta.url)))],
     },
     client: {
       // Our own install card replaces Chrome's mini-infobar; "Not now" is remembered under this key.

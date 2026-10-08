@@ -29,10 +29,10 @@ describe('isNavItemActive', () => {
 
 describe('navItemsFor', () => {
   it('shows Team only to leads who manage a team, Review to ward leads and above, Admin only to the admin', () => {
-    expect(navItemsFor('WARD_LEAD').map(i => i.to)).toEqual(['/app', '/app/supporters', '/app/review', '/app/team', '/app/settings'])
+    expect(navItemsFor('WARD_LEAD').map(i => i.to)).toEqual(['/app', '/app/supporters', '/app/review', '/app/map', '/app/team', '/app/settings'])
     expect(navItemsFor('PU_LEAD').map(i => i.to)).toEqual(['/app', '/app/capture', '/app/supporters', '/app/sync', '/app/settings'])
-    expect(navItemsFor('ADMIN').map(i => i.to)).toEqual(['/app', '/app/admin', '/app/settings'])
-    expect(navItemsFor('DG').map(i => i.to)).toEqual(['/app', '/app/review', '/app/team', '/app/settings'])
+    expect(navItemsFor('ADMIN').map(i => i.to)).toEqual(['/app', '/app/map', '/app/admin', '/app/settings'])
+    expect(navItemsFor('DG').map(i => i.to)).toEqual(['/app', '/app/review', '/app/map', '/app/team', '/app/settings'])
     expect(navItemsFor(undefined).map(i => i.to)).toEqual(['/app', '/app/settings'])
   })
 

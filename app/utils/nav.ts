@@ -1,4 +1,4 @@
-// Signed-in navigation. Add an entry when its page lands (later: map).
+// Signed-in navigation. Add an entry when its page lands.
 import type { Role } from '~~/shared/constants/roles'
 
 export interface NavItem {
@@ -18,6 +18,7 @@ export const APP_NAV: readonly NavItem[] = [
   { to: '/app/supporters', labelKey: 'nav.supporters', icon: 'i-lucide-list', roles: ['PU_LEAD', 'WARD_LEAD'] },
   { to: '/app/sync', labelKey: 'nav.sync', icon: 'i-lucide-refresh-cw', roles: ['PU_LEAD'] },
   { to: '/app/review', labelKey: 'nav.review', icon: 'i-lucide-clipboard-check', roles: ['WARD_LEAD', 'LGA_LEAD', 'STATE_LEAD', 'DG'] },
+  { to: '/app/map', labelKey: 'nav.map', icon: 'i-lucide-map', roles: ['WARD_LEAD', 'LGA_LEAD', 'STATE_LEAD', 'DG', 'ADMIN'] },
   { to: '/app/team', labelKey: 'nav.team', icon: 'i-lucide-users', roles: TEAM_ROLES },
   { to: '/app/admin', labelKey: 'nav.admin', icon: 'i-lucide-shield', roles: ['ADMIN'] },
   { to: '/app/settings', labelKey: 'nav.settings', icon: 'i-lucide-settings' },

@@ -7,7 +7,7 @@ import type { SupporterInput } from '~~/shared/types/supporter'
 import { newId } from '~~/shared/utils/uuid'
 import { normalizePhone } from '~~/shared/utils/phone'
 import { getLocalSession, type LocalSession } from '~/offline/local-session'
-import { countLocalPhone, discardCapture, getRejected, removeRejected, saveCapture } from '~/offline/outbox'
+import { captureStatus, countLocalPhone, discardCapture, getRejected, removeRejected, saveCapture } from '~/offline/outbox'
 import { requestBackgroundSync } from '~/offline/background'
 
 // Add supporter (UX §4.1, PRD US-4…US-7). One scroll, a big Save, only name/phone/support/PVC/consent required.
@@ -222,15 +222,17 @@ async function onSubmit(event: FormSubmitEvent<SupporterFormOutput>) {
     // answer: the service worker sends it once the connection is back (Background Sync), or the next engine run does.
     const report = await sync.run({ force: true, pull: false })
     if (!report || report.pushError !== undefined) void requestBackgroundSync()
-    const mine = report?.results.find(r => r.id === item.id)
-    if (mine?.result === 'rejected' || mine?.result === 'conflict') {
+    // The answer may have come to another run (one already going when the lead saved), so read the phone's record.
+    const mine = report ? await captureStatus(item.id).catch(() => undefined) : undefined
+    if (mine?.syncStatus === 'rejected') {
       // Refused while the lead is still with the supporter: keep the form so they can fix it and save again.
       await discardCapture(item.id)
-      saveError.value = mine.result === 'rejected' && REJECT_KEYS.has(mine.reason) ? `capture.errors.${mine.reason}` : 'capture.errors.conflict'
+      const reason = mine.rejectReason
+      saveError.value = reason && reason !== 'conflict' && REJECT_KEYS.has(reason) ? `capture.errors.${reason}` : 'capture.errors.conflict'
       return
     }
     await finishFix()
-    const onServer = mine?.result === 'accepted' || mine?.result === 'duplicate'
+    const onServer = mine?.syncStatus === 'synced'
     toast.add({
       title: t(onServer ? 'capture.saved' : 'capture.savedLocal'),
       color: 'success',

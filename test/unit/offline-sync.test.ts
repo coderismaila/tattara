@@ -249,6 +249,14 @@ describe('pull', () => {
     expect(await db.units.toArray()).toHaveLength(1)
     expect(await getPullStats()).toMatchObject({ total: 7 })
 
+    // A capture this phone already sent, refreshed by the pull, stays this phone's (Sent list, 4.4).
+    const sentHere = capture()
+    await saveCapture(sentHere)
+    await db.supporters.update(sentHere.id, { syncStatus: 'synced' })
+    await db.outbox.where('id').equals(sentHere.id).delete()
+    await applyPull(page({ supporters: [dto({ id: sentHere.id, fullName: 'Server Copy' })] }), 'u1')
+    expect(await db.supporters.get(sentHere.id)).toMatchObject({ fullName: 'Server Copy', deviceId: sentHere.deviceId })
+
     // Later pages carry no units: the stored ones stay.
     await applyPull(page(), 'u1')
     expect(await db.units.count()).toBe(1)

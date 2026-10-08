@@ -148,7 +148,7 @@ test.describe('capture (PU lead)', () => {
     await context.setOffline(true)
     try {
       await addSupporter('Zainab Offline', '0803 100 8001')
-      await expect(page.getByText('An ajiye a wannan wayar. Za a aika idan an sami intanet.')).toBeVisible()
+      await expect(page.getByText('An ajiye a wannan wayar. Za a aika idan an sami intanet.', { exact: true })).toBeVisible()
       await expect(page.getByTestId('capture-name')).toHaveValue('')
 
       // Offline duplicate notice from the phone's own copy (US-7).

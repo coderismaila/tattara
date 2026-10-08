@@ -70,7 +70,8 @@ export async function applyPull(page: PullResponse, userId: string): Promise<voi
       const local = await db.supporters.get(item.id)
       if (local?.syncStatus === 'rejected') continue
       if ('deleted' in item) await db.supporters.delete(item.id)
-      else await db.supporters.put(toLocal(item, item.updatedAt))
+      // Keep `deviceId`: it marks a capture made on this phone (the Sync screen's Sent list); the server doesn't send it.
+      else await db.supporters.put({ ...toLocal(item, item.updatedAt), deviceId: local?.deviceId })
     }
     if (page.units.length) {
       await db.units.clear()

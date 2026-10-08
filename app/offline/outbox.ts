@@ -128,6 +128,12 @@ export async function captureCounts(): Promise<{ pending: number, rejected: numb
   return { pending, rejected }
 }
 
+/** Where one capture stands on this phone (whichever sync run sent it). */
+export async function captureStatus(id: string): Promise<Pick<LocalSupporter, 'syncStatus' | 'rejectReason'> | undefined> {
+  const row = await db.supporters.get(id)
+  return row && { syncStatus: row.syncStatus, rejectReason: row.rejectReason }
+}
+
 /** A refused capture, for Fix (prefill the form). Undefined unless it is still refused. */
 export async function getRejected(id: string): Promise<LocalSupporter | undefined> {
   const row = await db.supporters.get(id)

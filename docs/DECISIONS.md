@@ -337,3 +337,12 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - **Page:** the Review page (`/app/review`) now opens to ward, LGA and state leads and the DG; ward leads see call-backs first, then flags. Open/Reviewed tabs, type chips with open counts, newest first with "Show more".
 - Confirming a flag has no automatic effect on the record yet (no removal, no verification change): it is a recorded judgement that 5.5's quality score counts.
 **Why:** SECURITY_PRIVACY §3 (flags review row), PRD goal 3.
+
+### ADR-044 · 2026-10-08 · Accepted · Lead quality score per unit, rebuilt nightly (5.5)
+**Decision:**
+- **Per unit, last 90 days:** a PU's score is its lead's work; a ward's, LGA's or state's is everything under it, so each supervisor sees the score of every unit (and lead) one level down in the Team list. Counts are taken per PU and rolled up (`rollUpCodes`).
+- **Formula** (`shared/utils/quality.ts`): `score = 100 × (0.5 × verified + 0.25 × (1 − min(1, 4 × flagRate)) + 0.25 × (1 − min(1, 4 × optOutRate)))`. *verified* = share with the thank-you delivered or a call-back confirmed, averaged with the call-back pass rate once there are ≥ 5 answered calls. *flagRate* counts open and confirmed flags (dismissed don't count) per supporter. 25% flagged or opted out zeroes that part. Fewer than 10 supporters → no score ("not enough data").
+- **Stored** in `unit_quality` (migration 0013) with the four inputs, so the Team page can say why a score is low; recomputed by `quality:compute` at 01:30 UTC after the flag scan (and by the dev seed).
+- **Shown** as number + word (Good ≥ 75, Fair 50–74, Low < 50), never colour alone, with a "Why this score" breakdown.
+- **Sync push answers first** (found while testing this task under load): flag checks and thank-you queueing run right after the response (`afterResponse`), so a lead's save never waits for them; their errors are logged, never returned.
+**Why:** PRD R-7 (verified rate, flag rate, opt-out rate, shown to supervisors).

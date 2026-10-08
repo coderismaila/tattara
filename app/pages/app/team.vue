@@ -200,6 +200,12 @@ const dialogTitle = computed(() => {
           {{ t('team.noLead') }}
         </p>
 
+        <TeamQualityScore
+          :code="member.code"
+          :score="member.qualityScore"
+          :quality="member.quality"
+        />
+
         <p
           v-if="member.level === 'pu'"
           class="text-sm"

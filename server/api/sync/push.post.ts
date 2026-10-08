@@ -8,6 +8,7 @@ import { queueThankYous } from '~~/server/services/supporter-sms'
 import { pushSupporters } from '~~/server/services/supporters'
 import { syncPushSchema } from '~~/shared/schemas/supporter'
 import { requireAuth } from '~~/server/utils/auth'
+import { afterResponse } from '~~/server/utils/after-response'
 import { useDb } from '~~/server/utils/db'
 import { RATE_LIMITS, enforceRateLimit } from '~~/server/utils/rate-limit'
 import { useSupporterSmsConfig } from '~~/server/utils/supporter-sms-config'
@@ -20,15 +21,14 @@ export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, `sync-push:${user.id}`, RATE_LIMITS.syncPush)
   const { items } = await readValidated(event, syncPushSchema)
   const results = await pushSupporters(useDb(), user, items)
-  // Flag checks (5.1) on what was newly accepted; they never fail the push.
+  // Flag checks (5.1) and the thank-you SMS (5.2) for what was newly accepted, after answering: the lead's save shouldn't
+  // wait for them (a slow 3G push is slow enough), and neither may fail the push.
   const accepted = results.flatMap(r => (r.result === 'accepted' ? [r.id] : []))
-  await flagAfterWrite(useDb(), accepted, Number(useRuntimeConfig().public.gpsFlagMeters))
-  // Thank-you SMS with the STOP instruction (5.2), sent by the minute task. Never fails the push.
-  try {
-    await queueThankYous(useDb(), accepted, useSupporterSmsConfig())
-  }
-  catch (error) {
-    console.error('[sms] thank-you not queued:', error instanceof Error ? error.message : error)
+  if (accepted.length) {
+    afterResponse('sync-push', async () => {
+      await flagAfterWrite(useDb(), accepted, Number(useRuntimeConfig().public.gpsFlagMeters))
+      await queueThankYous(useDb(), accepted, useSupporterSmsConfig())
+    })
   }
   return { results }
 })

@@ -71,6 +71,8 @@ export default defineNuxtConfig({
       '* * * * *': ['sms:process'],
       // 01:00 UTC = 02:00 in Lagos: the whole-registry flag scan (5.1).
       '0 1 * * *': ['flags:scan'],
+      // 01:30 UTC, after the flag scan: lead quality scores (5.5).
+      '30 1 * * *': ['quality:compute'],
       // Removal requests and STOPs are anonymised within the hour (72 h deadline, US-18).
       '15 * * * *': ['supporters:anonymise'],
       // 04:00 UTC = 05:00 in Lagos: the day's call-back sample (5.3).

@@ -4,6 +4,7 @@ import { and, count, eq, inArray, like, ne, or, sql } from 'drizzle-orm'
 import { createDb, type Db } from '../../server/db/client.ts'
 import { flags, invites, otpCodes, puStats, supporters, unitTargets, units, userDevices, users } from '../../server/db/schema/index.ts'
 import { runFlagChecks } from '../../server/services/flags.ts'
+import { computeQuality } from '../../server/services/quality.ts'
 import { recomputePuStats } from '../../server/services/supporters.ts'
 import { hashPin } from '../../server/utils/pin.ts'
 import { UNIT_LEVELS } from '../../shared/constants/enums.ts'
@@ -167,7 +168,10 @@ export async function seedDev(url: string, options: SeedOptions = {}): Promise<S
       return { ...geo, users: idByKey.size, supporters: supporterCount }
     })
     // The planted patterns become open flags (5.1), as the nightly scan would raise them.
-    if (result.supporters > 0) await runFlagChecks(db)
+    if (result.supporters > 0) {
+      await runFlagChecks(db)
+      await computeQuality(db) // and the nightly quality scores (5.5)
+    }
     return result
   }
   finally {

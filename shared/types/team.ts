@@ -17,6 +17,17 @@ export interface TeamMember {
   }
   /** PU rows: the registered-voter figure (US-24), NULL until reported. Always NULL above PU level. */
   registeredVoters: number | null
-  /** Lead quality score (task 5.5). */
+  /** Quality score 0–100 of the unit's last 90 days (task 5.5); NULL with too little data. */
   qualityScore: number | null
+  /** What the score is made of; NULL when the unit had no supporters in the window. Aggregates only. */
+  quality: TeamQuality | null
+}
+
+export interface TeamQuality {
+  verifiedRate: number
+  flagRate: number
+  optOutRate: number
+  passRate: number | null
+  supporters: number
+  computedAt: string
 }

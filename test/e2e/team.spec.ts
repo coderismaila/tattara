@@ -76,6 +76,16 @@ test.describe.serial('team management', () => {
   })
 })
 
+// 5.5: each PU shows its quality score (number + word) and what it is made of. The dev seed computes the scores.
+test('the ward lead sees the quality score of each PU and why', async ({ page }) => {
+  await page.goto('/app/team')
+  const quality = page.getByTestId('team-quality-19/01/01/001')
+  await expect(quality.getByTestId('team-quality-score-19/01/01/001')).toHaveText(/^\d{1,3} · (Mai kyau|Matsakaici|Ƙasa)$/)
+  await quality.getByText('Dalilin wannan maki').click()
+  await expect(quality.getByText('Magoya baya (kwana 90)')).toBeVisible()
+  await expect(quality).toContainText('ana sabuntawa kowane dare')
+})
+
 test.describe('team access', () => {
   test.use({ storageState: { cookies: [], origins: [] } })
 

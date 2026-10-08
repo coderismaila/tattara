@@ -12,6 +12,7 @@ import { maskPhoneForDisplay } from '../../shared/utils/phone.ts'
 import { isWithin, parentCode } from '../../shared/utils/pu-code.ts'
 import { assertAuditMetaSafe, recordAudit } from './audit.ts'
 import { sendInvite, type AuthConfig, type OnSmsQueued } from './auth.ts'
+import { qualityFor } from './quality.ts'
 
 type Caller = Pick<SessionUser, 'id' | 'role' | 'unitCode'>
 
@@ -62,7 +63,9 @@ export async function listTeam(db: Db, caller: Caller, unitCode?: string): Promi
         .orderBy(desc(users.createdAt))
 
   const direct = target === own
+  const quality = await qualityFor(db, children.map(c => c.code))
   const members: TeamMember[] = children.map((c) => {
+    const q = quality.get(c.code)
     const candidates = leads.filter(l => l.unitCode === c.code)
     // The active lead if there is one, else the newest pending invite.
     const lead = candidates.find(l => l.status === 'active') ?? candidates[0]
@@ -71,7 +74,17 @@ export async function listTeam(db: Db, caller: Caller, unitCode?: string): Promi
       name: c.name,
       level: c.level,
       registeredVoters: c.level === 'pu' ? c.registeredVoters : null,
-      qualityScore: null,
+      qualityScore: q?.score ?? null,
+      quality: q
+        ? {
+            verifiedRate: q.verifiedRate,
+            flagRate: q.flagRate,
+            optOutRate: q.optOutRate,
+            passRate: q.passRate,
+            supporters: q.supporters,
+            computedAt: q.computedAt.toISOString(),
+          }
+        : null,
       lead: lead
         ? {
             id: lead.id,

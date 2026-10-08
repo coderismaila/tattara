@@ -127,6 +127,11 @@ The ward code is the scope (a replaced ward lead's open calls go to the new lead
 
 ## 4. Stats
 
+### `unit_quality` (5.5, rebuilt nightly)
+`unit_code PK FK units (on delete cascade), score int 0–100 null, verified_rate, flag_rate, opt_out_rate, pass_rate null, supporters, computed_at`
+
+One row per unit (PU, ward, LGA, state) with supporters received in the last 90 days. Aggregates only.
+
 ### `pu_stats` (maintained incrementally)
 `pu_code PK, total, verified, flagged_open, male, female, age_18_24 … age_65_plus, strong, leaning, undecided, has_pvc_yes, volunteers, opted_out, last_capture_at, updated_at`
 

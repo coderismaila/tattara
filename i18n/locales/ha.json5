@@ -160,6 +160,36 @@
     },
   },
   team: {
+    quality: {
+      // TODO(ha-review)
+      label: "Inganci",
+      band: {
+        // TODO(ha-review)
+        good: "Mai kyau",
+        // TODO(ha-review)
+        fair: "Matsakaici",
+        // TODO(ha-review)
+        low: "Ƙasa",
+      },
+      // TODO(ha-review)
+      notEnough: "Babu isassun magoya baya tukuna",
+      // TODO(ha-review)
+      why: "Dalilin wannan maki",
+      // TODO(ha-review)
+      supporters: "Magoya baya (kwana 90)",
+      // TODO(ha-review)
+      verified: "An tabbatar",
+      // TODO(ha-review)
+      callbacks: "Kiran tabbatarwa da suka yi nasara",
+      // TODO(ha-review)
+      tooFewCalls: "Kira sun yi kaɗan tukuna",
+      // TODO(ha-review)
+      flags: "Da alama",
+      // TODO(ha-review)
+      optOuts: "Sun fita",
+      // TODO(ha-review)
+      note: "Kwana 90 na baya, ana sabuntawa kowane dare (na ƙarshe: {date}).",
+    },
     // TODO(ha-review)
     title: 'Tawaga',
     // TODO(ha-review)

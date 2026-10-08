@@ -62,7 +62,7 @@ describe.skipIf(!dbAvailable)('team service', () => {
       expect(r.members[0]).toMatchObject({
         code: '19/01/01/001',
         level: 'pu',
-        qualityScore: null,
+        qualityScore: expect.any(Number), // the dev seed computes quality (5.5)
         lead: { fullName: 'Dev Kano PU Lead', status: 'active', phone: '+2348000000104' },
       })
       expect(r.members[1]!.lead).toBeNull()

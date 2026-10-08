@@ -143,6 +143,23 @@
       "phone_in_use": "This phone number belongs to an active lead elsewhere.",
       "already_deactivated": "This lead is already deactivated.",
       "rate_limited": "Too many invites for now. Try again in {minutes} minutes."
+    },
+    "quality": {
+      "label": "Quality",
+      "band": {
+        "good": "Good",
+        "fair": "Fair",
+        "low": "Low"
+      },
+      "notEnough": "Not enough supporters yet",
+      "why": "Why this score",
+      "supporters": "Supporters (90 days)",
+      "verified": "Verified",
+      "callbacks": "Call-backs passed",
+      "tooFewCalls": "Too few calls yet",
+      "flags": "Flagged",
+      "optOuts": "Opted out",
+      "note": "Last 90 days, updated nightly (last: {date})."
     }
   },
   "admin": {

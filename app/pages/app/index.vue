@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// Home (task 6.2, UX §4.2): PU leads get their PU at a glance (works offline); ward leads and above get their unit's
+// dashboard (lazy-loaded); DG and admin the region. The registered-voters card (3.7) stays below.
+import { getLocalSession, type LocalSession } from '~/offline/local-session'
 import { toUrlCode } from '~~/shared/utils/pu-code'
 
 definePageMeta({ layout: 'app', titleKey: 'nav.home' })
@@ -6,9 +9,18 @@ definePageMeta({ layout: 'app', titleKey: 'nav.home' })
 const { t, n } = useI18n()
 
 const { data: me } = await useFetch('/api/auth/me', { key: 'me' })
-const isPuLead = computed(() => me.value?.user.role === 'PU_LEAD')
+// Offline, /api/auth/me fails: the phone's own copy of the session (4.5) says who the lead is.
+const local = ref<LocalSession | null>(null)
+onMounted(async () => {
+  local.value = (await getLocalSession().catch(() => undefined)) ?? null
+})
+const role = computed(() => me.value?.user.role ?? local.value?.role ?? null)
+const isPuLead = computed(() => role.value === 'PU_LEAD')
+const puCode = computed(() => me.value?.user.unitCode ?? local.value?.unitCode ?? null)
 /** The caller's unit, `''` for region-wide roles (DG, admin). */
 const scopeCode = computed(() => me.value?.scope.unitCode ?? null)
+const canReview = computed(() => !!role.value && ['WARD_LEAD', 'LGA_LEAD', 'STATE_LEAD', 'DG'].includes(role.value))
+const name = computed(() => me.value?.user.fullName ?? local.value?.fullName ?? '')
 
 interface VotersSummary {
   code: string
@@ -42,15 +54,19 @@ onMounted(() => {
 
 <template>
   <section class="flex flex-col gap-4">
-    <div class="flex flex-col gap-2">
-      <h1 class="text-2xl font-bold">
-        {{ t('home.welcome') }}
-      </h1>
-      <!-- Role-aware home arrives in 6.2. -->
-      <p class="text-muted">
-        {{ t('home.placeholder') }}
-      </p>
-    </div>
+    <h1 class="text-2xl font-bold">
+      {{ name ? t('home.welcomeName', { name }) : t('home.welcome') }}
+    </h1>
+
+    <HomePuHome
+      v-if="isPuLead && puCode"
+      :pu-code="puCode"
+    />
+    <LazyHomeUnitDashboard
+      v-else-if="scopeCode !== null && !isPuLead"
+      :code="scopeCode"
+      :can-review="canReview"
+    />
 
     <div
       v-if="voters"

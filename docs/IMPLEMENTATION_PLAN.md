@@ -103,7 +103,7 @@ _4.5 was done before 4.2 (ADR-036): the lock must protect the phone before suppo
 
 - [x] **6.1 Stats service + routes** (`/stats/*`) with 60 s cache; `unit_daily_stats` nightly task; reconcile task.
   **AC:** `/stats/children/all` < 300 ms p95 on 41,671 PUs × 5M supporters (seeded load data).
-- [ ] **6.2 Role-aware home dashboards** per UX §4.2 (Nuxt UI dashboard components; charts with a light lib, lazy-loaded).
+- [x] **6.2 Role-aware home dashboards** per UX §4.2 (Nuxt UI dashboard components; charts with a light lib, lazy-loaded).
 - [ ] **6.3 Map page** MapLibre, choropleth drill-down State→LGA→Ward→PU points, metric switcher, breadcrumb, bottom sheet, legend.
   **AC:** map JS is not in the capture route bundle; drill-down works on a 2 GB Android device at ≥ 30 fps pan.
 - [ ] **6.4 Targets** set/distribute + progress display.

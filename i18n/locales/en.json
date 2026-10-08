@@ -65,7 +65,7 @@
   },
   "home": {
     "welcome": "Welcome",
-    "placeholder": "Your unit summary will appear here."
+    "welcomeName": "Welcome, {name}"
   },
   "settings": {
     "languageHelp": "The app opens in this language on this phone.",
@@ -485,6 +485,35 @@
       "noteTooLong": "Keep the note under 200 characters.",
       "notePhone": "Remove the phone number from the note.",
       "unknown": "Could not save. Try again."
+    }
+  },
+  "dashboard": {
+    "myPu": "My polling unit",
+    "today": "Added today",
+    "waiting": "Waiting to send",
+    "total": "Supporters",
+    "ofTarget": "of a target of {target}",
+    "noTarget": "No target set yet",
+    "progressLabel": "{value} of a target of {target}",
+    "asOf": "As of {time} (no connection)",
+    "region": "North West",
+    "supporters": "Supporters",
+    "coverage": "Coverage",
+    "verified": "Verified",
+    "target": "Target",
+    "trend": "Last {days} days: from {from} to {to} supporters.",
+    "trendNone": "The trend appears after a few days of daily totals.",
+    "openFlags": "Open flags",
+    "childrenHeading": "Units below",
+    "childrenHelp": "Lowest coverage first: these need attention.",
+    "childrenCaption": "Units below this one, lowest coverage first",
+    "loadFailed": "Could not load the numbers. Check your connection and try again.",
+    "col": {
+      "unit": "Unit",
+      "supporters": "Supporters",
+      "coverage": "Coverage",
+      "progress": "To target",
+      "leads": "Active leads"
     }
   }
 }

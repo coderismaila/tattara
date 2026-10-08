@@ -357,3 +357,13 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - **Nightly:** `stats:daily` (23:55 Lagos) upserts each unit's cumulative totals into `unit_daily_stats` (migration 0014; `all` for the region); `stats:reconcile` (02:00 UTC) compares `pu_stats` with a fresh count and rebuilds it if any PU drifted, logging which (drift means a write path skipped `applyStatDelta`).
 - `/stats/leaderboard` and `/stats/inactive` come with 6.5; `/geo/pus` with the map (6.3).
 **Why:** PRD US-11, US-13; ARCHITECTURE §7.
+
+### ADR-046 · 2026-10-08 · Accepted · Home dashboards: SVG instead of a chart library, dashboard code lazy (6.2)
+**Decision:**
+- **PU lead home** works offline: "added today" counts the phone's records since the start of the Lagos day, "waiting" is the outbox (live), and the total and target come from `/api/stats/unit/:pu`, remembered in Dexie `meta` (`homeStats`, aggregates only, wiped with everything else) and shown "as of …" when offline.
+- **Ward and above** (DG and admin: the region): summary (supporters, coverage, verified %, target ring, 30-day trend), open flags linking to Review (reviewers only), and the units below as a table sorted lowest coverage first; units above PU link to their Team list (`/app/team?unit=19-01`, which the Team page now honours). Online only: these leads hold no supporter data offline.
+- **No chart library:** the trend line and progress ring are two small SVG components with pure, tested geometry (`app/utils/charts.ts`); each has a text equivalent. Revisit only if a later screen needs real charts.
+- **The ward-and-above dashboard is a lazy component** (`LazyHomeUnitDashboard`): its chunk is never fetched on a PU lead's home (checked by E2E against the built chunk).
+- **Plain semantic table** for the units below, not `UTable`: lighter, and rows stack on phones.
+- "Inactive leads" joins the home with `/stats/inactive` in 6.5.
+**Why:** UX §4.2; CLAUDE.md rule 9 (2 GB phones, small capture-side JS).

@@ -121,7 +121,7 @@
     // TODO(ha-review)
     welcome: 'Barka da zuwa',
     // TODO(ha-review)
-    placeholder: 'Taƙaitaccen bayanin yankinka zai bayyana a nan.',
+    welcomeName: 'Barka da zuwa, {name}',
   },
   settings: {
     // TODO(ha-review)
@@ -875,6 +875,60 @@
       notePhone: "Cire lambar waya daga bayanin.",
       // TODO(ha-review)
       unknown: "Ba a iya ajiyewa ba. Sake gwadawa.",
+    },
+  },
+  dashboard: {
+    // TODO(ha-review)
+    myPu: "Rumfata",
+    // TODO(ha-review)
+    today: "An ƙara yau",
+    // TODO(ha-review)
+    waiting: "Na jiran aika",
+    // TODO(ha-review)
+    total: "Magoya baya",
+    // TODO(ha-review)
+    ofTarget: "cikin burin {target}",
+    // TODO(ha-review)
+    noTarget: "Ba a saita buri ba tukuna",
+    // TODO(ha-review)
+    progressLabel: "{value} cikin burin {target}",
+    // TODO(ha-review)
+    asOf: "Har zuwa {time} (babu intanet)",
+    // TODO(ha-review)
+    region: "Arewa maso Yamma",
+    // TODO(ha-review)
+    supporters: "Magoya baya",
+    // TODO(ha-review)
+    coverage: "Kai wa ga masu rajista",
+    // TODO(ha-review)
+    verified: "An tabbatar",
+    // TODO(ha-review)
+    target: "Buri",
+    // TODO(ha-review)
+    trend: "Kwanaki {days} na baya: daga magoya baya {from} zuwa {to}.",
+    // TODO(ha-review)
+    trendNone: "Yanayin zai bayyana bayan kwanaki kaɗan na jimlar yau da kullum.",
+    // TODO(ha-review)
+    openFlags: "Alamomi a buɗe",
+    // TODO(ha-review)
+    childrenHeading: "Yankunan ƙasa",
+    // TODO(ha-review)
+    childrenHelp: "Mafi ƙarancin kai wa ga masu rajista a farko: waɗannan suna buƙatar kulawa.",
+    // TODO(ha-review)
+    childrenCaption: "Yankunan da ke ƙarƙashin wannan, mafi ƙarancin kai wa a farko",
+    // TODO(ha-review)
+    loadFailed: "Ba a iya ɗauko alƙaluman ba. Duba intanet ɗinka ka sake gwadawa.",
+    col: {
+      // TODO(ha-review)
+      unit: "Yanki",
+      // TODO(ha-review)
+      supporters: "Magoya baya",
+      // TODO(ha-review)
+      coverage: "Kai wa",
+      // TODO(ha-review)
+      progress: "Zuwa ga buri",
+      // TODO(ha-review)
+      leads: "Shugabanni masu aiki",
     },
   },
 }

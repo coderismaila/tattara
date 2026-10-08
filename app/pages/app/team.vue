@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { deactivateSchema, inviteSchema } from '~~/shared/schemas/team'
+import { fromUrlCode } from '~~/shared/utils/pu-code'
 import type { TeamMember } from '~~/shared/types/team'
 
 definePageMeta({ layout: 'app', titleKey: 'nav.team' })
@@ -7,7 +8,13 @@ definePageMeta({ layout: 'app', titleKey: 'nav.team' })
 const { t, n, locale } = useI18n()
 const toast = useToast()
 
-const { data, error, refresh } = await useFetch('/api/team', { key: 'team' })
+// `?unit=19-01` (dashed code) opens a unit deeper in the caller's scope, e.g. from the home dashboard (6.2).
+const route = useRoute()
+const unitQuery = computed(() => {
+  const code = typeof route.query.unit === 'string' ? fromUrlCode(route.query.unit) : null
+  return code ? { unit: code } : {}
+})
+const { data, error, refresh } = await useFetch('/api/team', { key: 'team', query: unitQuery })
 const forbidden = computed(() => error.value?.statusCode === 403)
 
 type DialogKind = 'invite' | 'replace' | 'deactivate' | 'reset'

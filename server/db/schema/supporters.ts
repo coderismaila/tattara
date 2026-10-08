@@ -45,6 +45,8 @@ export const supporters = pgTable('supporters', {
   capturedBy: uuid().notNull().references(() => users.id),
   deviceId: text().notNull(),
   verification: verificationStatus().notNull().default('unverified'),
+  /** When the supporter opted out (STOP, 5.2). Not personal data: kept after anonymisation for the opt_out_spike flag. */
+  optedOutAt: timestamp({ withTimezone: true }),
   status: supporterStatus().notNull().default('active'),
   /** Server receive time. */
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),

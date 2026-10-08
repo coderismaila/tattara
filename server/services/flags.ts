@@ -7,6 +7,9 @@ import type { Db, DbLike } from '../db/client.ts'
 import {
   DEFAULT_GPS_FLAG_METERS,
   GPS_CLUSTER_MIN,
+  OPT_OUT_SPIKE_DAYS,
+  OPT_OUT_SPIKE_MIN,
+  OPT_OUT_SPIKE_RATIO,
   PU_CAPACITY_RATIO,
   RATE_ANOMALY_PER_HOUR,
   gpsFarThreshold,
@@ -19,7 +22,7 @@ export interface FlagCheckOptions {
   gpsFlagMeters?: number
 }
 
-export const FLAG_CHECKS = ['gps_far', 'duplicate_phone', 'pu_over_capacity', 'rate_anomaly', 'gps_cluster'] as const
+export const FLAG_CHECKS = ['gps_far', 'duplicate_phone', 'pu_over_capacity', 'rate_anomaly', 'gps_cluster', 'opt_out_spike'] as const
 export type FlagCheckType = typeof FLAG_CHECKS[number]
 /** New flags raised by each check. */
 export type FlagCheckResult = Record<FlagCheckType, number>
@@ -33,7 +36,7 @@ const exactLng = (col: SQL) => sql`round(ST_X(${col}::geometry)::numeric, 6)`
  * confirmed) is never raised again for the same type. Updates pu_stats.flagged_open for the PUs that got new flags.
  */
 export async function runFlagChecks(db: Db, options: FlagCheckOptions = {}): Promise<FlagCheckResult> {
-  const result: FlagCheckResult = { gps_far: 0, duplicate_phone: 0, pu_over_capacity: 0, rate_anomaly: 0, gps_cluster: 0 }
+  const result: FlagCheckResult = { gps_far: 0, duplicate_phone: 0, pu_over_capacity: 0, rate_anomaly: 0, gps_cluster: 0, opt_out_spike: 0 }
   const ids = options.supporterIds
   if (ids && ids.length === 0) return result
   const near = gpsFarThreshold(options.gpsFlagMeters ?? DEFAULT_GPS_FLAG_METERS, false)
@@ -148,6 +151,27 @@ export async function runFlagChecks(db: Db, options: FlagCheckOptions = {}): Pro
       join c on c.captured_by = s.captured_by and c.lat = ${exactLat(sql`s.gps`)} and c.lng = ${exactLng(sql`s.gps`)}
       where s.status <> 'anonymised' and s.gps is not null
         and not exists (select 1 from flags f where f.supporter_id = s.id and f.type = 'gps_cluster')
+      on conflict do nothing
+      returning pu_code`)
+
+    // Many recent opt-outs among one lead's supporters (5.2): people may have been signed up without agreeing. One flag
+    // per lead; after a review, the next one needs another window's worth of opt-outs.
+    await run('opt_out_spike', sql`
+      with o as (
+        select s.captured_by, max(s.pu_code) as pu_code, count(*)::int as supporters,
+          count(*) filter (where s.opted_out_at > now() - ${OPT_OUT_SPIKE_DAYS} * interval '1 day')::int as recent
+        from supporters s where ${theirLeads}
+        group by s.captured_by
+      )
+      insert into flags (id, user_id, pu_code, type, details)
+      select gen_random_uuid(), o.captured_by, o.pu_code, 'opt_out_spike', jsonb_build_object(
+        'optOuts', o.recent, 'supporters', o.supporters, 'days', ${OPT_OUT_SPIKE_DAYS}::int,
+        'min', ${OPT_OUT_SPIKE_MIN}::int, 'ratio', ${OPT_OUT_SPIKE_RATIO}::numeric)
+      from o
+      where o.recent >= ${OPT_OUT_SPIKE_MIN}::int and o.recent >= o.supporters * ${OPT_OUT_SPIKE_RATIO}::numeric
+        and not exists (select 1 from flags f
+          where f.user_id = o.captured_by and f.type = 'opt_out_spike' and f.supporter_id is null
+            and (f.status = 'open' or f.created_at > now() - ${OPT_OUT_SPIKE_DAYS} * interval '1 day'))
       on conflict do nothing
       returning pu_code`)
 

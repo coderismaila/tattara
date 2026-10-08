@@ -38,6 +38,8 @@ export interface EnqueueSmsInput {
   templateKey?: string
   scopeCode?: string
   createdBy?: string
+  /** The supporter a thank-you is for (5.2). */
+  supporterId?: string
 }
 
 export async function enqueueSms(db: DbLike, input: EnqueueSmsInput): Promise<SmsQueueRow> {
@@ -50,6 +52,7 @@ export async function enqueueSms(db: DbLike, input: EnqueueSmsInput): Promise<Sm
     templateKey: input.templateKey,
     scopeCode: input.scopeCode,
     createdBy: input.createdBy,
+    supporterId: input.supporterId,
   }).returning()
   return row!
 }

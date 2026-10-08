@@ -27,6 +27,8 @@ export const RATE_LIMITS = {
   syncPush: { limit: 120, windowSec: 60 },
   // Per user: one pull a minute, plus pages (a ward of ~6,000 supporters is 12 pages on a first pull).
   syncPull: { limit: 60, windowSec: 60 },
+  // Per source IP: the provider's delivery reports arrive in bursts after a big send.
+  smsWebhook: { limit: 600, windowSec: 60 },
   // It tells whether a number is known, so keep it to what a lead typing numbers needs.
   checkPhone: { limit: 60, windowSec: 60 },
 } as const satisfies Record<string, RateLimitRule>

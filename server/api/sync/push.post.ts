@@ -1,14 +1,16 @@
 // POST /api/sync/push { items: SupporterInput[≤50] } → { results } (API.md, ARCHITECTURE §5). PU leads only.
 // Each item is validated and upserted on its own; results come back in the same order. New records then go through
-// the flag checks (5.1).
+// the flag checks (5.1) and get a thank-you SMS (5.2).
 import { createError, defineEventHandler } from 'h3'
 import { useRuntimeConfig } from 'nitropack/runtime'
 import { flagAfterWrite } from '~~/server/services/flags'
+import { queueThankYous } from '~~/server/services/supporter-sms'
 import { pushSupporters } from '~~/server/services/supporters'
 import { syncPushSchema } from '~~/shared/schemas/supporter'
 import { requireAuth } from '~~/server/utils/auth'
 import { useDb } from '~~/server/utils/db'
 import { RATE_LIMITS, enforceRateLimit } from '~~/server/utils/rate-limit'
+import { useSupporterSmsConfig } from '~~/server/utils/supporter-sms-config'
 import { readValidated } from '~~/server/utils/validate'
 
 export default defineEventHandler(async (event) => {
@@ -21,5 +23,12 @@ export default defineEventHandler(async (event) => {
   // Flag checks (5.1) on what was newly accepted; they never fail the push.
   const accepted = results.flatMap(r => (r.result === 'accepted' ? [r.id] : []))
   await flagAfterWrite(useDb(), accepted, Number(useRuntimeConfig().public.gpsFlagMeters))
+  // Thank-you SMS with the STOP instruction (5.2), sent by the minute task. Never fails the push.
+  try {
+    await queueThankYous(useDb(), accepted, useSupporterSmsConfig())
+  }
+  catch (error) {
+    console.error('[sms] thank-you not queued:', error instanceof Error ? error.message : error)
+  }
   return { results }
 })

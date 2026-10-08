@@ -24,6 +24,7 @@ const row: Supporter = {
   capturedBy: '01923456-789a-7bcd-8ef0-000000000001',
   deviceId: 'device-1',
   verification: 'sms_delivered',
+  optedOutAt: null,
   status: 'active',
   createdAt: new Date('2026-09-01T08:05:00Z'),
   updatedAt: new Date('2026-09-01T08:05:00Z'),

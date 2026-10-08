@@ -24,7 +24,7 @@ if (process.env.CI && !dbAvailable) {
 }
 
 const PU = '19/01/01/001'
-const NONE: FlagCheckResult = { gps_far: 0, duplicate_phone: 0, pu_over_capacity: 0, rate_anomaly: 0, gps_cluster: 0 }
+const NONE: FlagCheckResult = { gps_far: 0, duplicate_phone: 0, pu_over_capacity: 0, rate_anomaly: 0, gps_cluster: 0, opt_out_spike: 0 }
 let phoneSeq = 0
 const nextPhone = () => `+23480399${String(70000 + phoneSeq++).padStart(5, '0').slice(-5)}`
 const KM_IN_DEG = 1 / 111
@@ -132,7 +132,7 @@ describe.skipIf(!dbAvailable)('flag engine', () => {
     it('evidence holds no names, phones or coordinates', async () => {
       const all = await db.select({ details: flags.details }).from(flags)
       const allowed = new Set(['distanceM', 'accuracyM', 'thresholdM', 'puLocationEstimated', 'uses', 'samePu', 'sharedPhone',
-        'supporters', 'registeredVoters', 'ratio', 'count', 'limit', 'windowStart', 'windowEnd', 'clusterSize'])
+        'supporters', 'registeredVoters', 'ratio', 'count', 'limit', 'windowStart', 'windowEnd', 'clusterSize', 'optOuts', 'days', 'min'])
       for (const { details } of all) {
         expect(Object.keys(details as object).filter(k => !allowed.has(k))).toEqual([])
         expect(JSON.stringify(details)).not.toMatch(/\+234|\d{10}/)

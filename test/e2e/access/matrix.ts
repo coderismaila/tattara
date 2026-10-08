@@ -218,6 +218,11 @@ export const ACCESS_MATRIX = {
       ensure(typeof body.serverTime === 'string' && typeof body.stats.total === 'number', 'serverTime and stats')
     },
   },
+  // The provider's webhook: a session means nothing here, only the body's signature does (5.2).
+  'POST /api/webhooks/sms': {
+    request: () => ({ method: 'POST', path: '/api/webhooks/sms', body: { type: 'inbound', sender: '2348031234567', message: 'STOP' } }),
+    expect: everyone(401),
+  },
 } satisfies Record<string, AccessEntry>
 
 export type AccessRoute = keyof typeof ACCESS_MATRIX

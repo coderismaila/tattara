@@ -55,7 +55,7 @@ export type FlagStatus = typeof FLAG_STATUSES[number]
 export const CALLBACK_OUTCOMES = ['verified', 'wrong_number', 'denies', 'unreachable'] as const
 export type CallbackOutcome = typeof CALLBACK_OUTCOMES[number]
 
-export const SMS_PURPOSES = ['thank_you', 'otp', 'invite', 'broadcast'] as const
+export const SMS_PURPOSES = ['thank_you', 'otp', 'invite', 'broadcast', 'opt_out_confirm'] as const
 export type SmsPurpose = typeof SMS_PURPOSES[number]
 
 export const SMS_STATUSES = ['queued', 'sent', 'failed', 'delivered'] as const

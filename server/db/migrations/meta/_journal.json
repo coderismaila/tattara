@@ -71,6 +71,13 @@
       "when": 1791421948408,
       "tag": "0009_flag_engine",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791425366372,
+      "tag": "0010_sms_opt_out",
+      "breakpoints": true
     }
   ]
 }

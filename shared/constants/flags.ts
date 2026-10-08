@@ -18,6 +18,13 @@ export const RATE_ANOMALY_PER_HOUR = 60
 /** This many supporters (or more) from one lead with exactly the same GPS fix form a cluster. */
 export const GPS_CLUSTER_MIN = 10
 
+/** opt_out_spike (5.2, ADR-041): at least this many opt-outs among one lead's supporters within the window… */
+export const OPT_OUT_SPIKE_MIN = 5
+/** …making up at least this share of the lead's supporters… */
+export const OPT_OUT_SPIKE_RATIO = 0.1
+/** …within this many days. */
+export const OPT_OUT_SPIKE_DAYS = 7
+
 /** The distance limit for a PU: the configured one, widened when the PU's location is estimated. */
 export function gpsFarThreshold(baseMeters: number, puLocationEstimated: boolean): number {
   const base = baseMeters > 0 ? baseMeters : DEFAULT_GPS_FLAG_METERS

@@ -31,7 +31,9 @@ export default defineNuxtConfig({
     appEnv: '',
     // NUXT_SMS_*: provider fake | termii; Termii's base URL is account-specific (dashboard).
     // fakeOutbox (NUXT_SMS_FAKE_OUTBOX): dev/test only, the fake provider also writes messages to this file (e2e).
-    sms: { provider: 'fake', apiKey: '', senderId: '', baseUrl: '', webhookSecret: '', fakeOutbox: '' },
+    // replyNumber (NUXT_SMS_REPLY_NUMBER): two-way number supporters reply STOP to (5.2); blank = "tell your PU lead".
+    // webhookSecret (NUXT_SMS_WEBHOOK_SECRET): HMAC key of the provider's webhook signature; blank = webhook off.
+    sms: { provider: 'fake', apiKey: '', senderId: '', baseUrl: '', webhookSecret: '', fakeOutbox: '', replyNumber: '' },
     // nuxt-auth-utils reads session.password (NUXT_SESSION_PASSWORD), ≥ 32 chars
     session: {
       password: '',
@@ -42,6 +44,8 @@ export default defineNuxtConfig({
     },
     // HMAC key for OTP codes at rest (NUXT_OTP_SECRET, ≥ 32 chars).
     otpSecret: '',
+    // HMAC key for opted-out phone numbers (NUXT_PHONE_HASH_SECRET, ≥ 32 chars; never change it: old opt-outs stop matching).
+    phoneHashSecret: '',
     // siteUrl: base for links sent by SMS (invites), NUXT_PUBLIC_SITE_URL.
     // lockIdleMinutes: idle time before the PIN lock (SECURITY_PRIVACY §7: 5), NUXT_PUBLIC_LOCK_IDLE_MINUTES.
     public: { appVersion: '', gpsFlagMeters: 3000, siteUrl: 'http://localhost:3000', orgName: '', lockIdleMinutes: 5 },
@@ -67,6 +71,8 @@ export default defineNuxtConfig({
       '* * * * *': ['sms:process'],
       // 01:00 UTC = 02:00 in Lagos: the whole-registry flag scan (5.1).
       '0 1 * * *': ['flags:scan'],
+      // Removal requests and STOPs are anonymised within the hour (72 h deadline, US-18).
+      '15 * * * *': ['supporters:anonymise'],
     },
   },
 

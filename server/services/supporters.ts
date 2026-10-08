@@ -1,7 +1,7 @@
 // Supporter records (PRD §6.2, ARCHITECTURE §5 and §7, SECURITY_PRIVACY §3–4). Pure (DB injected).
 // The only module that reads or writes `supporters` directly (a test enforces it). Writes keep pu_stats in step in
 // the same transaction. Duplicate-phone limits (3.5) and flags (5.1) build on top of this.
-import { and, desc, eq, lt, ne, sql, type SQL } from 'drizzle-orm'
+import { and, desc, eq, inArray, lt, ne, sql, type SQL } from 'drizzle-orm'
 import type { Db, DbLike, DbTx } from '../db/client.ts'
 import { puStats, supporters, units, type Supporter } from '../db/schema/index.ts'
 import type { Role } from '../../shared/constants/roles.ts'
@@ -536,4 +536,80 @@ export async function pullSupporters(
     items: page.map(r => r.row),
     nextCursor: rows.length > query.limit && last ? { at: Number(last.at), id: last.row.id } : null,
   }
+}
+
+// ── SMS verification, opt-out and anonymisation (5.2) ───────────────────────
+
+/**
+ * The thank-you SMS to `phone` was delivered: the number is real and reachable, so its unverified, live supporters
+ * become `sms_delivered` (pu_stats.verified moves with them). Returns how many changed.
+ */
+export async function verifyPhoneBySms(db: Db, phone: string): Promise<number> {
+  return db.transaction(async (tx) => {
+    const changed = await tx.update(supporters)
+      .set({ verification: 'sms_delivered', updatedAt: sql`now()` })
+      .where(and(eq(supporters.phone, phone), eq(supporters.verification, 'unverified'), ne(supporters.status, 'anonymised')))
+      .returning()
+    for (const row of changed) {
+      await applyStatDelta(tx, row.puCode, statDelta({ ...row, verification: 'unverified' }, row))
+    }
+    return changed.length
+  })
+}
+
+/**
+ * A STOP from `phone`: every live supporter on that number is opted out and queued for anonymisation (a shared
+ * household number can't tell us which person replied, ADR-041). Records already opted out are left alone (a repeated
+ * STOP changes and audits nothing). Returns the records changed.
+ */
+export async function optOutPhone(db: Db, phone: string): Promise<Supporter[]> {
+  return db.transaction(async (tx) => {
+    await lockPhone(tx, phone)
+    const before = await tx.select().from(supporters)
+      .where(and(eq(supporters.phone, phone), ne(supporters.status, 'anonymised'), ne(supporters.verification, 'opted_out')))
+    const changed: Supporter[] = []
+    for (const row of before) {
+      const [after] = await tx.update(supporters).set({
+        verification: 'opted_out',
+        status: 'removal_requested',
+        optedOutAt: sql`coalesce(${supporters.optedOutAt}, now())`,
+        updatedAt: sql`now()`,
+      }).where(eq(supporters.id, row.id)).returning()
+      await applyStatDelta(tx, row.puCode, statDelta(row, after!))
+      changed.push(after!)
+    }
+    return changed
+  })
+}
+
+/** The latest consent language on a number (to answer a STOP in it), or null when no record has it. */
+export async function consentLanguageForPhone(db: DbLike, phone: string): Promise<Supporter['consentLanguage'] | null> {
+  const [row] = await db.select({ language: supporters.consentLanguage }).from(supporters)
+    .where(eq(supporters.phone, phone)).orderBy(desc(supporters.createdAt)).limit(1)
+  return row?.language ?? null
+}
+
+/**
+ * Anonymise every record waiting for removal (lead requests and STOPs), at most `limit` per call: name → '—', phone,
+ * address and GPS removed; the enums and dates stay for aggregates, so pu_stats doesn't change (DATA_MODEL §3).
+ * Returns the anonymised records' ids and PUs.
+ */
+export async function anonymiseRequested(db: Db, limit = 500): Promise<{ id: string, puCode: string }[]> {
+  return db.transaction(async (tx) => {
+    const due = tx.select({ id: supporters.id }).from(supporters)
+      .where(eq(supporters.status, 'removal_requested'))
+      .limit(limit)
+      .for('update', { skipLocked: true })
+    const before = await tx.select({ id: supporters.id }).from(supporters).where(inArray(supporters.id, due))
+    if (!before.length) return []
+    return tx.update(supporters).set({
+      status: 'anonymised',
+      fullName: '—',
+      phone: null,
+      address: null,
+      gps: null,
+      gpsAccuracyM: null,
+      updatedAt: sql`now()`,
+    }).where(inArray(supporters.id, before.map(r => r.id))).returning({ id: supporters.id, puCode: supporters.puCode })
+  })
 }

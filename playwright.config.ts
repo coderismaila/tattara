@@ -48,6 +48,8 @@ export default defineConfig({
       // Test-only values; real secrets come from the deploy environment.
       NUXT_SESSION_PASSWORD: 'e2e-only-session-password-at-least-32-chars',
       NUXT_OTP_SECRET: 'e2e-only-otp-secret-at-least-32-characters',
+      NUXT_PHONE_HASH_SECRET: 'e2e-only-phone-hash-secret-at-least-32-chars',
+      NUXT_SMS_WEBHOOK_SECRET: 'e2e-only-webhook-secret',
     },
   },
 })

@@ -58,7 +58,7 @@ Stats never include names or phones. `:code` is `all` for the region (DG).
 ## Messaging (v1.1)
 | GET | `/sms/templates` | STATE+ | | |
 | POST | `/sms/broadcasts` | STATE+ | `{ templateKey, scopeCode, filters }` | returns an estimate first; `confirm: true` to queue |
-| POST | `/webhooks/sms` | provider | provider payload | signature check; handles STOP + delivery reports |
+| POST | `/webhooks/sms` | provider | provider payload | No session. `X-Termii-Signature` = HMAC-SHA512 of the raw body with `NUXT_SMS_WEBHOOK_SECRET`, else 401; 404 while no secret is set; 600/min per IP. Delivery reports mark the SMS delivered/failed (a delivered thank-you verifies the number's supporters); an inbound STOP (or variant) opts the number out. Unknown events → 200 `{ ok, handled: 'ignored' }` (task 5.2, live in MVP) |
 | GET/POST | `/announcements` | read: any in scope; write: LGA+ | | |
 
 ## Exports

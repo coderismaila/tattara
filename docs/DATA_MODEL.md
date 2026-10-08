@@ -93,6 +93,7 @@ composite FK a lead can only sit at a unit of their role's level. CHECK: phone i
 | captured_by | uuid FK users | |
 | device_id | text | |
 | verification | enum `unverified\|sms_delivered\|callback_verified\|callback_failed\|opted_out` | |
+| opted_out_at | timestamptz null | set by a STOP (5.2); kept after anonymisation (opt_out_spike) |
 | status | enum `active\|removal_requested\|anonymised` | |
 | created_at | timestamptz | server receive time |
 | updated_at | timestamptz | server clock; LWW |
@@ -137,7 +138,16 @@ CHECK: every counter ≥ 0.
 ## 5. Messaging and ops
 
 ### `sms_queue`
-| id | to_phone | body | template_key | purpose enum `thank_you\|otp\|invite\|broadcast` | scope_code | status enum `queued\|sent\|failed\|delivered` | attempts | next_attempt_at | last_error | provider_ref | created_by | created_at | sent_at |
+| id | to_phone | body | template_key | purpose enum `thank_you\|otp\|invite\|broadcast\|opt_out_confirm` | scope_code | status enum `queued\|sent\|failed\|delivered` | attempts | next_attempt_at | last_error | provider_ref | created_by | supporter_id FK null (on delete set null) | created_at | sent_at |
+
+Indexes also on `provider_ref` (delivery reports) and `supporter_id`. Finished thank-you and STOP-confirmation rows
+are deleted once no live supporter uses the number (hourly anonymisation, 5.2).
+
+### `sms_opt_outs` (5.2)
+| phone_hash PK (HMAC-SHA256 of the E.164 number with `NUXT_PHONE_HASH_SECRET`, 64 hex) | created_at |
+
+Numbers that replied STOP. Never the number itself; outlives the anonymised records so no thank-you or broadcast
+reaches the number again.
 
 Processed by the `sms:process` Nitro task: claims due rows with `FOR UPDATE SKIP LOCKED` plus a 5-minute lease,
 retries with backoff (30 s × 2ⁿ, max 5 attempts). All times use the DB clock. OTP and invite bodies are replaced

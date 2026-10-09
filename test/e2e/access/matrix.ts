@@ -282,6 +282,20 @@ export const ACCESS_MATRIX = {
       ensure(body.points.every((p: any) => p.code.startsWith('19/01/01/') && typeof p.lat === 'number'), 'points in the ward')
     },
   },
+  // Targets (6.4): the DG sets states, every other lead the units directly below theirs; only the unit's own lead splits.
+  'PUT /api/targets/:code': {
+    request: () => ({ method: 'PUT', path: '/api/targets/19-01-01', body: { target: 500 } }),
+    expect: only({ kanoLga: 200 }),
+    check: (_caller, body) => ensure(body.code === '19/01/01' && body.target === 500, 'the ward target'),
+  },
+  'POST /api/targets/:code/distribute': {
+    request: () => ({ method: 'POST', path: '/api/targets/19-01-01/distribute', body: { preview: true } }),
+    expect: only({ kanoWard: 200 }),
+    check: (_caller, body) => {
+      ensure(body.saved === false && body.children.length > 0, 'a preview of the ward’s PUs')
+      ensure(body.children.reduce((a: number, c: any) => a + c.target, 0) === body.target, 'adds up to the target')
+    },
+  },
   // The provider's webhook: a session means nothing here, only the body's signature does (5.2).
   'POST /api/webhooks/sms': {
     request: () => ({ method: 'POST', path: '/api/webhooks/sms', body: { type: 'inbound', sender: '2348031234567', message: 'STOP' } }),

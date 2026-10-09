@@ -13,7 +13,7 @@ import { recomputePuStats } from './supporters.ts'
 /** The snapshot key for the region. */
 export const REGION_KEY = 'all'
 /** Length of a child's code below each level ('' = region → states). */
-const CHILD_CODE_LENGTH: Record<UnitLevel | 'region', number | null> = { region: 2, state: 5, lga: 8, ward: 12, pu: null }
+export const CHILD_CODE_LENGTH: Record<UnitLevel | 'region', number | null> = { region: 2, state: 5, lga: 8, ward: 12, pu: null }
 const CHILD_LEVEL: Record<UnitLevel | 'region', UnitLevel | null> = { region: 'state', state: 'lga', lga: 'ward', ward: 'pu', pu: null }
 
 const levelOf = (code: string): UnitLevel | 'region' => (code === '' ? 'region' : unitLevel(code)!)
@@ -40,7 +40,7 @@ export function sortChildren(rows: ChildStats[], metric: ChildMetric, sort: 'asc
   })
 }
 
-type Rollup = {
+export type Rollup = {
   code: string
   supporters: number
   verified: number
@@ -52,7 +52,7 @@ type Rollup = {
 }
 
 /** pu_stats + registered voters rolled up to codes of length `len` under `code` (len 0 = one row for the region). */
-async function rollup(db: DbLike, code: string, len: number): Promise<Rollup[]> {
+export async function rollup(db: DbLike, code: string, len: number): Promise<Rollup[]> {
   const key = len === 0 ? sql`''` : sql`left(u.code, ${len})`
   return db.execute<Rollup>(sql`
     select ${key} as code,
@@ -68,7 +68,7 @@ async function rollup(db: DbLike, code: string, len: number): Promise<Rollup[]> 
     group by 1`) as unknown as Promise<Rollup[]>
 }
 
-async function targetsFor(db: DbLike, codes: string[]): Promise<Map<string, number>> {
+export async function targetsFor(db: DbLike, codes: string[]): Promise<Map<string, number>> {
   if (!codes.length) return new Map()
   const rows = await db.select({ code: unitTargets.unitCode, target: unitTargets.target }).from(unitTargets).where(inArray(unitTargets.unitCode, codes))
   return new Map(rows.map(r => [r.code, r.target]))

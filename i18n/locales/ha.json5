@@ -975,4 +975,76 @@
     // TODO(ha-review)
     unitDashboard: "Allon bayanin yanki",
   },
+  targets: {
+    // TODO(ha-review)
+    title: "Buri",
+    // TODO(ha-review)
+    open: "Saita buri",
+    // TODO(ha-review)
+    saved: "An adana burin.",
+    // TODO(ha-review)
+    dialogTitle: "Burin {name}",
+    // TODO(ha-review)
+    label: "Yawan magoya baya da ake nema",
+    // TODO(ha-review)
+    help: "Lamba cikakkiya, 0 ko fiye.",
+    // TODO(ha-review)
+    save: "Adana",
+    // TODO(ha-review)
+    set: "Canza",
+    // TODO(ha-review)
+    setFor: "Canza burin {name}",
+    // TODO(ha-review)
+    ownSetAbove: "Shugaban da ke samanka ne ke saita burinka. Ba a saita shi ba tukuna.",
+    // TODO(ha-review)
+    childrenHeading: "Burin yankunan ƙasa",
+    // TODO(ha-review)
+    staleNote: "Ci gaba yana sabuntawa cikin minti ɗaya.",
+    allocation: {
+      // TODO(ha-review)
+      noTarget: "Za ka iya raba buri bayan an saita naka.",
+      // TODO(ha-review)
+      exact: "An raba dukan burinka.",
+      // TODO(ha-review)
+      under: "Ba a raba {amount} ba tukuna.",
+      // TODO(ha-review)
+      over: "Burin yankunan ƙasa ya zarce naka da {amount}.",
+      // TODO(ha-review)
+      statesTotal: "Jimlar burin jihohi: {total}",
+    },
+    split: {
+      // TODO(ha-review)
+      open: "Raba burina",
+      // TODO(ha-review)
+      title: "Raba burinka",
+      // TODO(ha-review)
+      loading: "Ana lissafi…",
+      // TODO(ha-review)
+      byVoters: "An raba {target} gwargwadon masu rajista na kowane yanki.",
+      // TODO(ha-review)
+      byPus: "Wasu rumfuna ba su da adadin masu rajista tukuna, don haka an raba {target} gwargwadon yawan rumfuna.",
+      // TODO(ha-review)
+      caption: "Burin kowane yanki kafin da bayan rabawa",
+      // TODO(ha-review)
+      before: "Yanzu",
+      // TODO(ha-review)
+      after: "Sabo",
+      // TODO(ha-review)
+      confirm: "Adana rabon",
+      // TODO(ha-review)
+      saved: "An adana rabon.",
+    },
+    errors: {
+      // TODO(ha-review)
+      invalid: "Rubuta lamba cikakkiya, 0 ko fiye.",
+      // TODO(ha-review)
+      tooBig: "Lambar ta yi yawa.",
+      // TODO(ha-review)
+      notAllowed: "Shugabannin mazaɓa, ƙaramar hukuma, jiha da DG ne ke saita buri.",
+      // TODO(ha-review)
+      noTarget: "Sai an saita burinka kafin a raba shi.",
+      // TODO(ha-review)
+      noChildren: "Babu yankuna a ƙasan naka.",
+    },
+  },
 }

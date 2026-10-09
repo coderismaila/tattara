@@ -539,5 +539,45 @@
     "openDashboard": "Open dashboard",
     "backToMap": "Back to the map",
     "unitDashboard": "Unit dashboard"
+  },
+  "targets": {
+    "title": "Targets",
+    "open": "Set targets",
+    "saved": "Target saved.",
+    "dialogTitle": "Target for {name}",
+    "label": "Supporters to reach",
+    "help": "A whole number, 0 or more.",
+    "save": "Save",
+    "set": "Change",
+    "setFor": "Change the target for {name}",
+    "ownSetAbove": "Your own target is set by the lead above you. It hasn’t been set yet.",
+    "childrenHeading": "Targets of the units below",
+    "staleNote": "Progress updates within a minute.",
+    "allocation": {
+      "noTarget": "You can split once your own target is set.",
+      "exact": "Your whole target is shared out.",
+      "under": "{amount} not yet shared out.",
+      "over": "The units below add up to {amount} more than your target.",
+      "statesTotal": "State targets add up to {total}."
+    },
+    "split": {
+      "open": "Split my target",
+      "title": "Split your target",
+      "loading": "Working it out…",
+      "byVoters": "{target} split in proportion to each unit’s registered voters.",
+      "byPus": "Some PUs have no registered-voter figure yet, so {target} is split by number of PUs.",
+      "caption": "Each unit’s target before and after the split",
+      "before": "Now",
+      "after": "New",
+      "confirm": "Save the split",
+      "saved": "Split saved."
+    },
+    "errors": {
+      "invalid": "Enter a whole number, 0 or more.",
+      "tooBig": "That number is too large.",
+      "notAllowed": "Targets are set by ward, LGA and state leads and the DG.",
+      "noTarget": "Your own target must be set before you can split it.",
+      "noChildren": "There are no units below yours."
+    }
   }
 }

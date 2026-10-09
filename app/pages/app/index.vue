@@ -2,6 +2,7 @@
 // Home (task 6.2, UX §4.2): PU leads get their PU at a glance (works offline); ward leads and above get their unit's
 // dashboard (lazy-loaded); DG and admin the region. The registered-voters card (3.7) stays below.
 import { getLocalSession, type LocalSession } from '~/offline/local-session'
+import { TEAM_ROLES } from '~/utils/nav'
 import { toUrlCode } from '~~/shared/utils/pu-code'
 
 definePageMeta({ layout: 'app', titleKey: 'nav.home' })
@@ -20,6 +21,8 @@ const puCode = computed(() => me.value?.user.unitCode ?? local.value?.unitCode ?
 /** The caller's unit, `''` for region-wide roles (DG, admin). */
 const scopeCode = computed(() => me.value?.scope.unitCode ?? null)
 const canReview = computed(() => !!role.value && ['WARD_LEAD', 'LGA_LEAD', 'STATE_LEAD', 'DG'].includes(role.value))
+/** Ward leads and above set the targets of the units below them (6.4); the page opens from here, not the nav bar. */
+const canSetTargets = computed(() => !!role.value && TEAM_ROLES.includes(role.value))
 const name = computed(() => me.value?.user.fullName ?? local.value?.fullName ?? '')
 
 interface VotersSummary {
@@ -66,6 +69,15 @@ onMounted(() => {
       v-else-if="scopeCode !== null && !isPuLead"
       :code="scopeCode"
       :can-review="canReview"
+    />
+    <UButton
+      v-if="canSetTargets"
+      to="/app/targets"
+      variant="outline"
+      icon="i-lucide-target"
+      class="min-h-12 self-start"
+      :label="t('targets.open')"
+      data-testid="home-targets"
     />
 
     <div

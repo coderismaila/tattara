@@ -52,8 +52,8 @@ Stats never include names or phones. `:code` is `all` for the region (DG).
 | POST | `/callbacks/:id` | WARD | `{ outcome: verified\|wrong_number\|denies\|unreachable, notes? }` (notes ≤ 200, no phone numbers) | `{ item: { id, outcome, verification } }`. verified → `callback_verified`; wrong number / denies → `callback_failed` + a `callback_failed` flag; unreachable → no change; an opted-out or anonymised supporter keeps its state. Audited (outcome, never notes). Once only: 409 `already_done`. Another ward's lead 404, other roles 403 |
 
 ## Targets
-| PUT | `/targets/:code` | parent-level lead of :code, or DG | `{ target }` | |
-| POST | `/targets/:code/distribute` | owner of :code | `{ method: 'proportional' }` | splits across children |
+| PUT | `/targets/:code` | DG for a state; otherwise the lead of the unit directly above :code | `{ target }` (whole number, 0–10,000,000) | `{ code, target, previous }`. Audited `target.set` (from/to). Out of scope 403, other callers 403, unknown/inactive unit 404 (task 6.4, ADR-048) |
+| POST | `/targets/:code/distribute` | the lead of :code (state, LGA, ward) | `{ method: 'proportional', preview?: boolean }` | `{ code, target, basis: registered_voters|pu_count, children: [{ code, name, weight, target, previous }], saved }`. Splits the own target across the active units below (largest remainder, adds up exactly); registered voters only when every PU below has a figure, else PU count. `preview` saves nothing. 409 `no_target` / `no_children`. Audited `target.distribute` when saved |
 
 ## Messaging (v1.1)
 | GET | `/sms/templates` | STATE+ | | |

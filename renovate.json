@@ -1,0 +1,34 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":semanticCommits", ":timezone(Africa/Lagos)"],
+  "schedule": ["before 6am on monday"],
+  "prConcurrentLimit": 5,
+  "rangeStrategy": "bump",
+  "lockFileMaintenance": { "enabled": true, "schedule": ["before 6am on monday"] },
+  "vulnerabilityAlerts": { "enabled": true, "schedule": ["at any time"], "labels": ["security"] },
+  "packageRules": [
+    {
+      "description": "Nuxt core and official modules move together (CLAUDE.md: latest 4.5.x patch; a new minor needs a human).",
+      "matchPackageNames": ["nuxt", "@nuxt/**", "nitropack", "h3"],
+      "groupName": "nuxt",
+      "matchUpdateTypes": ["minor", "major"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchPackageNames": ["nuxt", "@nuxt/**", "nitropack", "h3"],
+      "matchUpdateTypes": ["patch"],
+      "groupName": "nuxt patches"
+    },
+    {
+      "description": "Dev tooling: one weekly PR for patches and minors.",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "dev tooling"
+    },
+    {
+      "description": "TypeScript stays on 6.x (ADR-009).",
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "<7"
+    }
+  ]
+}

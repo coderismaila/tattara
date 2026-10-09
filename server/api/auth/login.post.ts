@@ -5,11 +5,12 @@ import { loginSchema } from '~~/shared/schemas/auth'
 import { startSession } from '~~/server/utils/auth'
 import { sendQueuedSmsNow, useAuthConfig } from '~~/server/utils/auth-config'
 import { useDb } from '~~/server/utils/db'
-import { RATE_LIMITS, enforceRateLimit, tooManyRequests } from '~~/server/utils/rate-limit'
+import { RATE_LIMITS, clientIp, enforceRateLimit, tooManyRequests } from '~~/server/utils/rate-limit'
 import { readValidated } from '~~/server/utils/validate'
 
 export default defineEventHandler(async (event) => {
   const input = await readValidated(event, loginSchema)
+  await enforceRateLimit(event, `login-ip:${clientIp(event)}`, RATE_LIMITS.loginIp)
   await enforceRateLimit(event, `login:${input.phone}`, RATE_LIMITS.login)
 
   const result = await attemptLogin(useDb(), input, useAuthConfig(), sendQueuedSmsNow)

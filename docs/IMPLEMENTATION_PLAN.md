@@ -111,7 +111,7 @@ _4.5 was done before 4.2 (ADR-036): the lock must protect the phone before suppo
 
 ## Phase 7 — Hardening & pilot
 
-- [ ] **7.1 Security headers, CSP, rate limits review, dependency audit.**
+- [x] **7.1 Security headers, CSP, rate limits review, dependency audit.**
 - [ ] **7.2 Load test** (k6): 330 sync pushes/s for 10 min without errors; DB CPU < 70%.
 - [ ] **7.3 Observability:** structured logs, error tracking with PII scrubbing, client sync telemetry.
 - [ ] 👤 **7.4 Hausa language review** of all strings + consent text; legal review of consent + DPIA.

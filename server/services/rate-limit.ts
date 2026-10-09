@@ -20,6 +20,14 @@ export interface RateLimitResult {
 export const RATE_LIMITS = {
   // Above the 5-wrong-PIN lockout so the lockout (with its clear message) always triggers first (ADR-024).
   login: { limit: 10, windowSec: 15 * 60 },
+  // Per source IP, against guessing across many phones (7.1). Generous: many leads share one carrier NAT address or
+  // the venue Wi-Fi at a training session; the per-phone limits and lockout do the real work.
+  loginIp: { limit: 200, windowSec: 15 * 60 },
+  // Per phone, across codes (each code also allows 5 attempts), and per source IP.
+  otpVerify: { limit: 10, windowSec: 15 * 60 },
+  otpVerifyIp: { limit: 200, windowSec: 15 * 60 },
+  // Per source IP: invite tokens are 128-bit, so this only bounds noise.
+  setupIp: { limit: 100, windowSec: 60 * 60 },
   otpSend: { limit: 3, windowSec: 60 * 60 },
   // Per inviter: each invite is an SMS.
   invite: { limit: 100, windowSec: 60 * 60 },

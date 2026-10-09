@@ -75,6 +75,8 @@ ADMIN has no default read access to supporter PII; break-glass access requires a
 - The DB is not publicly reachable. The app DB role has least privilege; `audit_log` is INSERT-only for the app role.
 - Encrypted backups with PITR; restore tested quarterly.
 - Dependencies: `pnpm audit` in CI; Renovate for updates; track Nuxt security advisories (there were critical fixes in 2026 — stay on the latest 4.5.x patch).
+  Implemented in 7.1 (ADR-050): headers + hashed page CSP from `server/plugins/security-headers.ts`; CI runs
+  `pnpm audit:runtime` (fails on high/critical advisories in shipped packages); `renovate.json`.
 
 ## 7. On the device
 - Data in IndexedDB is readable by anyone who unlocks the phone. Mitigations:

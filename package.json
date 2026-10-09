@@ -31,7 +31,8 @@
     "geo:build": "node scripts/import-grid3-boundaries.ts",
     "test:coverage": "vitest run --project unit --project integration --coverage",
     "admin:create": "node scripts/create-user.ts",
-    "icons": "node scripts/make-icons.ts"
+    "icons": "node scripts/make-icons.ts",
+    "audit:runtime": "node scripts/audit-runtime.ts"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.1",
@@ -39,7 +40,7 @@
     "@nuxtjs/i18n": "10.6.0",
     "@vite-pwa/nuxt": "1.1.1",
     "dexie": "^4.4.6",
-    "drizzle-orm": "^0.45.3",
+    "drizzle-orm": "^0.45.4",
     "h3": "^1.15.11",
     "libphonenumber-js": "^1.13.14",
     "maplibre-gl": "^6.13.0",

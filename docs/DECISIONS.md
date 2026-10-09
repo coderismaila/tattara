@@ -397,3 +397,27 @@ Integration tests create a throwaway DB from `template0` per file; they skip loc
 - Both routes cached 60 s per unit and options, like the other stats routes.
 - **Performance** (`pnpm perf:stats --activity`: 41,671 PUs, a PU lead each, 1M supporter rows, uncached p95): leaderboard region→PU **123 ms**, state→LGA 28 ms, ward→PU 11 ms; inactive region 129 ms, state 30 ms, ward 5 ms. Two fixes got the region board from 573 ms there: an index on `supporters (captured_at, pu_code)` (migration 0015) makes the 7-day count an index-only scan of the week's rows (440 → 22 ms, whatever the row order), and ranking + `limit` moved into one SQL statement instead of parsing and sorting 41k rows in Node. The 5M-row run (`--rows=5000000`) needs ~6 GB of Docker disk and filled this laptop's disk on 2026-10-09; the 7-day count grows with a week's captures, not with all-time totals, so 1M is representative.
 **Why:** PRD US-14, UX §4.2.
+
+### ADR-050 · 2026-10-09 · Accepted · Security headers, hashed CSP, rate-limit review, dependency gate (7.1)
+**Decision:**
+- **Own Nitro plugin, not `nuxt-security`** (`server/plugins/security-headers.ts`, rules in `server/utils/security-headers.ts`): nuxt-security claims Nuxt 4 support but nothing for compat 5 (whose server rules broke a module before), and the part we need is ~40 lines.
+- **Every response:** HSTS (1 year, subdomains), `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`, `X-Frame-Options: DENY`, `Cross-Origin-Opener/Resource-Policy: same-origin`, `Permissions-Policy` with everything off but `geolocation=(self)`, and a header CSP for what a meta tag can't carry (`frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'`). `X-Powered-By` removed. Nitro's error responses keep their own stricter `no-referrer` / `script-src 'none'`.
+- **Page CSP by hash, in a `<meta>` right after the charset** (a `render:html` hook): `default-src 'self'`, `script-src 'self'` + the SHA-256 of each inline executable script (import map, Nuxt config/colour-mode), no `unsafe-inline`/`unsafe-eval` for scripts; `style-src 'self' 'unsafe-inline'` (Vue, Nuxt UI and MapLibre set inline styles); `img-src 'self' data: blob:`; `worker-src 'self'` (service worker; MapLibre's worker is a same-origin asset since the 6.3 fix); `connect-src 'self'`. Hashes, not nonces: the landing page is prerendered and the /app shell is served offline from the service-worker cache, so a per-request nonce can't reach them; the meta tag travels with the HTML. Not applied in `pnpm dev` (Vite's client is inline).
+- **Zod jitless in the browser** (`app/plugins/00.zod-jitless.client.ts`, at module level): Zod 4 probes `new Function('')` when it builds its first object schema; under this CSP that is reported as a violation. Module level because the router loads the first page (and its schemas) before plugin `setup()` runs.
+- **Body size:** `/api` writes over 64 KB (1 MB for `/sync/push`) get 413 before anything reads the body; a write without Content-Length but with Transfer-Encoding gets 411.
+- **Rate-limit review** (Postgres fixed windows, ADR-024):
+
+  | Route | Limit | Note |
+  |---|---|---|
+  | `POST /auth/login` | 10/15 min per phone (+ 5-PIN lockout) · **new** 200/15 min per IP | IP limit is generous: carrier NAT and training-venue Wi-Fi put many leads behind one address |
+  | `POST /auth/otp/verify` | **new** 10/15 min per phone · 200/15 min per IP | plus 5 attempts per code, 10-min expiry |
+  | `POST /auth/otp/resend` | 3/hour per phone | each is an SMS |
+  | `POST /auth/setup` | **new** 100/hour per IP | 128-bit single-use token |
+  | `POST /team/invite`, `/admin/users/dg` | 100/hour per inviter | each is an SMS |
+  | `POST /sync/push` · `GET /sync/pull` | 120/min · 60/min per user | |
+  | `GET /supporters/check-phone` | 60/min per user | reveals whether a number is known |
+  | `POST /webhooks/sms` | 600/min per IP | signature checked |
+  | Other authenticated routes | none | scoped, audited, and the heavy reads cached 60 s; revisit with 7.2's load test |
+  Per-IP keys use `X-Forwarded-For`, which the production proxy must overwrite (7.6 runbook); a spoofed header only spreads one client over more buckets and never lifts a per-phone limit.
+- **Dependencies:** patch updates (`@nuxt/ui` 4.11.3, `drizzle-orm` 0.45.4, `nuxt-auth-utils` 0.5.31); pnpm `overrides` (in `pnpm-workspace.yaml`) for fixed versions within the same major (`source-map-js` 1.2.2, which ships via vue-i18n; `shell-quote`, `fflate`, `@modelcontextprotocol/client`). Audit: 22 → 18 advisories, **none in a package the server ships**; the rest are dev-only (Nuxt devtools' `simple-git`, the CLI's `node-forge`, i18n build's `braces`, `mapshaper`'s zip libraries, `drizzle-kit`'s esbuild), most with no fix inside their parent's range yet. **CI gate:** `pnpm audit:runtime` after the build fails on a high/critical advisory in `.output/server/node_modules` and lists the rest. `renovate.json`: weekly, grouped; Nuxt minors/majors need dashboard approval (CLAUDE.md pins 4.5.x; 4.6.0 is out).
+**Why:** SECURITY_PRIVACY §6, PRD security requirements.

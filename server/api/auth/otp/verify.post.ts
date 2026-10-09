@@ -5,10 +5,13 @@ import { otpVerifySchema } from '~~/shared/schemas/auth'
 import { startSession } from '~~/server/utils/auth'
 import { useAuthConfig } from '~~/server/utils/auth-config'
 import { useDb } from '~~/server/utils/db'
+import { RATE_LIMITS, clientIp, enforceRateLimit } from '~~/server/utils/rate-limit'
 import { readValidated } from '~~/server/utils/validate'
 
 export default defineEventHandler(async (event) => {
   const input = await readValidated(event, otpVerifySchema)
+  await enforceRateLimit(event, `otp-verify-ip:${clientIp(event)}`, RATE_LIMITS.otpVerifyIp)
+  await enforceRateLimit(event, `otp-verify:${input.phone}`, RATE_LIMITS.otpVerify)
   const result = await verifyDeviceOtp(useDb(), input, useAuthConfig())
   if (result.kind === 'ok') {
     await startSession(event, result.user, input.deviceId)

@@ -51,6 +51,8 @@ jobs:
       - run: pnpm test:coverage
       - run: pnpm test:nuxt
       - run: pnpm build
+      # High/critical advisories in packages the server ships fail the build; dev-only ones are listed (ADR-050).
+      - run: pnpm audit:runtime
 
   e2e:
     name: E2E (Playwright)

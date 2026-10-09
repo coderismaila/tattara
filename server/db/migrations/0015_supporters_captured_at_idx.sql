@@ -1,0 +1,1 @@
+CREATE INDEX "supporters_captured_at_pu_idx" ON "supporters" USING btree ("captured_at","pu_code");

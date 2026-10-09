@@ -133,7 +133,8 @@ try {
       cross join lateral (select now() - (case when pl.rn % 10 = 0 then interval '10 days' else interval '0' end)
         - random() * interval '80 days' as at) t`
   }
-  await sql`analyze`
+  // Vacuum too: autovacuum keeps the visibility map current in steady state (index-only scans, ADR-049).
+  await sql`vacuum analyze`
   await sql.end()
 
   const { db, client } = createDb(url.toString(), { max: 2 })
@@ -154,7 +155,9 @@ try {
   console.log(p95 >= P95_LIMIT_MS ? `FAIL: /stats/children/all p95 ≥ ${P95_LIMIT_MS} ms` : `OK: /stats/children/all p95 < ${P95_LIMIT_MS} ms`)
 }
 finally {
-  await admin.unsafe(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`)
+  // `--keep` leaves the database for EXPLAIN ANALYZE; drop it by hand afterwards.
+  if (process.argv.includes('--keep')) console.log(`Kept database ${name}`)
+  else await admin.unsafe(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`)
   await admin.end()
 }
 process.exit(p95 !== undefined && p95 < P95_LIMIT_MS ? 0 : 1)

@@ -59,6 +59,8 @@ export const supporters = pgTable('supporters', {
   index('supporters_phone_idx').on(t.phone),
   index('supporters_captured_by_at_idx').on(t.capturedBy, t.capturedAt),
   index('supporters_pu_code_created_idx').on(t.puCode, t.createdAt),
+  // The leaderboard's "last 7 days" (6.5, ADR-049): an index-only scan of the week's captures, however the rows lie.
+  index('supporters_captured_at_pu_idx').on(t.capturedAt, t.puCode),
   index('supporters_gps_gist_idx').using('gist', t.gps),
   // Search (3.4): name "contains" and phone endings, via pg_trgm (enabled in migration 0007).
   index('supporters_full_name_trgm_idx').using('gin', sql`lower(${t.fullName}) gin_trgm_ops`),

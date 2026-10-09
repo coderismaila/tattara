@@ -120,6 +120,9 @@ describe.skipIf(!dbAvailable)('leaderboard and inactive leads', () => {
       const coverage = await leaderboard(db, '19/01/01', 'pu', 'coverage', 2)
       expect(coverage !== 'bad_level' && coverage?.rows.map(r => [r.code, r.value])).toEqual([['19/01/01/001', 0.04], ['19/01/01/002', 0.02]])
       expect(coverage !== 'bad_level' && coverage?.total).toBe(3)
+      // A 0 is still a value: a PU with a figure and no supporters ranks above one without a figure.
+      const all = await leaderboard(db, '19/01', 'pu', 'coverage', 20)
+      expect(all !== 'bad_level' && all?.rows.slice(-2).map(r => [r.code, r.value])).toEqual([['19/01/01/003', 0], ['19/01/02/002', null]])
     })
 
     it('stays inside the unit; refuses a level at or above it; null for unknown units', async () => {

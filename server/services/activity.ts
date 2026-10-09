@@ -15,7 +15,6 @@ import {
   type NotStartedLead,
 } from '../../shared/types/stats.ts'
 import { unitLevel } from '../../shared/utils/pu-code.ts'
-import { coverageOf, rollup } from './stats.ts'
 
 const DEPTH: Record<UnitLevel | 'region', number> = { region: 0, state: 1, lga: 2, ward: 3, pu: 4 }
 const CODE_LENGTH: Record<UnitLevel, number> = { state: 2, lga: 5, ward: 8, pu: 12 }
@@ -38,28 +37,14 @@ export function leaderboardLevel(code: string, requested?: UnitLevel): UnitLevel
   return DEPTH[requested] > DEPTH[own] ? requested : null
 }
 
-type Unranked = Omit<LeaderboardRow, 'rank' | 'value'>
+/** The ranked column per metric (a whitelist: never interpolate the query string). */
+const METRIC_COLUMN: Record<LeaderboardMetric, SQL> = { recent: sql`recent`, progress: sql`progress`, coverage: sql`coverage` }
 
-const metricValue = (r: Unranked, metric: LeaderboardMetric): number | null =>
-  metric === 'recent' ? r.recent : r[metric]
-
-/** Highest first; no value last; ties on total supporters, then code. Ranks are 1…n in that order. */
-export function rankRows(rows: readonly Unranked[], metric: LeaderboardMetric): LeaderboardRow[] {
-  return rows
-    .map(r => ({ ...r, value: metricValue(r, metric) }))
-    .sort((a, b) => {
-      if (a.value === null || b.value === null) {
-        if (a.value !== b.value) return a.value === null ? 1 : -1
-      }
-      else if (a.value !== b.value) {
-        return b.value - a.value
-      }
-      return b.supporters - a.supporters || a.code.localeCompare(b.code)
-    })
-    .map((r, i) => ({ ...r, rank: i + 1 }))
-}
-
-/** null = unknown unit; 'bad_level' = the level isn't below the unit. */
+/**
+ * null = unknown unit; 'bad_level' = the level isn't below the unit. One statement ranks and limits in Postgres: the
+ * region's PU board joins 41,671 units, and parsing and sorting them in Node cost ~300 ms (perf:stats, ADR-049).
+ * Highest first; no value last; ties on total supporters, then code. Coverage and progress match stats.ts.
+ */
 export async function leaderboard(
   db: DbLike, code: string, requestedLevel: UnitLevel | undefined, metric: LeaderboardMetric, limit: number,
 ): Promise<Leaderboard | null | 'bad_level'> {
@@ -71,42 +56,49 @@ export async function leaderboard(
   if (!level) return 'bad_level'
   const len = CODE_LENGTH[level]
 
-  const [totals, recent, names, targets] = await Promise.all([
-    rollup(db, code, len),
-    db.execute<{ code: string, n: number }>(sql`
-      select left(s.pu_code, ${len}) as code, count(*)::int as n from supporters s
+  const rows = await db.execute<Omit<LeaderboardRow, 'rank' | 'value'> & { total: number }>(sql`
+    with totals as (
+      select left(u.code, ${len}) as code,
+        coalesce(sum(p.total), 0) as supporters,
+        coalesce(sum(p.total) filter (where u.registered_voters is not null), 0) as covered,
+        sum(u.registered_voters) as voters
+      from units u left join pu_stats p on p.pu_code = u.code
+      where u.level = 'pu' and ${under(sql`u.code`, code)}
+      group by 1
+    ),
+    recent as (
+      select left(s.pu_code, ${len}) as code, count(*) as n from supporters s
       where ${under(sql`s.pu_code`, code)} and s.captured_at >= now() - make_interval(days => ${LEADERBOARD_WINDOW_DAYS})
-      group by 1`),
-    db.execute<{ code: string, name: string }>(sql`
-      select u.code, u.name from units u where u.level = ${level} and u.active and ${under(sql`u.code`, code)}`),
-    db.execute<{ code: string, target: number }>(sql`
-      select t.unit_code as code, t.target from unit_targets t join units u on u.code = t.unit_code
-      where u.level = ${level} and ${under(sql`t.unit_code`, code)}`),
-  ])
-  const totalBy = new Map(totals.map(r => [r.code, r]))
-  const recentBy = new Map((recent as unknown as { code: string, n: number }[]).map(r => [r.code, r.n]))
-  const targetBy = new Map((targets as unknown as { code: string, target: number }[]).map(r => [r.code, r.target]))
+      group by 1
+    ),
+    board as (
+      select x.code, x.name,
+        coalesce(r.n, 0)::int as recent,
+        coalesce(tt.supporters, 0)::int as supporters,
+        case when t.target > 0 then coalesce(tt.supporters, 0)::float8 / t.target end as progress,
+        case when tt.voters > 0 then tt.covered::float8 / tt.voters end as coverage
+      from units x
+      left join totals tt on tt.code = x.code
+      left join recent r on r.code = x.code
+      left join unit_targets t on t.unit_code = x.code
+      where x.level = ${level} and x.active and ${under(sql`x.code`, code)}
+    )
+    select *, count(*) over ()::int as total from board
+    order by ${METRIC_COLUMN[metric]} desc nulls last, supporters desc, code collate "C"
+    limit ${limit}`) as unknown as (Omit<LeaderboardRow, 'rank' | 'value'> & { total: number })[]
 
-  const rows: Unranked[] = (names as unknown as { code: string, name: string }[]).map((u) => {
-    const r = totalBy.get(u.code)
-    const supporters = r?.supporters ?? 0
-    const target = targetBy.get(u.code) ?? null
-    return {
-      code: u.code,
-      name: u.name,
-      recent: recentBy.get(u.code) ?? 0,
-      supporters,
-      progress: target ? supporters / target : null,
-      coverage: coverageOf(r?.covered ?? 0, r?.voters ?? null),
-    }
-  })
-  const ranked = rankRows(rows, metric)
   return {
     unit: { code, level: levelOf(code) },
     level,
     metric,
-    total: ranked.length,
-    rows: ranked.slice(0, limit),
+    total: rows[0]?.total ?? 0,
+    rows: rows.map(({ total: _total, ...r }, i): LeaderboardRow => ({
+      ...r,
+      progress: r.progress === null ? null : Number(r.progress),
+      coverage: r.coverage === null ? null : Number(r.coverage),
+      value: metric === 'recent' ? r.recent : r[metric] === null ? null : Number(r[metric]),
+      rank: i + 1,
+    })),
     computedAt: new Date().toISOString(),
   }
 }

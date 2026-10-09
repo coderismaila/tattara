@@ -37,6 +37,8 @@ test.describe('map (ward lead)', () => {
     const loaded = scripts(page)
     await page.goto('/app/map')
     await expect(page.locator('.maplibregl-canvas')).toBeVisible({ timeout: 20_000 })
+    // Something is actually drawn: needs MapLibre's worker (a canvas alone proved nothing, see ADR-047).
+    await expect.poll(async () => Number(await page.getByTestId('map-canvas').getAttribute('data-rendered')), { timeout: 20_000 }).toBeGreaterThan(0)
     await expect(page.getByTestId('map-legend')).toContainText('Kai wa ga masu rajista')
     await page.getByTestId('map-list-toggle').click() // phones: the list sits behind a toggle
     await expect(page.locator('[data-testid^="home-child-19/01/01/"]')).toHaveCount(10)
@@ -64,6 +66,7 @@ test.describe('map (LGA lead)', () => {
     await page.getByTestId('home-child-19/01/01').getByRole('button').click()
     await page.getByTestId('map-zoom-in').click()
     await expect(page.locator('[data-testid^="home-child-19/01/01/"]')).toHaveCount(10)
+    await expect.poll(async () => Number(await page.getByTestId('map-canvas').getAttribute('data-rendered')), { timeout: 20_000 }).toBeGreaterThan(0)
     await expect(page.getByTestId('map-breadcrumb').getByRole('listitem')).toHaveCount(2) // LGA › ward
     await page.getByTestId('map-breadcrumb').getByRole('button').click() // back up to the LGA
     await expect(page.getByTestId('home-child-19/01/01')).toBeVisible()

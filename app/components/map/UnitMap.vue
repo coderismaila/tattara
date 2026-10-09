@@ -98,15 +98,31 @@ function pointsCollection(): GeoFeatureCollection {
   }
 }
 
+/** After drawing settles, note how many units are actually on screen (`data-rendered`, for tests and debugging). */
+function reportRendered() {
+  map?.once('idle', () => {
+    if (!map || !container.value) return
+    const layers = ['areas-fill', 'areas-nodata', 'pus-circle']
+    container.value.dataset.rendered = String(map.queryRenderedFeatures({ layers }).length)
+  })
+}
+
+/** A fit asked for while there was nothing to fit to yet (a ward's PU points arrive after the drill-down). */
+let pendingFit = false
+
 async function draw(fit: boolean) {
   if (!map) return
   const fc = await areas()
   const pts = pointsCollection()
   ;(map.getSource('areas') as GeoJSONSource).setData(fc)
   ;(map.getSource('pus') as GeoJSONSource).setData(pts)
-  if (fit) {
+  if (fit) pendingFit = true
+  if (pendingFit) {
     const b = bounds(fc.features.length ? fc : pts)
-    if (b) map.fitBounds(b, { padding: 24, duration: 0, maxZoom: 13 })
+    if (b) {
+      map.fitBounds(b, { padding: 24, duration: 0, maxZoom: 13 })
+      pendingFit = false
+    }
   }
 }
 
@@ -120,7 +136,14 @@ function setHover(code: string | null) {
 }
 
 onMounted(async () => {
-  const [maplibre] = await Promise.all([import('maplibre-gl'), import('maplibre-gl/dist/maplibre-gl.css')])
+  const [maplibre, worker] = await Promise.all([
+    import('maplibre-gl'),
+    // MapLibre builds its worker URL from its own file location at runtime, which no bundler can follow (dev serves it
+    // from .vite/deps, the build from a hashed chunk): hand it the worker file as an asset Vite knows about.
+    import('maplibre-gl/dist/maplibre-gl-worker.mjs?url'),
+    import('maplibre-gl/dist/maplibre-gl.css'),
+  ])
+  maplibre.setWorkerUrl(worker.default)
   map = new maplibre.Map({
     container: container.value!,
     style: { version: 8, sources: {}, layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#F5F2EC' } }] },
@@ -163,6 +186,7 @@ onMounted(async () => {
     map.on('click', 'areas-nodata', select)
     map.on('click', 'pus-circle', select)
     await draw(true)
+    reportRendered()
     emit('ready')
   })
 })
@@ -172,8 +196,8 @@ onBeforeUnmount(() => {
   map = null
 })
 
-watch(() => props.code, () => void draw(true))
-watch(() => [props.rows, props.points, props.metric, props.breaks], () => void draw(false))
+watch(() => props.code, () => draw(true).then(reportRendered))
+watch(() => [props.rows, props.points, props.metric, props.breaks], () => draw(false).then(reportRendered))
 watch(() => props.highlight, code => setHover(code))
 </script>
 

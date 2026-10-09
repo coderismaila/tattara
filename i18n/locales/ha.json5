@@ -1047,4 +1047,94 @@
       noChildren: "Babu yankuna a ƙasan naka.",
     },
   },
+  activity: {
+    // TODO(ha-review)
+    title: "Ƙwazo",
+    // TODO(ha-review)
+    open: "Ƙwazo",
+    // TODO(ha-review)
+    homeInactive: "Shugabanni {count} na buƙatar tuntuɓa",
+    // TODO(ha-review)
+    notAllowed: "Shugabannin mazaɓa, ƙaramar hukuma, jiha da DG ne ke ganin wannan shafi.",
+    // TODO(ha-review)
+    tabsLabel: "Zaɓi abin da za a nuna",
+    tabs: {
+      // TODO(ha-review)
+      top: "Yankuna na gaba",
+      // TODO(ha-review)
+      inactive: "Shugabanni marasa aiki",
+    },
+    // TODO(ha-review)
+    openTeam: "Tawaga",
+    // TODO(ha-review)
+    openTeamFor: "Buɗe tawagar {name}",
+    // TODO(ha-review)
+    more: "Ana nuna {shown} cikin {total}.",
+    top: {
+      // TODO(ha-review)
+      heading: "Jerin gwanaye",
+      // TODO(ha-review)
+      levelLabel: "Matakin yanki",
+      // TODO(ha-review)
+      metricLabel: "A jera da",
+      // TODO(ha-review)
+      empty: "Babu yankuna a wannan matakin.",
+      // TODO(ha-review)
+      showing: "Na farko {shown} cikin yankuna {total}",
+      // TODO(ha-review)
+      rank: "Matsayi na {rank}",
+      // TODO(ha-review)
+      recentValue: "{count} a kwanaki {days}",
+    },
+    level: {
+      // TODO(ha-review)
+      state: "Jihohi",
+      // TODO(ha-review)
+      lga: "Ƙananan hukumomi",
+      // TODO(ha-review)
+      ward: "Mazaɓu",
+      // TODO(ha-review)
+      pu: "Rumfuna",
+    },
+    metric: {
+      // TODO(ha-review)
+      recent: "Sababbi a mako ɗaya",
+      // TODO(ha-review)
+      progress: "Ci gaba zuwa buri",
+      // TODO(ha-review)
+      coverage: "Kai wa ga masu rajista",
+    },
+    inactive: {
+      // TODO(ha-review)
+      heading: "Shugabannin rumfa marasa aiki",
+      // TODO(ha-review)
+      daysLabel: "Babu ƙari cikin",
+      // TODO(ha-review)
+      days: "Kwanaki {days}",
+      // TODO(ha-review)
+      none: "Kowane shugaban rumfa ya ƙara magoyi baya cikin kwanaki {days} na baya.",
+      // TODO(ha-review)
+      noCaptures: "Bai ƙara magoyi ba tsawon kwanaki {days}",
+      // TODO(ha-review)
+      neverCaptured: "Bai taɓa ƙara magoyi ba (kwanaki {days} tun da ya fara)",
+    },
+    notStarted: {
+      // TODO(ha-review)
+      heading: "Ba su fara ba",
+      // TODO(ha-review)
+      none: "Babu gayyatar da ke jira.",
+      // TODO(ha-review)
+      invited: "An gayyace shi kwanaki {days} da suka wuce, bai fara ba tukuna",
+    },
+    role: {
+      // TODO(ha-review)
+      STATE_LEAD: "Shugaban jiha",
+      // TODO(ha-review)
+      LGA_LEAD: "Shugaban ƙaramar hukuma",
+      // TODO(ha-review)
+      WARD_LEAD: "Shugaban mazaɓa",
+      // TODO(ha-review)
+      PU_LEAD: "Shugaban rumfa",
+    },
+  },
 }

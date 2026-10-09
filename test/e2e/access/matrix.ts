@@ -282,6 +282,23 @@ export const ACCESS_MATRIX = {
       ensure(body.points.every((p: any) => p.code.startsWith('19/01/01/') && typeof p.lat === 'number'), 'points in the ward')
     },
   },
+  // Activity (6.5): the leaderboard is aggregates (admin included); inactive leads name leads, so not the admin.
+  'GET /api/stats/leaderboard/:code': {
+    request: () => ({ method: 'GET', path: '/api/stats/leaderboard/19-01-01' }),
+    expect: only({ admin: 200, dg: 200, kanoState: 200, kanoLga: 200, kanoWard: 200 }),
+    check: (_caller, body) => {
+      ensure(body.level === 'pu' && body.rows.length > 0 && body.rows.every((r: any) => r.code.startsWith('19/01/01/')), 'the ward’s PUs')
+      ensure(!JSON.stringify(body).match(/\+234|fullName/), 'no names or phones')
+    },
+  },
+  'GET /api/stats/inactive/:code': {
+    request: () => ({ method: 'GET', path: '/api/stats/inactive/19-01-01' }),
+    expect: only({ dg: 200, kanoState: 200, kanoLga: 200, kanoWard: 200 }),
+    check: (_caller, body) => {
+      ensure(Array.isArray(body.inactive) && Array.isArray(body.notStarted), 'both lists')
+      ensure(!JSON.stringify(body).match(/\+234|phone/i), 'no phone numbers')
+    },
+  },
   // Targets (6.4): the DG sets states, every other lead the units directly below theirs; only the unit's own lead splits.
   'PUT /api/targets/:code': {
     request: () => ({ method: 'PUT', path: '/api/targets/19-01-01', body: { target: 500 } }),

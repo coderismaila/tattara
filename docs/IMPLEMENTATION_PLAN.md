@@ -107,7 +107,7 @@ _4.5 was done before 4.2 (ADR-036): the lock must protect the phone before suppo
 - [x] **6.3 Map page** MapLibre, choropleth drill-down State→LGA→Ward→PU points, metric switcher, breadcrumb, bottom sheet, legend.
   **AC:** map JS is not in the capture route bundle; drill-down works on a 2 GB Android device at ≥ 30 fps pan.
 - [x] **6.4 Targets** set/distribute + progress display.
-- [ ] **6.5 Leaderboard + inactive leads.**
+- [x] **6.5 Leaderboard + inactive leads.**
 
 ## Phase 7 — Hardening & pilot
 

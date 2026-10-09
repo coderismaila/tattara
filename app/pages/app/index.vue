@@ -3,6 +3,7 @@
 // dashboard (lazy-loaded); DG and admin the region. The registered-voters card (3.7) stays below.
 import { getLocalSession, type LocalSession } from '~/offline/local-session'
 import { TEAM_ROLES } from '~/utils/nav'
+import type { InactiveLeads } from '~~/shared/types/stats'
 import { toUrlCode } from '~~/shared/utils/pu-code'
 
 definePageMeta({ layout: 'app', titleKey: 'nav.home' })
@@ -23,6 +24,10 @@ const scopeCode = computed(() => me.value?.scope.unitCode ?? null)
 const canReview = computed(() => !!role.value && ['WARD_LEAD', 'LGA_LEAD', 'STATE_LEAD', 'DG'].includes(role.value))
 /** Ward leads and above set the targets of the units below them (6.4); the page opens from here, not the nav bar. */
 const canSetTargets = computed(() => !!role.value && TEAM_ROLES.includes(role.value))
+// "Inactive leads" count (UX §4.2, 6.5): fetched after the page shows, never blocking Home.
+const inactiveUrl = computed(() => (canSetTargets.value && scopeCode.value !== null ? `/api/stats/inactive/${toUrlCode(scopeCode.value)}` : ''))
+const { data: inactiveList } = useLazyFetch<InactiveLeads>(inactiveUrl, { server: false, immediate: !!inactiveUrl.value })
+const inactiveCount = computed(() => (inactiveList.value ? inactiveList.value.inactiveTotal + inactiveList.value.notStartedTotal : 0))
 const name = computed(() => me.value?.user.fullName ?? local.value?.fullName ?? '')
 
 interface VotersSummary {
@@ -70,15 +75,27 @@ onMounted(() => {
       :code="scopeCode"
       :can-review="canReview"
     />
-    <UButton
+    <div
       v-if="canSetTargets"
-      to="/app/targets"
-      variant="outline"
-      icon="i-lucide-target"
-      class="min-h-12 self-start"
-      :label="t('targets.open')"
-      data-testid="home-targets"
-    />
+      class="flex flex-wrap gap-2"
+    >
+      <UButton
+        to="/app/targets"
+        variant="outline"
+        icon="i-lucide-target"
+        class="min-h-12"
+        :label="t('targets.open')"
+        data-testid="home-targets"
+      />
+      <UButton
+        :to="{ path: '/app/activity', query: inactiveCount ? { tab: 'inactive' } : {} }"
+        variant="outline"
+        icon="i-lucide-trophy"
+        class="min-h-12"
+        :label="inactiveCount ? t('activity.homeInactive', { count: n(inactiveCount) }) : t('activity.open')"
+        data-testid="home-activity"
+      />
+    </div>
 
     <div
       v-if="voters"

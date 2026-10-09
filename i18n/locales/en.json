@@ -579,5 +579,58 @@
       "noTarget": "Your own target must be set before you can split it.",
       "noChildren": "There are no units below yours."
     }
+  },
+  "activity": {
+    "title": "Activity",
+    "open": "Activity",
+    "homeInactive": "{count} leads need a nudge",
+    "notAllowed": "This page is for ward, LGA and state leads and the DG.",
+    "tabsLabel": "Choose what to show",
+    "tabs": {
+      "top": "Top units",
+      "inactive": "Inactive leads"
+    },
+    "openTeam": "Team",
+    "openTeamFor": "Open the team list for {name}",
+    "more": "Showing {shown} of {total}.",
+    "top": {
+      "heading": "Leaderboard",
+      "levelLabel": "Unit level",
+      "metricLabel": "Rank by",
+      "empty": "There are no units at this level.",
+      "showing": "Top {shown} of {total} units",
+      "rank": "Rank {rank}",
+      "recentValue": "{count} in {days} days"
+    },
+    "level": {
+      "state": "States",
+      "lga": "LGAs",
+      "ward": "Wards",
+      "pu": "Polling units"
+    },
+    "metric": {
+      "recent": "Added this week",
+      "progress": "Progress to target",
+      "coverage": "Coverage"
+    },
+    "inactive": {
+      "heading": "Inactive PU leads",
+      "daysLabel": "No captures in",
+      "days": "{days} days",
+      "none": "Every PU lead has added a supporter in the last {days} days.",
+      "noCaptures": "No supporters added for {days} days",
+      "neverCaptured": "Has never added a supporter ({days} days since starting)"
+    },
+    "notStarted": {
+      "heading": "Not started",
+      "none": "No invites are waiting.",
+      "invited": "Invited {days} days ago, not set up yet"
+    },
+    "role": {
+      "STATE_LEAD": "State lead",
+      "LGA_LEAD": "LGA lead",
+      "WARD_LEAD": "Ward lead",
+      "PU_LEAD": "PU lead"
+    }
   }
 }

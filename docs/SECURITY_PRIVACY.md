@@ -40,6 +40,8 @@ Draft consent script (for legal review; the Hausa version needs a native transla
 | Flags review | — | ✓ | ✓ (masked) | ✓ (masked) | ✓ (masked) | — |
 | Set targets (6.4) | — | PUs in own ward | wards in own LGA | LGAs in own state | states | — |
 | Split own target (6.4) | — | own ward | own LGA | own state | — | — |
+| Leaderboard (6.5, aggregates) | — | own ward | own LGA | own state | all | all |
+| Inactive / not-started leads (6.5, names only) | — | own ward | own LGA | own state | all | — |
 | SMS broadcast | — | — | — | own state | all | — |
 | Request export | — | — | — | own state | all | — |
 | Approve export | — | — | — | — | — | ✓ |

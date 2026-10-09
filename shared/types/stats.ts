@@ -59,3 +59,64 @@ export interface ChildrenStats {
   children: ChildStats[]
   computedAt: string
 }
+
+/** Leaderboard rankings (task 6.5, ADR-049). `recent` = supporters captured in the last LEADERBOARD_WINDOW_DAYS days. */
+export const LEADERBOARD_METRICS = ['recent', 'progress', 'coverage'] as const
+export type LeaderboardMetric = typeof LEADERBOARD_METRICS[number]
+export const LEADERBOARD_WINDOW_DAYS = 7
+
+export interface LeaderboardRow {
+  rank: number
+  code: string
+  name: string
+  /** The ranked metric; NULL ranks last (no target / no registered-voter figures). */
+  value: number | null
+  recent: number
+  supporters: number
+  progress: number | null
+  coverage: number | null
+}
+
+export interface Leaderboard {
+  unit: { code: string, level: UnitLevel | 'region' }
+  level: UnitLevel
+  metric: LeaderboardMetric
+  /** Units ranked (before `limit`). */
+  total: number
+  rows: LeaderboardRow[]
+  computedAt: string
+}
+
+/** An active PU lead with no captures in the window (task 6.5). Lead names only: no phone numbers. */
+export interface InactiveLead {
+  userId: string
+  name: string
+  unitCode: string
+  unitName: string
+  /** NULL: never captured. */
+  lastCaptureAt: string | null
+  lastSeenAt: string | null
+  /** Whole days since the last capture, or since setting up when there is none. */
+  daysInactive: number
+}
+
+/** A lead invited but never set up (task 6.5): any role below the caller. */
+export interface NotStartedLead {
+  userId: string
+  name: string
+  role: string
+  unitCode: string
+  unitName: string
+  invitedAt: string
+  daysSinceInvite: number
+}
+
+export interface InactiveLeads {
+  unit: { code: string, level: UnitLevel | 'region' }
+  days: number
+  inactive: InactiveLead[]
+  inactiveTotal: number
+  notStarted: NotStartedLead[]
+  notStartedTotal: number
+  computedAt: string
+}
